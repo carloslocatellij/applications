@@ -54,7 +54,7 @@ else:
 # by default give a view/generic.extension to all actions from localhost
 # none otherwise. a pattern can be 'controller/function.extension'
 # -------------------------------------------------------------------------
-response.generic_patterns = []
+response.generic_patterns = [] 
 if request.is_local and not configuration.get('app.production'):
     response.generic_patterns.append('*')
 
@@ -107,12 +107,12 @@ mail.settings.ssl = configuration.get('smtp.ssl') or False
 # -------------------------------------------------------------------------
 # configure auth policy
 # -------------------------------------------------------------------------
-auth.settings.registration_requires_verification = True
+auth.settings.registration_requires_verification = False
 auth.settings.registration_requires_approval = False
 auth.settings.reset_password_requires_verification = True
 
-# -------------------------------------------------------------------------
-# read more at http://dev.w3.org/html5/markup/meta.name.html
+# -------------------------------------------------------------------------  
+# read more at http://dev.w3.org/html5/markup/meta.name.html               
 # -------------------------------------------------------------------------
 response.meta.author = configuration.get('app.author')
 response.meta.description = configuration.get('app.description')
@@ -121,7 +121,7 @@ response.meta.generator = configuration.get('app.generator')
 response.show_toolbar = configuration.get('app.toolbar')
 
 # -------------------------------------------------------------------------
-# your http://google.com/analytics id
+# your http://google.com/analytics id                                      
 # -------------------------------------------------------------------------
 response.google_analytics_id = configuration.get('google.analytics_id')
 
@@ -153,77 +153,3 @@ if configuration.get('scheduler.enabled'):
 # after defining tables, uncomment below to enable auditing
 # -------------------------------------------------------------------------
 # auth.enable_record_versioning(db)
-
-Cenarios = db.define_table("Cenarios",
-    Field('Nome', 'string', unique=True),
-    Field('Ambientacao', 'string'),
-    Field('Desc_Geral', 'text'),
-    Field('Img', 'upload'),
-    auth.signature,
-    format = '%(Nome)s',
-
-)
-
-Campanhas = db.define_table('Campanhas',
-    Field('Nome', 'string', unique=True),
-    Field('IdCenario', 'reference Cenarios'),
-    Field('IdMestre', 'integer'),
-    Field('Ambientacao', 'string'),
-    Field('Nv_Desafio_Atual', 'integer'),
-    Field('Descriçao', 'text'),
-    Field('Min_Jogadores', 'integer'),
-    Field('Max_jogadores', 'integer'),
-    Field('Img', 'upload'),
-    auth.signature,
-    format = '%(Nome)s',
-)
-
-Quests = db.define_table('Quests',
-	Field('Nome', 'string', unique=True),
-	Field('Nivel', 'integer'),
-	Field('Descriçao', 'text'),
-	Field('Img', 'upload'),
-    Field('Min_Jogadores', 'integer'),
-    Field('Max_jogadores', 'integer'),
-	auth.signature,
-    format = '%(Nome)s',
-)
-
-db.define_table('CampanhaQuest',
-	Field('IdCampanha', 'reference Campanhas'),
-	Field('IdQuest', 'reference Quests'),
-
-)
-
-Personagens = db.define_table('Personagens',
-    Field('Nome', 'string', unique=True),
-    Field('IdRaça', 'integer'),
-    Field('Sexo', 'string'),
-    Field('IdClasseBase', 'integer'),
-    Field('IdArquetipo', 'integer'),
-    Field('IdProfissao', 'integer'),
-    Field('Descriçao', 'text'),
-    Field('Img', 'upload'),
-	auth.signature,
-    format = '%(Nome)s',
-
-)
-
-db.define_table('PersonagemCampanha',
-	Field('IdPersonagem', 'reference Personagens'),
-	Field('IdCampanha', 'reference Campanhas'),
- )
-
-db.define_table('PersonagemQuest',
-	Field('IdPersonagem', 'reference Personagens'),
-	Field('IdQuest', 'reference Quests'),
- )
-
-
-Classes = db.define_table('Classes',
-    Field('Nome', 'string', unique=True),
-    Field('AtributoBase', 'string'),
-    Field('Img', 'upload'),
-    auth.signature,
-    format = '%(Nome)s',
-)
