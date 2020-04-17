@@ -8,13 +8,14 @@ Cenarios = db.define_table("Cenarios",
 
 )
 
+
 Campanhas = db.define_table('Campanhas',
     Field('Nome', 'string', unique=True),
     Field('IdCenario', 'reference Cenarios'),
     Field('IdMestre', 'integer'),
     Field('Ambientacao', 'string'),
     Field('Nv_Desafio_Atual', 'integer'),
-    Field('Descriçao', 'text'),
+    Field('Descricao', 'text'),
     Field('Min_Jogadores', 'integer'),
     Field('Max_jogadores', 'integer'),
     Field('Img', 'upload'),
@@ -25,7 +26,7 @@ Campanhas = db.define_table('Campanhas',
 Quests = db.define_table('Quests',
 	Field('Nome', 'string', unique=True),
 	Field('Nivel', 'integer'),
-	Field('Descriçao', 'text'),
+	Field('Descricao', 'text'),
 	Field('Img', 'upload'),
     Field('Min_Jogadores', 'integer'),
     Field('Max_jogadores', 'integer'),
@@ -41,12 +42,12 @@ db.define_table('CampanhaQuest',
 
 Personagens = db.define_table('Personagens',
     Field('Nome', 'string', unique=True),
-    Field('IdRaça', 'integer'),
+    Field('IdRaca', 'integer'),
     Field('Sexo', 'string'),
     Field('IdClasseBase', 'integer'),
-    Field('IdArquetipo', 'integer'),
-    Field('IdProfissao', 'integer'),
-    Field('Descriçao', 'text'),
+    Field('Arquetipo', 'string'),
+    Field('Profissao', 'string'),
+    Field('Descricao', 'text'),
     Field('Img', 'upload'),
 	auth.signature,
     format = '%(Nome)s',
@@ -70,4 +71,17 @@ Classes = db.define_table('Classes',
     Field('Img', 'upload'),
     auth.signature,
     format = '%(Nome)s',
+)
+
+Sistema = db.define_table('Sistema',
+    Field('Nome', 'string', unique=True),
+    Field('Descricao', 'text'),
+
+)
+
+Atributo = db.define_table('Atributo',
+    Field('Atributo', 'string'),
+    Field('IdSistema', 'reference Sistema'),
+    Field('Descricao', 'text'),
+
 )
