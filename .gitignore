@@ -293,3 +293,4 @@ RPGestor/models/0db.py
 __init__.py
 __init__.pyc
 __pycache__
+*.swp
