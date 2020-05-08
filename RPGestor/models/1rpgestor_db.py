@@ -21,6 +21,7 @@ Campanhas = db.define_table('Campanhas',
     Field('Img', 'upload'),
     auth.signature,
     format = '%(Nome)s',
+    #migrate = 'Campanhas.table'
 )
 
 Quests = db.define_table('Quests',
@@ -37,6 +38,7 @@ Quests = db.define_table('Quests',
 db.define_table('CampanhaQuest',
 	Field('IdCampanha', 'reference Campanhas'),
 	Field('IdQuest', 'reference Quests'),
+    #migrate = 'CampanhaQuest.table'
 
 )
 
@@ -57,11 +59,13 @@ Personagens = db.define_table('Personagens',
 db.define_table('PersonagemCampanha',
 	Field('IdPersonagem', 'reference Personagens'),
 	Field('IdCampanha', 'reference Campanhas'),
+    #migrate = 'PersonagemCampanha.table'            
  )
 
 db.define_table('PersonagemQuest',
 	Field('IdPersonagem', 'reference Personagens'),
 	Field('IdQuest', 'reference Quests'),
+    #migrate = 'PersonagemQuest.table'            
  )
 
 
@@ -83,5 +87,5 @@ Atributo = db.define_table('Atributo',
     Field('Atributo', 'string'),
     Field('IdSistema', 'reference Sistema'),
     Field('Descricao', 'text'),
-
+    #migrate = 'Atributo.table'
 )

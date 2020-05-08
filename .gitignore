@@ -289,7 +289,9 @@ admin/
 welcome/
 examples/
 MeioAmbienteRP/
-RPGestor/models/0db.py
+*/RPGestor/models/0db.py
+RPGestor/models/0db*
+applications/RPGestor/models/*db.py*
 __init__.py
 __init__.pyc
 __pycache__
