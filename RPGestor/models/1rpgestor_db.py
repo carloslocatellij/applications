@@ -77,15 +77,20 @@ Classes = db.define_table('Classes',
     format = '%(Nome)s',
 )
 
-Sistema = db.define_table('Sistema',
+Sistema = db.define_table('Sistemas',
     Field('Nome', 'string', unique=True),
     Field('Descricao', 'text'),
 
 )
 
-Atributo = db.define_table('Atributo',
+Atributo = db.define_table('Atributos',
     Field('Atributo', 'string'),
-    Field('IdSistema', 'reference Sistema'),
+    Field('IdSistema', 'reference Sistemas'),
     Field('Descricao', 'text'),
     #migrate = 'Atributo.table'
 )
+
+Propriedades = db.define_table('Propriedades',
+
+
+    )

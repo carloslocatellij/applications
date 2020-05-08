@@ -8,24 +8,28 @@
 def index():
     response.flash = T(" RPGestor")
     #grd_campanhas = SQLFORM.grid(Campanhas)
-    li_campanhas = db().select(Campanhas.Nome, Campanhas.Img, orderby=Campanhas.Nome)
+    li_campanhas = db().select(Campanhas.Nome, Campanhas.Img, Campanhas.id, orderby=Campanhas.Nome)
+
+    li_cenarios = db().select(Cenarios.Nome, Cenarios.Img, Cenarios.id, orderby=Cenarios.Nome)
+
+    li_personagens = db().select(Personagens.Nome, Personagens.Img, Personagens.id, orderby=Personagens.Nome)
 
     return dict(message=T('Bem Vindo ao RPGestor, Sistema de Gestão de jogos de RPG!'),
         msg_campanhas=T('Campanhas em andamento:'),
 
        # grd_campanhas=grd_campanhas,
-        li_campanhas = li_campanhas,
+        li_campanhas = li_campanhas, li_personagens= li_personagens, li_cenarios = li_cenarios,
 
         msg_personagens=T('Ultimos Personagens criados:'),
 
         msg_cenarios=T('Cenários em destaque:'),
         )
 
-def Campanha():
+'''def Campanha():
     campanha = Campanhas(request.args(0, cast=int)) or redirect(URL('index'))
 
     return dict(campanha = campanha)
-
+'''
 
 
 
@@ -38,10 +42,6 @@ def Criar_Cenario():
     form = SQLFORM(Cenarios)
     return dict(form = form)
 
-
-def Criar_Campanha():
-    form = SQLFORM(Campanhas)
-    return dict(form = form)
 
 
 
