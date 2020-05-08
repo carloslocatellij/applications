@@ -1,0 +1,49 @@
+{{extend 'layout.html'}}
+
+{{block header}}
+<div class="jumbotron jumbotron-fluid background" style="background-color: #333; color:white; padding:30px;word-wrap:break-word;">
+  <div class="container center">
+    <h1 class="display-5">{{=request.application}}
+    {{=request.controller}}
+    {{=request.function}}</h1>
+  </div>
+</div>
+{{end}}
+
+
+<div class="row">
+  <div class="col-md-12" align="center">
+
+    <h1>{{=campanha.Nome}}</h1>
+
+        <div style="text-align:center">
+        {{=IMG(_src=URL('download', args=campanha.Img ), _width="400px")}}
+        </div>
+        <div style="text-align:center">
+          <h3>Cenário</h3>
+          {{=A(db(Cenarios.id == campanha.IdCenario).select(Cenarios.Nome)[0].Nome, _href=URL('Cenarios', args=campanha.IdCenario))}}
+          <br>
+          <h3>Ambientação</h3>
+          {{=campanha.Ambientacao}}
+          <br>
+          <h3>Descrição</h3>
+          {{=campanha.Descricao}}
+          <br>
+          <h3>Nível de desafio</h3>
+          {{=campanha.Nv_Desafio_Atual}}
+          
+          
+        </div>
+
+   
+    </div>
+
+    <div class="col-md-12" align="center">
+
+
+
+  </div>
+</div>
+
+
+

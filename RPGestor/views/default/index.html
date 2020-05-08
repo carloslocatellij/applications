@@ -11,10 +11,11 @@
 {{end}}
 
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-md-12" align="center">
+
     {{if 'message' in globals():}}
     <h2>{{=message}}</h2>
-
+    <br>
    
     </div>
 
@@ -23,7 +24,8 @@
       <h2>{{=msg_campanhas}}</h2>
         <ul>
         {{for camp in li_campanhas:}}
-        {{=LI(A(camp.Nome, _href=URL('Campanha', args=Campanhas.id)))}}
+        {{=LI(A( camp.Nome ,IMG( _src=URL('download', args=camp.Img ), _width="70px"
+) , _href=URL('','Campanhas', 'Campanha', args=camp.id)))}}
         {{pass}}
         </ul>
 
@@ -32,12 +34,23 @@
     <div class="col-md-12" align="center">
       
       <h2>{{=msg_personagens}}</h2>
+      <ul>
+        {{for person in li_personagens:}}
+        {{=LI(A( person.Nome ,IMG( _src=URL('download', args=person.Img ), _width="70px") , _href=URL('Personagem', args=person.id)))}}
+        {{pass}}
+        </ul>
 
     </div>
 
         <div class="col-md-12" align="center">
       
       <h2>{{=msg_cenarios}}</h2>
+        <ul>
+        {{for cenario in li_cenarios:}}
+        {{=LI(A( cenario.Nome ,IMG( _src=URL('download', args=cenario.Img ), _width="70px") , _href=URL('Cenario', args=cenario.id)))}}
+        {{pass}}
+        </ul>
+
 
     </div>
 
