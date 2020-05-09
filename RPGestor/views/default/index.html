@@ -21,22 +21,23 @@
 
     <div class="col-md-12" align="center">
       
-      <h2>{{=msg_campanhas}}</h2>
+      <h2> {{=A('Campanhas', _href=URL('','Campanhas', 'Campanhas')) }} em Andamento</h2>
         <ul>
         {{for camp in li_campanhas:}}
-        {{=LI(A( camp.Nome ,IMG( _src=URL('download', args=camp.Img ), _width="70px"
+        {{=LI(A( camp.Nome , IMG( _src=URL('download', args=camp.Img ), _width="70px"
 ) , _href=URL('','Campanhas', 'Campanha', args=camp.id)))}}
         {{pass}}
         </ul>
+        <h5></h5>
 
     </div>
 
     <div class="col-md-12" align="center">
       
-      <h2>{{=msg_personagens}}</h2>
+      <h2>Ultimos {{=A('Personagens', _href=URL('','Personagens', 'Personagens')) }} Criados</h2>
       <ul>
         {{for person in li_personagens:}}
-        {{=LI(A( person.Nome ,IMG( _src=URL('download', args=person.Img ), _width="70px") , _href=URL('Personagem', args=person.id)))}}
+        {{=LI(A( person.Nome ,IMG( _src=URL('download', args=person.Img ), _width="70px") , _href=URL('','Personagens', 'Personagem', args=person.id)))}}
         {{pass}}
         </ul>
 

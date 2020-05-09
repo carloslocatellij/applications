@@ -1,0 +1,49 @@
+{{extend 'layout.html'}}
+
+{{block header}}
+<div class="jumbotron jumbotron-fluid background" style="background-color: #333; color:white; padding:30px;word-wrap:break-word;">
+  <div class="container center">
+    <h1 class="display-5">{{=request.application}}
+    {{=request.controller}}
+    {{=request.function}}</h1>
+  </div>
+</div>
+{{end}}
+
+
+<div class="row">
+  <div class="col-md-12" align="center">
+    <h1>Nome: {{=personagem.Nome}}</h1>
+
+        <table>
+        <td>
+        <div style="text-align:center">
+        {{=IMG(_src=URL('download', args=personagem.Img ), _width="25%")}}
+        </div>
+        </td>
+
+        <td >
+        <div style="text-align:left;">
+          
+          <h3>Raça: {{=A(db(Racas.id == personagem.IdRaca).select(Racas.Nome)[0].Nome, _href=URL('Racas', args=personagem.IdRaca))}}</h3>
+          <br>
+          <h3>Sexo: {{=personagem.Sexo}}</h3>
+          <br>
+          <h3>Classe: {{=A(db(Classes.id == personagem.IdClasseBase).select(Classes.Nome)[0].Nome, _href=URL('Classes', args=personagem.IdClasseBase))}}</h3>
+          
+          </td>
+          
+        </div>
+        </table>
+   
+    </div>
+
+    <div class="col-md-12" align="center">
+
+
+
+  </div>
+</div>
+
+
+

@@ -42,11 +42,27 @@ db.define_table('CampanhaQuest',
 
 )
 
+
+Racas = db.define_table('Racas',
+    Field('Nome', 'string', unique=True),
+    Field('Descricao', 'text'),
+    Field('Img', 'upload'),
+    format = '%(Nome)s'
+    )
+
+Classes = db.define_table('Classes',
+    Field('Nome', 'string', unique=True),
+    Field('AtributoBase', 'string'),
+    Field('Img', 'upload'),
+    auth.signature,
+    format = '%(Nome)s',
+)
+
 Personagens = db.define_table('Personagens',
     Field('Nome', 'string', unique=True),
-    Field('IdRaca', 'integer'),
+    Field('IdRaca', 'reference Racas'),
     Field('Sexo', 'string'),
-    Field('IdClasseBase', 'integer'),
+    Field('IdClasseBase', 'reference Classes'),
     Field('Arquetipo', 'string'),
     Field('Profissao', 'string'),
     Field('Descricao', 'text'),
@@ -69,13 +85,7 @@ db.define_table('PersonagemQuest',
  )
 
 
-Classes = db.define_table('Classes',
-    Field('Nome', 'string', unique=True),
-    Field('AtributoBase', 'string'),
-    Field('Img', 'upload'),
-    auth.signature,
-    format = '%(Nome)s',
-)
+
 
 Sistema = db.define_table('Sistemas',
     Field('Nome', 'string', unique=True),

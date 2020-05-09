@@ -1,0 +1,29 @@
+{{extend 'layout.html'}}
+
+{{block header}}
+<div class="jumbotron jumbotron-fluid background" style="background-color: #333; color:white; padding:30px;word-wrap:break-word;">
+  <div class="container center">
+    <h1 class="display-5">
+    {{=request.application}}
+    {{=request.controller}}
+    {{=request.function}}
+    </h1>
+  </div>
+</div>
+{{end}}
+
+<div class="row">
+    
+    <div class="col-md-12" align="center">
+      {{if 'message' in globals():}}
+      <h2>{{=message}}</h2>
+      {{pass}}
+    </div>
+
+    <div class="col-md-12" align="center">
+      <h2> Campanhas em Andamento </h2>
+        
+    </div>
+
+</div>
+{{=grid}}
