@@ -297,3 +297,4 @@ __init__.py
 __init__.pyc
 __pycache__
 *.swp
+appconfig.ini
