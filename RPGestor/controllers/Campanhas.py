@@ -17,6 +17,14 @@ def Campanha():
     	campanha = campanha
     	)
 
+
+@auth.requires_login()
+def Editar_Campanha():
+	campanha = db.Campanhas(request.args(0, cast=int)) or redirect(URL('Campanhas'))
+	form = SQLFORM(Campanhas)
+	return dict(form = form, campanha=campanha)
+
+@auth.requires_login()
 def Criar_Campanha():
 	form = SQLFORM(Campanhas)
 	return dict(form = form)
