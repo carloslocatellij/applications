@@ -20,10 +20,19 @@
       {{pass}}
     </div>
 
-    <div class="col-md-12" align="center">
-      <h2> Personagens </h2>
-        
-    </div>
+    <TABLE>
+    <td>
+        <div class="col-md-12" align="rigth"> <h2> {{=A('Criar Persongem', _href=URL('Personagens', 'Criar_Personagem')) }}</h2> </div>
+    
+    </td>
+    <td>
+        <div class="col-md-12" align="left">
+            <h3>Buscar Personagem</h3>
+        [ {{=A('listall',_href=URL('Personagem'))}}]<br />
+        {{=formbusca}}<br />{{=target_div}}
+        </div>
+    </td>
+
+    </TABLE>
 
 </div>
-{{=grid}}
