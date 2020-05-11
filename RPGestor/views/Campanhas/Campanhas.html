@@ -20,10 +20,20 @@
       {{pass}}
     </div>
 
-    <div class="col-md-12" align="center">
-      <h2> Campanhas em Andamento </h2>
-        
-    </div>
+    <TABLE>
+    <td>
+        <div class="col-md-12" align="rigth"> <h2> {{=A('Nova Campanha', _href=URL('Campanhas', 'Criar_Campanha')) }}</h2> </div>
+    
+    </td>
+    <td>
+        <div class="col-md-12" align="left">
+            <h3>Buscar Campanha</h3>
+        [ {{=A('#',_href=URL('Campanha'))}}]<br />
+        {{=formbusca}}<br />{{=target_div}}
+        </div>
+    </td>
+
+    </TABLE>
 
 </div>
-{{=grid}}
+
