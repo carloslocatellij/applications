@@ -1,0 +1,3 @@
+[submodule "easy_store"]
+	path = easy_store
+	url = https://github.com/carloslocatellij/easy_store.git
