@@ -21,7 +21,7 @@
         </div>
         <div style="text-align:center">
           <h3>Cenário</h3>
-          {{=A(db(Cenarios.id == campanha.IdCenario).select(Cenarios.Nome)[0].Nome, _href=URL('Cenarios', args=campanha.IdCenario))}}
+           {{=A(db(Cenarios.id == campanha.IdCenario).select(Cenarios.Nome)[0].Nome, _href=URL('Cenarios', args=campanha.IdCenario))}}
           <br>
           <h3>Ambientação</h3>
           {{=campanha.Ambientacao}}
