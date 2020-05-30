@@ -293,7 +293,6 @@ MeioAmbienteRP/
 RPGestor/models/0db.py
 *0db.py
 applications/RPGestor/models/*db.py*
-__init__.py
 __init__.pyc
 __pycache__
 *.swp
