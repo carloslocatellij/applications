@@ -3,4 +3,4 @@
 	url = https://github.com/carloslocatellij/easy_store.git
 [submodule "prod_cad"]
 	path = prod_cad
-	url = https://github.com/carloslocatellij/prod_cad
+	url = https://github.com/carloslocatellij/prod_cad.git
