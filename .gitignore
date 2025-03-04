@@ -212,12 +212,12 @@ parameters*.py
 cron.master
 binaries/*old*
 
-./welcome
-./welcome/*
-./examples
-./examples/*
-./admin
-./admin/*
+#./welcome
+#./welcome/*
+#./examples
+#./examples/*
+#./admin
+#./admin/*
 */.vscode/*
 
 *.zip
