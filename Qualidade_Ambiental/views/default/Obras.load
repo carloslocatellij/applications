@@ -1,0 +1,68 @@
+
+{{block header}}
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+<div class="container"  {{if obra:}}style="border: 1px solid; padding-block: 2px;"{{pass}} >
+    {{=A('Editar', _href=URL(c='default',f='Obras', args=[obra], vars={'f':'editar'}), _class='btn btn-primary', )
+        if obra else ''}}
+        {{=A('Novo', _href=URL(c='default',f='Obras', vars={}), _class='btn btn-primary',)if obra else ''}}
+</div>    
+
+<br>
+{{end}}
+{{=formobra.custom.begin}}
+
+<div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+<table width="100%" style="border: 1px solid; padding:10px;word-wrap:break-word;">    
+    <tr>
+        <div align='left' hidden="true">{{=formobra.custom.widget['Id']}}</td>
+            <td width="40%" align='left'>{{=A('Gerador', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary', _style="height: 25px")}}: {{=A(DIV(B('+')), _class="btn btn-primary", _type="button", _style="height: 25px",  _href='#{}'.format('NovaPessoa'), **atributo ),SPAN(_class="caret")}}
+                    <div align='left' class="card">{{=formobra.custom.widget['IdGerador']}}</div></td>
+            <td width="30%" align='left'>{{=A('Endereço', _href=URL(c='default',f='Enderecos',  vars={}), _class='btn btn-primary', _style="height: 25px")}}: {{=A('+', _class="btn btn-primary", _type="button", _style="height: 25px",  _href='#{}'.format('NovoEndereco'), **atributo ),SPAN(_class="caret")}}
+                    <div align='left' class="card">{{=formobra.custom.widget['IdEndereco']}}</div></td>  
+            <td width="15%" align='left'>{{=B('Alvará:      ')  }}<div align='left' class="card">{{=formobra.custom.widget['Alvara']}}</td>
+            <td width="15%" align='left'>{{=B('Data Alvará: ')  }}<div align='left' class="card">{{=formobra.custom.widget['DataAlvara']}}</td>                    
+            </tr>
+        <tr>
+            <td>
+                {{=DIV(LOAD('default', 'Pessoas.load', ajax=True), _id='NovaPessoa', _class="collapse list-unstyled")}}
+            </td> 
+        <td>
+            {{=DIV(LOAD('default', 'Enderecos.load', ajax=True), _id='NovoEndereco', _class="collapse list-unstyled")}}  
+        </td>
+        </tr>       
+    <tr>   
+        <table>
+            <td width="15%" align='left'>{{=B('Cadastro Mun:')  }}<div align='left' class="card">{{=formobra.custom.widget['CadMunicipal']}}</div></td>
+            <td width="15%" align='left'>{{=B('Finalidade:  ')  }}<div align='left' class="card">{{=formobra.custom.widget['Finalidade']}}</div></td>
+            <td width="15%" align='left'>{{=B('N. Quartos:') }}<div align='left' class="card">{{=formobra.custom.widget['Nquartos']}}</div></td>
+            <td width="15%" align='left'>{{=B('Pavtos Inferiores:')}} <div align='left' class="card">{{=formobra.custom.widget['PavtosSubS']}}</div></td>
+            <td width="15%" align='left'>{{=B('Pavtos Sob o Solo:')}} <div align='left' class="card">{{=formobra.custom.widget['PavtosSobreS']}}</div></td>         
+        </table>           
+    </tr>
+    <tr>
+        <table>
+            <td width="10%" align='left'>{{=B('Area do Terreno:')}} <div align='left' class="card">{{=formobra.custom.widget['AreaTerreno']}}</div></td>
+            <td width="12%" align='left'>{{=B('Área à Executar/Executada:')}} <div align='left' class="card">{{=formobra.custom.widget['AreaConstrExecutar']}}</div></td>
+            <td width="10%" align='left'>{{=B('Área Demolição:')}} <div align='left' class="card">{{=formobra.custom.widget['AreaConstrDemolir']}}</div></td>
+            <td width="12%" align='left'>{{=B('Área Construída anterior:')}} <div align='left' class="card">{{=formobra.custom.widget['AreaConstrExist']}}</div></td>
+            <td width="8%" align='left'>{{=B('Corte:')}} <div align='left' class="card">{{=formobra.custom.widget['Corte']}}</div></td>
+            <td width="8%" align='left'>{{=B('Aterro:') }}<div align='left' class="card">{{=formobra.custom.widget['Aterro']}}</div></td>
+            <table >
+                <td width="20%"></td>
+                <td width="20%" align='left' style="padding:10px;word-wrap:break-word;" >{{=B('Piscina:') }}<div align='center' class="card">{{=formobra.custom.widget['Piscina']}}</div></td>
+                <td width="20%" align='left' style="padding:10px;word-wrap:break-word;" >{{=B('Edicula:') }}<div align='center' class="card">{{=formobra.custom.widget['Edicula']}}</div></td>
+                <td width="20%" align='left' style="padding:10px;word-wrap:break-word;">{{=B('Cob. Met:') }}<div align='center' class="card">{{=formobra.custom.widget['CobertMetalica']}}</div></td>
+                <td width="20%" align='left' style="padding:10px;word-wrap:break-word;">{{=B('M. Refl.:') }}<div align='center' class="card">{{=formobra.custom.widget['MadeiraReflorest']}}</div></td>
+            </table>
+            
+            
+        </table>
+    </tr>
+
+</table>
+</div>
+{{=formobra.custom.submit}}
+
+{{=formobra.custom.end}}

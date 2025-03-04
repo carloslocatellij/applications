@@ -1,0 +1,56 @@
+
+<script src="{{=URL('static','js/jquery.mask.min.js')}}"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $('#DofsObra_IdDof').mask('0000 0000 0000 0000', {placeholder: "_____   _____   _____   _____"});
+      });
+      
+</script>
+<script type="text/javascript">
+   $(document).ready(function(){
+      document.getElementById('DofsObra_IdDof').focus();})
+</script>
+
+<style>
+    table tr{
+       vertical-align: top;
+    }
+</style>
+
+
+<div class="jumbotron jumbotron-fluid" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+{{=formdof}}
+{{=A('Consuta IBAMA', _href="http://servicos.ibama.gov.br/ctf/consulta_dof.php", _class="btn btn-primary",_target="_blank" )}}
+
+<br>
+
+<div class="card">
+{{if formarq:}}
+{{=formarq.custom.begin}}
+        <div align='left' class="card">{{=formarq.custom.widget['arquivo']}}</div>
+
+{{=formarq.custom.submit}}
+{{=formarq.custom.end}}
+
+
+
+{{pass}}
+</div>
+</div>
+<br>
+
+<table>
+<td>
+{{=DIV(dofsgrade, _class="card")}}
+Volume total = {{=vol}}
+</td>
+<td>
+{{if madeirasgrade:}}
+<div class="card" style="border: 1px solid; padding-block: 2px; ">
+{{=madeirasgrade}}
+</div>
+</td>
+{{pass}}
+
+
+</table>

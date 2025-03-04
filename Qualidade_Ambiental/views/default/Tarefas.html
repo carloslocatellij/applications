@@ -1,0 +1,183 @@
+{{extend 'layout.html'}}
+<script src="https://unpkg.com/unpoly@2.6.1/unpoly.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/unpoly@2.6.1/unpoly.min.css">
+<link rel="stylesheet" href="https://unpkg.com/unpoly@2.6.1/unpoly-bootstrap4.min.css">
+<link rel="stylesheet" href="https://unpkg.com/unpoly@2.6.1/unpoly-bootstrap5.min.css">
+<style>
+
+input[type=checkbox] + label {
+display: block;
+margin: 0em;
+cursor: pointer;
+padding: 0.1em;
+}
+
+input[type=checkbox] {
+display: none;
+}
+
+input[type=checkbox] + label:before {
+content: "\2713";
+border: 0.13em solid #000;
+border-radius: 0.2em;
+display: inline-block;
+width: 1.6em;
+height: 1.6em;
+padding-left: 0.2em;
+padding-bottom: 0.3em;
+margin-right: 0.2em;
+vertical-align: bottom;
+color: transparent;
+transition: .2s;
+}
+
+input[type=checkbox] + label:active:before {
+transform: scale(1.5);
+}
+
+input[type=checkbox]:checked + label:before {
+background-color: springgreen;
+border-color: black;
+color: #000000;
+}
+
+input[type=checkbox]:disabled + label:before {
+transform: scale(1);
+border-color: #aaa;
+}
+
+input[type=checkbox]:checked:disabled + label:before {
+transform: scale(1);
+background-color: #bfb;
+border-color: #bfb;
+}
+</style>
+
+
+<h2 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+<br>
+{{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo ),SPAN(_class="caret") }}
+  {{=DIV(formbusca, _id='Busca', _class="collapse list-unstyled")}}
+
+<br>
+
+{{=Modal('Busca', grade, 'grade')}}
+
+
+<div class="input-group-prepend" align='left'>
+{{=A('Editar', _href=URL(c='default',f='Tarefas', args=[id_da_tarefa] if 'id_da_tarefa' in locals() else '', vars={ 'f':'editar'}),
+ _class='btn btn-primary', ) if 'id_da_tarefa' in locals() else ''}}
+
+</div>
+
+<div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+
+    {{=formtarefa.custom.begin}}
+        <table width="100%" >
+                    <tr>
+                        <tr>
+                            <td width="35%" align='left'>    {{=B('Tarefa:')}} 
+                                    {{if request.vars.f=='ver':}}
+                                    <div align='center' class="input-group mb-3" style="border: 1px solid ; padding:10px;word-wrap:break-word;">
+                                    {{else:}}
+                                    <div align='center' class="input-group mb-3">{{pass}} 
+                                    <div class="input-group-prepend" align='center' >
+                                        {{=A(B('+Pessoa'), _class="btn btn-primary", _type="button", _style="", _href='#{}'.format('NovaPessoa'),
+                                         **atributo ),SPAN(_class="caret")}}
+                                    {{=DIV(B(formtarefa.custom.widget['Titulo']), _style="color: darkgreen; padding-left:150px " , _align="center")}}
+                                    </div> </div></td> 
+                            <td width="25%" align='left' > {{=B('Protocolo:')}} 
+                                <div align='center' class="card" style="border: 1px solid; padding:10px;word-wrap:break-word;  color: darkgreen">
+                                        {{=A(B('Protocolo:'), _class="btn btn-primary", _type="button", _style="", 
+                                        _href=URL('default', 'Processos', args=[ id_do_processo]  if 'id_do_processo' in locals() else None,
+                                         vars={'f':'ver'}  if 'id_do_processo' in locals() else None) )}} 
+                                   {{=formtarefa.custom.widget['Protocolo']}}</div></td>
+                                <tr>
+                                    <td>
+                                        {{=DIV(LOAD('default', 'Pessoas.load' ,ajax=True), _id='NovaPessoa', _class="collapse list-unstyled")}}
+                                    </td>    
+                                </tr>
+                            </tr> 
+                        </tr>
+                        <tr>
+                    <table width="100%">
+                            <td width="20%" align='left'> {{=B('Responsável:     ')}}
+                                <div align='left' class="card">
+                                {{=formtarefa.custom.widget['Responsavel']}}</td>
+                            <td width="10%" align='left' style="padding: 5px;">{{=B('Data Inicial: ')}}
+                                <div align='center' class="card" style="border: 1px solid; padding:10px;word-wrap:break-word; color: darkgreen">
+                                    {{=formtarefa.custom.widget['DataIni']}}</td>
+                            <td width="10%" align='left'style="padding: 5px;">{{=B('Data Final:      ')}}
+                                 <div align='center' class="card" style="border: 1px solid; padding:10px;word-wrap:break-word; color: darkgreen">
+                                    {{=formtarefa.custom.widget['DataFim']}}</td>
+                            <td width="25%" align='left'style="padding: 5px;">{{=B('Estado:         ')}}
+                                 {{if request.vars.f=='ver':}}<div align='center' style="border: 1px solid; padding:10px;word-wrap:break-word;  color: darkgreen">{{else:}}<div align='center' class="card">{{pass}} 
+                                {{=formtarefa.custom.widget['Status']}}</td></div>
+                            <td width="25%" align='left'style="padding: 5px;">{{=B('Tipo:         ')}} 
+                                {{if request.vars.f=='ver':}}<div align='center' style="border: 1px solid; padding:10px;word-wrap:break-word;  color: darkgreen">{{else:}}<div align='center' class="card">{{pass}} 
+                                {{=formtarefa.custom.widget['Tipo']}}</td></div>
+                        </tr>
+
+                    </table>
+
+                        <table>
+                            <td width="15%" align='left'style="padding: 5px;     justify-content: top; vertical-align: top;">{{=B(H3('Procedimentos:         '))}}
+                                 <div align='center' class="card" style="border: 1px solid; padding: 5px; word-wrap:break-word; color: darkslategray">
+                                    {{=formtarefa.custom.widget['checklist']}}</div>
+                                   {{=B('Descrição:    ')}} <div align='left' class="card">
+                                        {{=formtarefa.custom.widget['Descricao']}}</div></td>
+                                    
+                                <td width="15%" align='left'style="padding: 5px; justify-content: top; vertical-align: top;">
+                                    {{if 'id_do_processo' in locals():}}
+                                    {{=DIV(dados_obra,)}}
+                                        {{=DIV(LOAD('default', 'Analises.load', ajax=True, args=[id_da_tarefa , id_da_analise],
+                                        vars={'id_do_processo': id_do_processo, 'id_da_tarefa':id_da_tarefa}, user_signature=True), _id='NovaAnalise')}}
+                                    {{#=dados_pgr}}
+                                    {{pass}}
+                                
+                            </td>
+                        </td>
+                        <tr>    
+                            
+                            <table class="jumbotron" style="border: 1px solid">
+                                <br/>
+                                <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}} 
+                                    {{for k, v in formtarefa.custom.linkto.items():}}        
+                                    {{=TD(DIV(v, _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
+                                    {{pass}}
+                                </td>
+                            </table>
+                        </tr>
+                    </table>
+                        <div style="position: absolute;" id="suggestions" class="suggestions"></div>
+        </table>
+    </td>  
+
+
+        <div>
+        {{if request.vars.f != 'ver':}}
+        {{=formtarefa.custom.submit}} {{pass}}
+        </div>
+        
+        {{=formtarefa.custom.end}}
+</div>
+
+<script type="text/javascript">
+    up.compiler("#Busca", function() {up.submit('formbusca', { target: '#grade' }); $("#grade").modal()} );
+    $(document).ready(function(){
+    
+        var meuform = document.getElementsByTagName('form');
+        $('#Tarefas_Tipo').change(function() { $(meuform).submit()        
+        });
+        });
+
+    up.on("up:formbusca:submit", function() {
+    if (up.modal.isOpen()) {
+        submit_from_modal = true
+    }
+})
+        
+</script>

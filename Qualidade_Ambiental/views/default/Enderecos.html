@@ -1,0 +1,79 @@
+{{extend 'layout.html'}}
+    {{block head}}
+    <script src="https://unpkg.com/unpoly@2.6.1/unpoly.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/unpoly@2.6.1/unpoly.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/unpoly@2.6.1/unpoly-bootstrap4.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/unpoly@2.6.1/unpoly-bootstrap5.min.css">
+    {{end}}
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+           document.getElementById('Enderecos_IdLogradouro').focus();})
+     </script>
+
+<h2 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+
+    <div class="container" {{if endereco:}}style="border: 1px solid; padding-block: 2px;"{{pass}}>
+    {{=A('Editar', _href=URL(c='default',f='Enderecos', args=[endereco], vars={'f':'editar'}), _class='btn btn-primary', ) if endereco else ''}}
+    {{=A('Novo', _href=URL(c='default',f='Enderecos',  vars={}), _class='btn btn-primary',)if endereco else ''}}
+    </div>
+    
+    <div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+    {{=form.custom.begin}}
+    <table width="80%" >
+        <tr>
+            <div align='left' hidden="true">{{=form.custom.widget['Id']}}</div>
+            <td width="45%" align='left'>{{=A(('Logradouro'), _href=URL(c='default',f='Logradouros',  vars={}), _class='btn btn-primary', _style="height: 25px")}}: {{=A(B('+'), _class="btn btn-primary", _type="button", _style="height: 25px", _href='#{}'.format('NovoLogradouro'), **atributo ),SPAN(_class="caret")}}
+                <div align='left' class="card">{{=form.custom.widget['IdLogradouro']}} </div>  
+            <td width="15%" align='left'>{{=B('Num:')}} <div align='left' class="card">{{=form.custom.widget['Num']}}</td>
+            <td width="25%" align='left'>{{=B('Quadra:')}} <div align='left' class="card">{{=form.custom.widget['Quadra']}}</td>
+            <td width="25%" align='left'>{{=B('Lote:')}} <div align='left' class="card">{{=form.custom.widget['Lote']}}</td>
+        </tr>
+        <tr>
+            <tr>
+                <td>{{=DIV(LOAD('default', 'Logradouros.load', ajax=True), _id='NovoLogradouro', _class="collapse list-unstyled")}}</td>    
+            </tr> 
+            <table width="50%">
+                <td width="15%" align='left'>{{=B('Tipo:')}} <div align='left' class="card">{{=form.custom.widget['Tipo']}}</td>
+                <td width="15%" align='left'>{{=B('Complto:')}} <div align='left' class="card">{{=form.custom.widget['Complemento']}}</td>
+                <td width="60px%" align='left'>{{=B('Tipo: ')}}<div align='left' class="card">{{=form.custom.widget['TipoB']}}</td>
+                <td width="15%" align='left'>{{=B('Complto.:')}} <div align='left' class="card">{{=form.custom.widget['ComplementoB']}}</td>
+                    <table class="jumbotron" style="border: 1px solid">
+                        <br/>
+                        <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}} 
+                            {{for k, v in form.custom.linkto.items():}}        
+                            {{=TD(DIV(v, _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
+                            {{pass}}
+                        </td>
+                    </table>
+                    
+            </table>
+        </tr>
+        <div style="position: absolute;" id="suggestions" class="suggestions"></div>
+    </table>
+</td>  
+        <div>
+    {{=form.custom.submit}} 
+    </div>
+    
+    {{=form.custom.end}}
+    </div>
+
+
+    <br>
+    {{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo ),SPAN(_class="caret") }}
+      {{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled") }}
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        
+        up.compiler($("#formbusca").submit( function(e) {
+        $("#formbusca").submit($("#grade").modal( {show: true}));
+        }));
+
+    });
+</script>

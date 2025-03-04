@@ -1,0 +1,67 @@
+{{extend 'layout.html'}}
+    {{block head}}
+    {{end}}
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+           document.getElementById('Logradouros_Logradouro').focus();})
+     </script>
+
+<h2 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+
+    <div class="container" {{if logradouro:}}style="border: 1px solid; padding-block: 2px;"{{pass}}>
+    {{=A('Editar', _href=URL(c='default',f='Logradouros', args=[logradouro], vars={'f':'editar'}), _class='btn btn-primary', ) if logradouro else ''}}
+    {{=A('Novo', _href=URL(c='default',f='Logradouros',  vars={}), _class='btn btn-primary',)if logradouro else ''}}
+    </div>
+    
+    <div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+    {{=formlogr.custom.begin}}
+    <table width="80%" >
+        <tr>
+            <div align='left' hidden="true">{{=formlogr.custom.widget['Id']}}</div>
+            <td width="45%" align='left'>{{=B(('Logradouro'),)}}
+                <div align='left' class="card">{{=formlogr.custom.widget['Logradouro']}} </div>  
+            <td width="15%" align='left'>{{=B('Cep:')}} <div align='left' class="card">{{=formlogr.custom.widget['Cep']}}</td>
+            <td width="25%" align='left'>{{=B('Denominacao:')}} <div align='left' class="card">{{=formlogr.custom.widget['Denominacao']}}</td>
+            <td width="25%" align='left'>{{=B('Prefixo:')}} <div align='left' class="card">{{=formlogr.custom.widget['Prefixo']}}</td>
+        </tr>
+        <tr>
+            <table >
+                <td width="10%" align='left'>{{=B('No:')}} <div align='left' class="card">{{=formlogr.custom.widget['No']}}</td>
+                <td width="10%" align='left'>{{=B('NoInicial:')}} <div align='left' class="card">{{=formlogr.custom.widget['NoInicial']}}</td>
+                <td width="10%" align='left'>{{=B('NoFinal: ')}}<div align='left' class="card">{{=formlogr.custom.widget['NoFinal']}}</td>
+                <td width="10%" align='left'>{{=B('Lado.:')}} <div align='left' class="card">{{=formlogr.custom.widget['Lado']}}</td>
+                <td width="10%" align='left'>{{=B('Complemento.:')}} <div align='left' class="card">{{=formlogr.custom.widget['Complemento']}}</td>
+                    <td width="30%" align='left'>{{=B('IdBairro.:')}} <div align='left' class="card">{{=formlogr.custom.widget['IdBairro']}}</td>
+                        <td width="30%" align='left'>{{=B('IdCidade.:')}} <div align='left' class="card">{{=formlogr.custom.widget['IdCidade']}}</td>
+                
+
+                    <table class="jumbotron" style="border: 1px solid">
+                        <br/>
+                        <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}} 
+                            {{for k, v in formlogr.custom.linkto.items():}}        
+                            {{=TD(DIV(v, _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
+                            {{pass}}
+                        </td>
+                    </table>
+                    
+            </table>
+        </tr>
+        <div style="position: absolute;" id="suggestions" class="suggestions"></div>
+    </table>
+</td>  
+        <div>
+    {{=formlogr.custom.submit}} 
+    </div>
+    
+    {{=formlogr.custom.end}}
+    </div>
+
+
+    <br>
+    {{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo ),SPAN(_class="caret") }}
+      {{=DIV(BEAUTIFY(formxbusca), _id='Busca', _class="collapse list-unstyled") }}

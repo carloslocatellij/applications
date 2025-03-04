@@ -1,0 +1,39 @@
+
+<h2 class="container center">{{='Análise'}}</h2>
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+{{if id_da_analise :}}
+<div class="container" style="border: 1px solid; padding-block: 2px;>
+{{=A('Editar', _href=URL(c='default',f='Analises', args=[id_da_analise], vars={'f':'editar', 'id_do_processo': id_do_processo} ) , _class='btn btn-primary', cid=request.cid ) if id_do_processo else ''}}
+{{=A('Novo', _href=URL(c='default',f='Analises',  args=[id_da_analise], vars={'id_do_processo': id_do_processo}), _class='btn btn-primary', cid=request.cid) if id_do_processo  else ''}}
+</div>
+{{pass}}
+
+<div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+
+    {{=formanalise.custom.begin}}
+        <table width="100%" >
+                    <tr>
+                        <td width="45%" align='left'>{{=B('Protocolo:'),}} <div align='left' class="card">{{=formanalise.custom.widget['Protocolo']}}</div> </td> 
+                        <td width="25%" align='left' style="padding-inline: 20px;">{{=B('Documento: ')}}<div align='left' class="card">{{=formanalise.custom.widget['DocsProcesso']}}</td>
+                        <td width="15%" align='left'style="padding-inline: 20px;">{{=B('Campo:      ')}} <div align='left' class="card">{{=formanalise.custom.widget['CamposProcesso']}}</td>
+                        <td width="15%" align='left'style="padding-inline: 20px;">{{=B('Analise:    ')}} <div align='left' class="card">{{=formanalise.custom.widget['TipoAnalise']}}</td>
+                    </tr>
+        </table>
+        <table width="100%" >
+
+                        <td align='left'style="padding-inline: 20px;">{{=B('Obs:         ')}} <div align='center' class="card" >{{=formanalise.custom.widget['Obs']}}</td></div>
+                        
+        </table>
+    </td>  
+
+        <div>
+        {{=formanalise.custom.submit}} 
+        </div>
+        
+        {{=formanalise.custom.end}}
+</div>
+
+{{=grade}}
+

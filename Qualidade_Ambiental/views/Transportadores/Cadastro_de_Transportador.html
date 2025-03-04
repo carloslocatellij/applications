@@ -1,0 +1,85 @@
+{{extend 'layout.html'}}
+
+<script type="text/javascript">
+    $(document).ready(function(){
+       document.getElementById('Transportador_IdPessoa').focus();})
+ </script>
+
+{{block header}}
+
+<h2 class="card" style="padding:10px;word-wrap:break-word;">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+<div class="container"  {{if reg:}}style="border: 1px solid; padding-block: 2px;"{{pass}} >
+    {{=A('Editar', _href=URL(c='Transportadores',f='Cadastro_de_Transportador', args=[reg], vars={'f':'editar'}), _class='btn btn-primary', )
+        if reg else ''}}
+        {{=A('Novo', _href=URL(c='Transportadores',f='Cadastro_de_Transportador', vars={}), _class='btn btn-primary',)if reg else ''}}
+</div>    
+
+<br>
+{{end}}
+
+
+{{=formtransp.custom.begin}}
+
+<div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+<table width="100%" style="border: 1px solid; padding:10px;word-wrap:break-word;">    
+    <tr>
+        <div align='left' hidden="true">{{=formtransp.custom.widget['Id']}}</td>
+            <td width="40%" align='left'>{{=A('Pessoa', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary', _style="height: 25px")}}: {{=A(DIV(B('+')), _class="btn btn-primary", _type="button", _style="height: 25px",  _href='#{}'.format('NovaPessoa'), **atributo ),SPAN(_class="caret")}}
+                    <div align='left' class="card">{{=formtransp.custom.widget['IdPessoa']}}</div></td>
+            
+            <td width="15%" align='left'>{{=B('NomeFantasia:      ')  }}<div align='left' class="card">{{=formtransp.custom.widget['NomeFantasia']}}</td>
+            <td width="15%" align='left'>{{=B('RazaoSocial: ')  }}<div align='left' class="card">{{=formtransp.custom.widget['RazaoSocial']}}</td>                    
+            </tr>
+        <tr>
+            <td>
+                {{=DIV(LOAD('default', 'Pessoas.load', ajax=True), _id='NovaPessoa', _class="collapse list-unstyled")}}
+            </td> 
+        </tr>       
+    <tr>   
+        <table>
+            <td width="15%" align='left'>{{=B('CNPJ:')  }}<div align='left' class="card">{{=formtransp.custom.widget['CNPJ']}}</div></td>
+            <td width="15%" align='left'>{{=B('Insc. Mun:  ')  }}<div align='left' class="card">{{=formtransp.custom.widget['IM']}}</div></td>
+            <td width="15%" align='left'>{{=B('N. CTR:') }}<div align='left' class="card">{{=formtransp.custom.widget['Cadastro']}}</div></td>
+            <td width="15%" align='left'>{{=B('Tipo:')}} <div align='left' class="card">{{=formtransp.custom.widget['Tipo']}}</div></td>
+            <td width="15%" align='left'>{{=B('Tel:')}} <div align='left' class="card">{{=formtransp.custom.widget['Tel']}}</div></td>         
+        </table>           
+    </tr>
+    <tr>
+        <table>
+            <td width="10%" align='left'>{{=B('email:')}} <div align='left' class="card">{{=formtransp.custom.widget['email']}}</div></td>
+            <td width="15%" align='left'>{{=B('Referencias.:')}} 
+                {{for k, v in formtransp.custom.linkto.items():}}
+                <br/>
+                {{=TD(v)}}
+                {{pass}}
+            </td>
+            </table>
+        </table>
+    </tr>
+</table>
+</div>
+{{=formtransp.custom.submit}}
+
+{{=formtransp.custom.end}}
+
+<br>
+<tr>
+    <td> 
+        {{if reg:}}
+        {{=DIV(LOAD('Transportadores', 'Situacao_do_Transportador.load', ajax=True, args=[reg]), _id='Situacao_do_Transportador', _class='jumbotron', _style="border: 1px solid; padding:10px;word-wrap:break-word;")}}
+        {{else:}}
+        <br>
+        {{=DIV(' --- Situação --- ')}}
+        {{pass}}
+    </td>
+</tr>
+
+<br>
+{{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo ),SPAN(_class="caret") }}
+  {{=DIV(formbusca, _id='Busca', _class="collapse list-unstyled")}}
+
+<br>
+{{=DIV(grade, _class="card", _align="center")}}
