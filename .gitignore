@@ -171,7 +171,6 @@ cython_debug/
 .pypirc
 
 #Web2py applications
-.*
 *.pyc
 *.pyo
 *~
@@ -212,13 +211,13 @@ parameters*.py
 ./examples.w2p
 cron.master
 binaries/*old*
-*
-!applications/welcome
-!applications/welcome/*
-!applications/examples
-!applications/examples/*
-!applications/admin
-!applications/admin/*
+
+./welcome
+./welcome/*
+./examples
+./examples/*
+./admin
+./admin/*
 */.vscode/*
 
 *.zip
