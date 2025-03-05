@@ -1,0 +1,172 @@
+{{extend 'layout.html'}}
+
+<script src="https://unpkg.com/unpoly@2.6.1/unpoly.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/unpoly@2.6.1/unpoly.min.css">
+<link rel="stylesheet" href="https://unpkg.com/unpoly@2.6.1/unpoly-bootstrap4.min.css">
+<link rel="stylesheet" href="https://unpkg.com/unpoly@2.6.1/unpoly-bootstrap5.min.css">
+
+<script type="text/javascript">
+    $(document).ready(function(){
+       document.getElementById('Obras_IdGerador').focus();})
+ </script>
+
+<style>
+
+    input[type=checkbox] + label {
+    display: block;
+    margin: 0em;
+    cursor: pointer;
+    padding: 0.1em;
+    }
+    
+    input[type=checkbox] {
+    display: block;
+    }
+    
+    input[type=checkbox] + label:before {
+    content: "\2713";
+    border: 0.13em solid #000;
+    border-radius: 0.2em;
+    display: inline-block;
+    width: 1.6em;
+    height: 1.6em;
+    padding-left: 0.2em;
+    padding-bottom: 0.3em;
+    margin-right: 0.2em;
+    vertical-align: bottom;
+    color: transparent;
+    transition: .2s;
+    }
+    
+    input[type=checkbox] + label:active:before {
+    transform: scale(1.5);
+    }
+    
+    input[type=checkbox]:checked + label:before {
+    background-color: springgreen;
+    border-color: black;
+    color: #000000;
+    }
+    
+    input[type=checkbox]:disabled + label:before {
+    transform: scale(1);
+    border-color: #aaa;
+    }
+    
+    input[type=checkbox]:checked:disabled + label:before {
+    transform: scale(1);
+    background-color: #bfb;
+    border-color: #bfb;
+    }
+    </style>
+
+
+{{block header}}
+{{=A('Atualiza', _href=cache.ram.clear(),  _class='btn btn-success')}}
+
+<h2 class="card" style="padding:10px;word-wrap:break-word;">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+{{=A('Anterior', _href=URL(c='default',f='Obras', args=[int(obra) -1], vars={'f':'ver'}), _class='btn btn-primary',)if obra else ''}}     
+{{=A('Proximo', _href=URL(c='default',f='Obras', args=[int(obra)+1], vars={'f':'ver'}), _class='btn btn-primary',)if obra else ''}} 
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+<div class="container"  {{if obra:}}style="border: 1px solid; padding-block: 2px;"{{pass}} >
+    {{=A('Editar', _href=URL(c='default',f='Obras', args=[obra], vars={'f':'editar'}), _class='btn btn-primary', )
+        if obra else ''}}
+        {{=A('Novo', _href=URL(c='default',f='Obras', vars={}), _class='btn btn-primary',)if obra else ''}}
+</div>    
+
+<br>
+{{end}}
+{{=formobra.custom.begin}}
+
+
+<div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word; ">
+<table width="100%" style="border: 1px solid; padding:10px;word-wrap:break-word;">    
+    <tr>
+        <div align='left' hidden="true">{{=formobra.custom.widget['Id']}}</td>
+            <td width="40%" align='left'>{{=A('Gerador', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary', _style="height: 25px")}}: {{=A(DIV(B('+')), _class="btn btn-primary", _type="button", _style="height: 25px",  _href='#{}'.format('NovaPessoa'), **atributo ),SPAN(_class="caret")}}
+                    <div align='left' class="card">{{=formobra.custom.widget['IdGerador']}}</div></td>
+            <td width="30%" align='left'>{{=A('Endereço', _href=URL(c='default',f='Enderecos', args=[session.endereco if session.endereco else None],
+                 vars={'f':'editar' if session.endereco else None}), _class='btn btn-primary', _style="height: 25px")}}: {{=A('+', _class="btn btn-primary", _type="button", _style="height: 25px",  _href='#{}'.format('NovoEndereco'), **atributo ),SPAN(_class="caret")}}{{=A('limpa', _href='', _style="height: 25px",  _class='btn btn-warning')}}
+                    <div align='left' class="card">{{=formobra.custom.widget['IdEndereco']}} </div></td>  
+            <td width="15%" align='left'>{{=B('Alvará:      ')  }}<div align='left' class="card">{{=formobra.custom.widget['Alvara']}}</td>
+            <td width="15%" align='left'>{{=B('Data Alvará: ')  }}<div align='left' class="card">{{=formobra.custom.widget['DataAlvara']}}</td>                    
+            </tr>
+        <tr>
+            <td>
+                {{=DIV(LOAD('default', 'Pessoas.load', ajax=True), _id='NovaPessoa', _class="collapse list-unstyled")}}
+            </td> 
+        <td>
+            {{=DIV(LOAD('default', 'Enderecos.load', ajax=True, args=[session.endereco if session.endereco else None],
+             vars={'f':'editar' if session.endereco else None} ), _id='NovoEndereco', _class="collapse list-unstyled")}}
+
+              
+        </td>
+        </tr>       
+    <tr>   
+        <table>
+            <td width="15%" align='left'>{{=B('Protocolo:')  }}<div align='left' class="card">{{=formobra.custom.widget['Protocolo']}}</div></td>
+            <td width="15%" align='left'>{{=B('Cadastro Mun:')  }}<div align='left' class="card">{{=formobra.custom.widget['CadMunicipal']}}</div></td>
+            <td width="15%" align='left'>{{=B('Finalidade:  ')  }}<div align='left' class="card">{{=formobra.custom.widget['Finalidade']}}</div></td>
+            <td width="15%" align='left'>{{=B('N. Quartos:') }}<div align='left' class="card">{{=formobra.custom.widget['Nquartos']}}</div></td>
+            <td width="15%" align='left'>{{=B('Pavtos Inferiores:')}} <div align='left' class="card">{{=formobra.custom.widget['PavtosSubS']}}</div></td>
+            <td width="15%" align='left'>{{=B('Pavtos Sob o Solo:')}} <div align='left' class="card">{{=formobra.custom.widget['PavtosSobreS']}}</div></td>         
+        </table>           
+    </tr>
+    <tr>
+        <table>
+            <td width="10%" align='left'>{{=B('Area do Terreno:')}} <div align='left' class="card">{{=formobra.custom.widget['AreaTerreno']}}</div></td>
+            <td width="12%" align='left'>{{=B('Área à Executar/Executada:')}} <div align='left' class="card">{{=formobra.custom.widget['AreaConstrExecutar']}}</div></td>
+            <td width="10%" align='left'>{{=B('Área Demolição:')}} <div align='left' class="card">{{=formobra.custom.widget['AreaConstrDemolir']}}</div></td>
+            <td width="12%" align='left'>{{=B('Área Construída anterior:')}} <div align='left' class="card">{{=formobra.custom.widget['AreaConstrExist']}}</div></td>
+            <td width="8%" align='left'>{{=B('Corte:')}} <div align='left' class="card">{{=formobra.custom.widget['Corte']}}</div></td>
+            <td width="8%" align='left'>{{=B('Aterro:') }}<div align='left' class="card">{{=formobra.custom.widget['Aterro']}}</div></td>
+            <table >
+                <td width="20%"></td>
+                <td width="20%" align='left' style="padding:10px;word-wrap:break-word;" >{{=B('Piscina:') }}<div align='center' class="card">{{=formobra.custom.widget['Piscina']}}</div></td>
+                <td width="20%" align='left' style="padding:10px;word-wrap:break-word;" >{{=B('Edicula:') }}<div align='center' class="card">{{=formobra.custom.widget['Edicula']}}</div></td>
+                <td width="20%" align='left' style="padding:10px;word-wrap:break-word;">{{=B('Cob. Met:') }}<div align='center' class="card">{{=formobra.custom.widget['CobertMetalica']}}</div></td>
+                <td width="20%" align='left' style="padding:10px;word-wrap:break-word;">{{=B('M. Refl.:') }}<div align='center' class="card">{{=formobra.custom.widget['MadeiraReflorest']}}</div></td>
+            </table>
+            
+            
+        </table>
+        <table class="jumbotron" style="border: 1px solid">
+            <br/>
+            <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}} 
+                <tr>
+                {{for k, v in formobra.custom.linkto.items():}}        
+                {{=TD(DIV(v, _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
+                {{pass}}
+                </tr>
+            </td>
+        </table>
+        {{=A('PGRCC', _href=URL('default', 'PGRCCs',  args=[], vars={'obra_id': obra , 'pessoa_id':pessoa}), _id='PGRCCs', _class="btn btn-success", _align="right" )}}
+    </tr>
+
+</table>
+</div>
+{{=formobra.custom.submit}}
+
+{{=formobra.custom.end}}
+
+<br>
+<tr>
+    <td> 
+        {{if obra:}}
+        {{=DIV(LOAD('default', 'DofsObras.load', ajax=True, args=[obra]), _id='DofsObra', _class='jumbotron', _style="border: 1px solid; padding:10px;word-wrap:break-word;")}}
+        {{else:}}
+        <br>
+        {{=DIV('DOCUMENTOS DE ORIGEM FLORESTAL')}}
+        {{pass}}
+    </td>
+</tr>
+
+<br>
+{{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo ),SPAN(_class="caret") }}
+  {{=DIV(formbusca, _id='Busca', _class="collapse list-unstyled")}}
+
+<br>
+{{=DIV(grade, _class="card", _align="center")}}

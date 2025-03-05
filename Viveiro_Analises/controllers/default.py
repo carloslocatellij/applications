@@ -1,9 +1,7 @@
 
-from datetime import datetime
 
 if 0 == 1:
-    from gluon import * # type: ignore
-    from gluon import (db, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
+    from gluon import (db, current, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
                        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01,
                        IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE,
                        IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC) # type: ignore
@@ -68,3 +66,30 @@ def download():
     http://..../[app]/default/download/[filename]
     """
     return response.download(request, db)
+
+def Processos():
+    processo = request.args(0) or None
+    f = request.vars['f'] if request.vars['f']  else None
+    
+    if f=='editar':
+        formprocess = SQLFORM(db.Requerimento, processo, showid=True )
+    elif f=='ver':
+        formprocess = SQLFORM(db.Requerimento, processo, readonly=True, formstyle='table3cols')
+    else:
+        formprocess = SQLFORM(db.Requerimento)
+
+    if formprocess.process().accepted:
+        response.flash = f'Dados do protocolo atualizados' if processo else 'Protocolo Registrado'
+        redirect(URL('default', 'Processos', args=[formprocess.vars.Protocolo], vars={'f':'ver'}))
+
+    elif formprocess.errors:
+        response.flash = 'Corrija os Erros indicados'
+    else:
+        pass
+
+    formbusca = buscador('Requerimento',  #type: ignore
+                         Requerente={'label': 'Requerente' },
+                         Endereco1={'name':'Endereco1', 'label':'Endereco1'},
+                         cep= {'type':'integer',  'label':'CEP'},  )
+        
+    return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca))

@@ -1,0 +1,73 @@
+{{extend 'layout.html'}}
+    {{block head}}
+
+    {{end}}
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+           document.getElementById('Processos_IdPessoa').focus();})
+     </script>
+
+<h2 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+<div class="container">
+{{=A('Editar', _href=URL(c='default',f='Processos', args=[processo], vars={ 'f':'editar'}), _class='btn btn-primary', ) if processo else ''}}
+{{=A('Novo', _href=URL(c='default',f='Processos',  vars={}), _class='btn btn-primary',)if processo else ''}}
+</div>
+
+<div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+
+    {{=formprocess.custom.begin}}
+        <table width="100%" >
+                    <tr>
+                        <tr>
+                            <td width="45%" align='left'>{{=A('Pessoa', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary', _style="height: 25px")}}: {{=A(B('+'), _class="btn btn-primary", _type="button", _style="height: 25px", _href='#{}'.format('NovaPessoa'), **atributo ),SPAN(_class="caret")}}
+                                <div align='left' class="card">{{=formprocess.custom.widget['IdPessoa']}}</div> </td> 
+                            <td width="25%" align='left' >{{=B('Protocolo:')}} <div align='left' class="card">{{=formprocess.custom.widget['Protocolo']}}</td>
+                            <td width="15%" align='left'> {{=B('Tipo:     ')}} <div align='left' class="card">{{=formprocess.custom.widget['IdTipo']}}</td>
+                            <tr>
+                                <td>
+                                    {{=DIV(LOAD('default', 'Pessoas.load', ajax=True), _id='NovaPessoa', _class="collapse list-unstyled")}}
+                                </td>    
+                            </tr>
+                        </tr> 
+                    </tr>
+                    <tr>
+                        <table width="50%">
+                            <td width="25%" align='left' style="padding-inline: 20px;">{{=B('Departamento: ')}}<div align='left' class="card">{{=formprocess.custom.widget['IdDpto']}}</td>
+                            <td width="15%" align='left'style="padding-inline: 20px;">{{=B('Assunto:      ')}} <div align='left' class="card">{{=formprocess.custom.widget['Assunto']}}</td>
+                            <td width="15%" align='left'style="padding-inline: 20px;">{{=B('Categoria:    ')}} <div align='left' class="card">{{=formprocess.custom.widget['IdCateg']}}</td>
+                            <td width="15%" align='left'style="padding-inline: 20px;">{{=B('Data:         ')}} <div align='center' class="card" style="border: 2px solid; padding:10px;word-wrap:break-word; color: darkgreen">{{=formprocess.custom.widget['DataReg']}}</td></div>
+                            <table class="jumbotron" style="border: 1px solid">
+                                <br/>
+                                <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}} 
+                                    <tr>
+                                    {{for k, v in formprocess.custom.linkto.items():}}        
+                                    {{=TD(DIV(v, _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
+                                    {{pass}}
+                                    </tr>
+                                </td>
+                            </table>
+                            </table>
+                        </tr>
+                        <div style="position: absolute;" id="suggestions" class="suggestions"></div>
+                        
+        </table>
+    </td>  
+
+
+        <div>
+        {{=formprocess.custom.submit}} 
+        </div>
+        
+        {{=formprocess.custom.end}}
+</div>
+
+    <br>
+    {{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo ),SPAN(_class="caret") }}
+      {{=DIV(formbusca, _id='Busca', _class="collapse list-unstyled")}}
+    
+    <br>
+    {{=DIV(grade, _class="card", _align="left")}}

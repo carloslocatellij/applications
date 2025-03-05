@@ -1,0 +1,50 @@
+{{#extend 'layout.html'}}
+<script type="text/javascript">
+    $(document).ready(function(){
+       document.getElementById('Pessoas_Nome').focus();})
+ </script>
+    {{block head}}
+
+    <script>
+jQuery("#Nome").keyup(function(){
+      ajax('{{=URL("default", "Pessoa_selector")}}', ['Nome'], 'suggestions')});
+    </script>
+    <script src="{{=URL('static','js/jquery.mask.min.js')}}"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $('#Obras_DataAlvara').mask('00/00/0000');
+        $('#Pessoas_CPF').mask('000.000.000-00',{placeholder: "___.___.___-__"}, {reverse: true}, );
+        $('#Pessoas_CNPJ').mask('00.000.000/0000-00', {placeholder: "__.___.___/___-__"}, {reverse: true});
+        $('#Pessoas_Telefone').mask('(00) 0000-0000');
+        $('#Pessoas_celular').mask('(00) 00000-0000');
+        
+      });
+  </script>
+    {{end}}
+
+    {{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+    {{=formpessoa.custom.begin}}
+    <table width="100%" >
+                <tr>
+                <td width="50%" align='left'>Nome: <div align='left'>{{=formpessoa.custom.widget['Nome']}}</td>
+                <td width="25%" align='left'>CPF: <div align='left'>{{=formpessoa.custom.widget['CPF']}}</td>
+                <td width="25%" align='left'>CNPJ: <div align='left'>{{=formpessoa.custom.widget['CNPJ']}}</td>
+                </tr>
+                <tr>
+                <td width="35%" align='left'>Endereço: <div align='left'>{{=formpessoa.custom.widget['IdEndereco']}}</td> 
+                <td width="25%" align='left'>Email: <div align='left'>{{=formpessoa.custom.widget['Email']}}</td>
+                </tr>
+                <tr>
+                <td width="35%" align='left'>Telefone: <div align='left'>{{=formpessoa.custom.widget['Telefone']}}</td>
+                <td width="25%" align='left'>Celular: <div align='left'>{{=formpessoa.custom.widget['celular']}}</td>
+                </tr>
+
+                <div style="position: absolute;" id="suggestions" class="suggestions"></div>
+    </table>
+
+        <div>
+    {{=formpessoa.custom.submit}} 
+    </div>
+    {{=formpessoa.custom.end}}
+

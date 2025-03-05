@@ -1,0 +1,66 @@
+{{extend 'layout.html'}}
+    {{block head}}
+    <script type="text/javascript">
+        $(document).ready(function(){
+           document.getElementById('AnaliseTec_DocsProcesso').focus();})
+     </script>
+
+    {{end}}
+
+<h2 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+
+{{if analise:}}
+    
+{{=DIV(LOAD('default', 'Processos.load', args=[protoc], vars={'f':'ver'}, ajax=True), _id='Processo', _class="jumbotron")}}
+{{pass}}
+
+<div class="container" {{if analise:}}style="border: 1px solid; padding-block: 2px;"{{pass}}>
+
+{{=A('Editar', _href=URL(c='default',f='Analises', args=[analise], vars={'f':'editar'}), _class='btn btn-primary', ) if analise else ''}}
+{{=A('Novo', _href=URL(c='default',f='Analises',  vars={}), _class='btn btn-primary',)if analise else ''}}
+</div>
+
+
+<div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+
+    {{=formanalise.custom.begin}}
+        <table width="100%" >
+                    <tr>
+                        <tr>
+                            <td width="45%" align='left'>{{=B('Protocolo:'),}}
+        
+                                <div align='left' class="card">{{=formanalise.custom.widget['Protocolo']}}</div> </td> 
+
+                        </tr> 
+                    </tr>
+                    <tr>
+                        <table width="50%">
+                            <td width="25%" align='left' style="padding-inline: 20px;">{{=B('Documento: ')}}<div align='left' class="card">{{=formanalise.custom.widget['DocsProcesso']}}</td>
+                            <td width="15%" align='left'style="padding-inline: 20px;">{{=B('Campo:      ')}} <div align='left' class="card">{{=formanalise.custom.widget['CamposProcesso']}}</td>
+                            <td width="15%" align='left'style="padding-inline: 20px;">{{=B('Analise:    ')}} <div align='left' class="card">{{=formanalise.custom.widget['TipoAnalise']}}</td>
+                                
+                            </table>
+                        </tr>
+                        <td width="15%" align='left'style="padding-inline: 20px;">{{=B('Obs:         ')}} <div align='center' class="card" >{{=formanalise.custom.widget['Obs']}}</td></div>
+                        <div style="position: absolute;" id="suggestions" class="suggestions"></div>
+                        
+        </table>
+    </td>  
+
+
+        <div>
+        {{=formanalise.custom.submit}} 
+        </div>
+        
+        {{=formanalise.custom.end}}
+</div>
+
+
+<br>
+{{=formbusca}}
+
+<br>
+{{=grade}}

@@ -1,0 +1,17 @@
+{{extend 'layout.html'}}
+
+
+{{block header}}
+
+  <div class="container center">
+    <h2>{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+  </div>
+{{end}}
+
+{{=consulta}}
+
+
+{{=BEAUTIFY(query)}}
+
+
+<img src="{{=URL('plotdados','/graf_entra_att.png')}}"  alt="Ocorreu um erro, ou, não há dados para variaveis informadas." height=55% width=75%>
