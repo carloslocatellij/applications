@@ -287,6 +287,7 @@
 'Qtd Ret2': 'Qtd Ret2',
 'Qtd Ret3': 'Qtd Ret3',
 'Qtd Ret4': 'Qtd Ret4',
+'Query Not Supported: %s': 'Query Not Supported: %s',
 'Query:': 'Consulta:',
 'Quick Examples': 'Exemplos rápidos',
 'RAM': 'RAM',

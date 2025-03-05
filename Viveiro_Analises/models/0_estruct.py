@@ -31,7 +31,7 @@ def buscador(tabela, regform=request.function ,**fields):
     campos = [Field(k, **v)  for k, v in fields.items()] 
     formbusca = SQLFORM.factory(*campos, formstyle='table3cols', formname='formbusca')
 
-    busca = db(db[tabela].Protocolo < 0)
+    busca = db(db[tabela].Protocolo > 0)
     tab2 = None
 
     if formbusca.process().accepted:
@@ -50,16 +50,16 @@ def buscador(tabela, regform=request.function ,**fields):
                     elif db[tab2][k].type == 'integer':
                         q.append( ( db[tabela][campo2] == db[tab2].id) & (db[tab2][k] == int(session[k])) ) 
                         
-                elif db[tabela][k].type == 'string':
-                    q.append((db[tabela][k].contains(str(session[k]) ) ) )
+                elif db[tabela][k].type == 'string' or db[tabela][k].type == 'text':
+                    q.append((db[tabela][k].contains(str(session[k]).to_upper() ) ) )
                 elif db[tabela][k].type == 'integer':
                     q.append((db[tabela][k] ==int(session[k])))
                 else:
                     q.append((db[tabela][k] == session[k]))
 
-        busca = db(*q) if q else db[tabela].id 
+        busca = db(*q) if q else db[tabela].Protocolo 
     grade =''
-    links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=session.controller, f=regform, args=row[tabela]['id'] if tab2 != None else row['id'], vars={'f': 'ver'})))]
+    links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=session.controller, f=regform, args=row[tabela]['Protocolo'] if tab2 != None else row['Protocolo'], vars={'f': 'ver'})))]
     grade = SQLFORM.grid( busca, represent_none='', links=links, editable=False, searchable=False, deletable=False, create=False, details=False,
                           csv=False,  maxtextlength = 120, _class="table", user_signature=False, )
 

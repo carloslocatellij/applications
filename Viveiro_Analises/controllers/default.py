@@ -1,9 +1,7 @@
 
-from datetime import datetime
 
 if 0 == 1:
-    from gluon import * # type: ignore
-    from gluon import (db, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
+    from gluon import (db, current, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
                        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01,
                        IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE,
                        IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC) # type: ignore
@@ -89,32 +87,9 @@ def Processos():
     else:
         pass
 
-    formbusca = SQLFORM.factory(
-        Field('Requerente'),
-        Field('Protocolo')
-        , formstyle='table3cols', formname='formbusca')
-        #Field('Tipo', 'integer', requires = IS_IN_SET(servicos))
-
-    if formbusca.process().accepted:
-        session.buscaPessoa =  formbusca.vars.Requerente
-        session.buscaProtocolo  = formbusca.vars.Protocolo
-        response.flash = 'Exibindo dados para: ',str(session.vars) 
-    
-    if session.buscaPessoa:
-        busca = db(db.Requerimento.Requerente.contains(session.buscaPessoa)) 
-        session.buscaPessoa = None
-    elif session.buscaProtocolo:
-        busca = db(db.Requerimento.Protocolo.contains(session.buscaProtocolo))
-        session.buscaProtocolo = None
-    else:
-        busca = db(db.Requerimento.Protocolo != '')
-
-    fields_grd= [db.Requerimento.Protocolo, db.Requerimento.Requerente, db.Requerimento.telefone1 , db.Requerimento.Endereco1]
-
-    links= [
-        dict(header='Ver', body=lambda row: A('Ver', _href=URL(c='default', f='Processos', args=row.Protocolo, vars={'f':'ver'})))] 
-
-
-    grade = SQLFORM.grid( busca, represent_none='',fields=fields_grd, links=links, editable=False, searchable=True, deletable=False, create=False, details=False, csv=False,  maxtextlength = 120, _class="table", user_signature=False,)
+    formbusca = buscador('Requerimento',  #type: ignore
+                         Requerente={'label': 'Requerente' },
+                         Endereco1={'name':'Endereco1', 'label':'Endereco1'},
+                         cep= {'type':'integer',  'label':'CEP'},  )
         
-    return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca, grade=grade))
+    return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca))
