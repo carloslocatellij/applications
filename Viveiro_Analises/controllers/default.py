@@ -36,7 +36,7 @@ def grid():
 
 
 # ---- Embedded wiki (example) ----
-def wiki():
+def wiki(): #Menu
     auth.wikimenu() # add the wiki to the menu
     return auth.wiki() 
 
@@ -66,8 +66,8 @@ def download():
     http://..../[app]/default/download/[filename]
     """
     return response.download(request, db)
-
-def Processos():
+ 
+def Processos(): #Menu
     processo = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else None
     
@@ -86,10 +86,18 @@ def Processos():
         response.flash = 'Corrija os Erros indicados'
     else:
         pass
-
+    
+    db.Requerimento.Endereco1.type = 'string'
+    db.Requerimento.Endereco = Field.Virtual('Endereco', lambda row: str(''.join([row.Requerimento.Endereco1, row.Requerimento.Numero1, row.Requerimento.Bairro])) )
+    db.Requerimento.Supressoes = Field.Virtual('Supressoes', lambda row: str(f'({row.Requerimento.qtd_ret1}) {row.Requerimento.especie_ret1} - ({row.Requerimento.qtd_ret2}) {row.Requerimento.especie_ret2}'))
+    
+    list_fields= [db.Requerimento.Protocolo, db.Requerimento.Requerente, db.Requerimento.Endereco, db.Requerimento.data_do_laudo, db.Requerimento.telefone1, db.Requerimento.Supressoes]
+    
     formbusca = buscador('Requerimento',  #type: ignore
+                         Protocolo={'label': 'Protocolo'},
+                         data_do_laudo={'label': 'Data'},
                          Requerente={'label': 'Requerente' },
-                         Endereco1={'name':'Endereco1', 'label':'Endereco1'},
-                         cep= {'type':'integer',  'label':'CEP'},  )
+                         Endereco1={'name':'Endereco1', 'label':'Endereço'},
+                         cep= {'type':'integer',  'label':'cep'}, list_fields=list_fields )
         
     return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca))

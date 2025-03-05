@@ -27,7 +27,7 @@ def Modal(title, content, id, vbutton=False):
      _class="up-modal-dialog", _style="max-width: 80%"),
      _class="up-modal", _id='grade'))
 
-def buscador(tabela, regform=request.function ,**fields):
+def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
     campos = [Field(k, **v)  for k, v in fields.items()] 
     formbusca = SQLFORM.factory(*campos, formstyle='table3cols', formname='formbusca')
 
@@ -50,8 +50,8 @@ def buscador(tabela, regform=request.function ,**fields):
                     elif db[tab2][k].type == 'integer':
                         q.append( ( db[tabela][campo2] == db[tab2].id) & (db[tab2][k] == int(session[k])) ) 
                         
-                elif db[tabela][k].type == 'string' or db[tabela][k].type == 'text':
-                    q.append((db[tabela][k].contains(str(session[k]).to_upper() ) ) )
+                elif 'string' in db[tabela][k].type:
+                    q.append((db[tabela][k].contains(str(session[k]).upper().strip() ) ) )
                 elif db[tabela][k].type == 'integer':
                     q.append((db[tabela][k] ==int(session[k])))
                 else:
@@ -61,7 +61,7 @@ def buscador(tabela, regform=request.function ,**fields):
     grade =''
     links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=session.controller, f=regform, args=row[tabela]['Protocolo'] if tab2 != None else row['Protocolo'], vars={'f': 'ver'})))]
     grade = SQLFORM.grid( busca, represent_none='', links=links, editable=False, searchable=False, deletable=False, create=False, details=False,
-                          csv=False,  maxtextlength = 120, _class="table", user_signature=False, )
+                          csv=True,  maxtextlength = 120, _class="table", user_signature=False, fields=list_fields)
 
     
    
