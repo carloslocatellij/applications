@@ -92,10 +92,26 @@ def Processos(): #Menu
     db.Requerimentos.Endereco = Field.Virtual('Endereco',
             lambda row: str(' '.join([row.Requerimentos.Endereco1,
                                      row.Requerimentos.Numero1, row.Requerimentos.Bairro])) )
-    db.Requerimentos.Supressoes = Field.Virtual('Supressoes',
-            lambda row: str(f'({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} - ({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}'))
     
-    list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente, db.Requerimentos.Endereco1 , db.Requerimentos.Endereco, db.Requerimentos.data_do_laudo, db.Requerimentos.telefone1, db.Requerimentos.Supressoes]
+    db.Requerimentos.Supressoes = Field.Virtual('Supressoes',
+            lambda row: ''.join([f'({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} ' if row.Requerimentos.especie_ret1 else ''
+                                 ,f'({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}' if row.Requerimentos.especie_ret2 else ''
+                                 ,f'({row.Requerimentos.qtd_ret3}) {row.Requerimentos.especie_ret3} ' if row.Requerimentos.especie_ret3 else ''
+                                 ,f'({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}' if row.Requerimentos.especie_ret4 else ''])
+            )
+    
+    db.Requerimentos.Podas = Field.Virtual('Podas',
+            lambda row: ''.join([f'({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1} ' if row.Requerimentos.especie_poda1 else ''
+                                 ,f'({row.Requerimentos.qtd_poda2}) {row.Requerimentos.especie_poda2}' if row.Requerimentos.especie_poda2 else ''
+                                 ,f'({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3} ' if row.Requerimentos.especie_poda3 else ''
+                                 ,f'({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}' if row.Requerimentos.especie_poda4 else ''])
+            )
+    
+    list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente,
+                  db.Requerimentos.Endereco, db.Requerimentos.data_do_laudo, db.Requerimentos.telefone1,
+                  db.Requerimentos.Supressoes, db.Requerimentos.Podas, db.Requerimentos.Despacho,
+                  db.Requerimentos.local_arvore, db.Requerimentos.tipo_imovel
+                  ]
     
     formbusca = buscador('Requerimentos',  # type: ignore
                          Protocolo={'label': 'Protocolo'},
@@ -140,7 +156,7 @@ def Lista_de_Registros():
 
     table, field, id = match.group(2), match.group(3), match.group(4)
     records = db(db[table][field]==id)
-    links = [dict(header='Ver', body=lambda row: A('Ver', _href=URL(c=session.controller, f=table, args=row.id, vars={'f': 'ver'})))]
+    links = [dict(header='Ver', body=lambda row: A('Ver', _href=URL(c=session.controller, f=table, args=row.Protocolo, vars={'f': 'ver'})))]
 
     return dict(records=SQLFORM.grid(records,  links=links,user_signature=False, editable=False, searchable=False, deletable=False, create=False,csv=False,
     represent_none='', maxtextlength = 120, _class="table"), table=table)
