@@ -1,12 +1,12 @@
 
 if 0==1:
-    from gluon import *
-    from gluon import db, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, IS_MATCH, a_db, db, auth, Auth
-    request = current.request
-    response = current.response
-    session = current.session
-    cache = current.cache
-    T = current.T
+    from gluon import * # type: ignore
+    from gluon import db, IS_IN_SET, IS_UPPER, DIV, XML, BODY, H4, CAT, Field, SQLFORM, A, URL, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, IS_MATCH, a_db, db, auth, Auth # type: ignore
+    request = current.request # type: ignore
+    response = current.response # type: ignore
+    session = current.session # type: ignore
+    cache = current.cache # type: ignore
+    T = current.T # type: ignore
 
 
 def Modal(title, content, id, vbutton=False):
@@ -34,7 +34,7 @@ def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
     busca = db(db[tabela].Protocolo > 0)
     tab2 = None
 
-    if formbusca.process().accepted:
+    if formbusca.process():
         for k,v in fields.items():
             session[k] =  formbusca.vars[k]
         q =[]
@@ -57,9 +57,11 @@ def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
                 else:
                     q.append((db[tabela][k] == session[k]))
 
-        busca = db(*q) if q else db[tabela].Protocolo 
+        busca = db(*q) if len(q) > 0 else db[tabela].Protocolo == '0'
     grade =''
-    links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=session.controller, f=regform, args=row[tabela]['Protocolo'] if tab2 != None else row['Protocolo'], vars={'f': 'ver'})))]
+    
+    links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=session.controller,
+                              f=regform, args=row[tabela]['Protocolo'] if tab2 != None else row['Protocolo'], vars={'f': 'ver'})))]
     grade = SQLFORM.grid( busca, represent_none='', links=links, editable=False, searchable=False, deletable=False, create=False, details=False,
                           csv=True,  maxtextlength = 120, _class="table", user_signature=False, fields=list_fields, links_placement = 'left')
 

@@ -73,15 +73,15 @@ def Processos(): #Menu
     f = request.vars['f'] if request.vars['f']  else None
     
     if f=='editar':
-        formprocess = SQLFORM(db.Requerimentos, processo, showid=True, linkto=URL('Lista_de_Registros', args='db') )
+        formprocess = SQLFORM(db.Requerimentos, processo, showid=True, linkto=URL('Lista_de_Registros', args='db') ) # type: ignore
     elif f=='ver':
-        formprocess = SQLFORM(db.Requerimentos, processo, readonly=True, formstyle='table3cols', linkto=URL('Lista_de_Registros', args='db'))
+        formprocess = SQLFORM(db.Requerimentos, processo, readonly=True, formstyle='table3cols', linkto=URL('Lista_de_Registros', args='db')) # type: ignore
     else:
         formprocess = SQLFORM(db.Requerimentos)
 
     if formprocess.process().accepted:
         response.flash = f'Dados do protocolo atualizados' if processo else 'Protocolo Registrado'
-        redirect(URL('default', 'Processos', args=[formprocess.vars.Protocolo], vars={'f':'ver'}))
+        redirect(URL('default', 'Processos', args=[formprocess.vars.Protocolo], vars={'f':'ver'})) # type: ignore
 
     elif formprocess.errors:
         response.flash = 'Corrija os Erros indicados'
@@ -90,8 +90,8 @@ def Processos(): #Menu
     
     db.Requerimentos.Endereco1.type = 'string'
     db.Requerimentos.Endereco = Field.Virtual('Endereco',
-            lambda row: str(' '.join([row.Requerimentos.Endereco1,
-                                     row.Requerimentos.Numero1, row.Requerimentos.Bairro])) )
+            lambda row: str(' '.join([row.Requerimentos.Endereco1 or '' ,
+                                     row.Requerimentos.Numero1 or '', row.Requerimentos.Bairro or ''])) )
     
     db.Requerimentos.Supressoes = Field.Virtual('Supressoes',
             lambda row: ''.join([f'({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} ' if row.Requerimentos.especie_ret1 else ''
@@ -137,7 +137,7 @@ def Laudos(): #Menu
 
     if form.process().accepted:
         response.flash = f'Dados do Laudo atualizados' if laudo else 'Laudo Registrado'
-        redirect(URL('default', 'Laudos', args=[form.vars.Protocolo], vars={'f':'ver'}))
+        redirect(URL('default', 'Laudos', args=[form.vars.Protocolo], vars={'f':'ver'})) # type: ignore
 
     elif form.errors:
         response.flash = 'Corrija os Erros indicados'
@@ -152,11 +152,11 @@ def Lista_de_Registros():
     REGEX = re.compile('^(\w+).(\w+).(\w+)\=\=(\d+)$')
     match = REGEX.match(request.vars.query)
     if not match:
-        redirect(URL('error'))
+        redirect(URL('error')) # type: ignore
 
     table, field, id = match.group(2), match.group(3), match.group(4)
     records = db(db[table][field]==id)
-    links = [dict(header='Ver', body=lambda row: A('Ver', _href=URL(c=session.controller, f=table, args=row.Protocolo, vars={'f': 'ver'})))]
+    links = [dict(header='Ver', body=lambda row: A('Ver', _href=URL(c=session.controller, f=table, args=row.Protocolo, vars={'f': 'ver'})))] # type: ignore
 
     return dict(records=SQLFORM.grid(records,  links=links,user_signature=False, editable=False, searchable=False, deletable=False, create=False,csv=False,
     represent_none='', maxtextlength = 120, _class="table"), table=table)

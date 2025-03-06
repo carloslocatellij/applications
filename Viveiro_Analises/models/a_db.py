@@ -10,7 +10,7 @@ import copy
 
 if 0==1:
     from gluon import * # type: ignore
-    from gluon import db, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, IS_MATCH, a_db, db, auth, Auth, pegaDof # type: ignore
+    from gluon import db, IS_IN_SET, IS_UPPER,  DAL, IS_INT_IN_RANGE, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, IS_MATCH, a_db, db, auth, Auth, pegaDof # type: ignore
     request = current.request # type: ignore
     response = current.response # type: ignore
     session = current.session # type: ignore
@@ -42,13 +42,26 @@ configuration = AppConfig(reload=True)
 # session.samesite('Strict')
 
 
+# - Banco Teste 
+# db = DAL(configuration.take("db")['uri'], #type: ignore
+#             pool_size=50,
+#             migrate_enabled=True, migrate=True, fake_migrate_all=True, lazy_tables=True,
+#             check_reserved=[configuration.take("db")['engine']],
+#             adapter_args={'safe': True},
+#             )
 
-db = DAL(configuration.take("db")['uri'], #type: ignore
+# Banco Produção
+db = DAL('{}://{}:{}@{}/{}'.format(
+                configuration.take("db")['engine'],
+                configuration.take("db")['username'],
+                configuration.take("db")['password'],
+                configuration.take("db")['uri'],
+                configuration.take("db")['database'] ) ,
             pool_size=50,
-            migrate_enabled=True, migrate=True, fake_migrate_all=True, lazy_tables=True,
-            check_reserved=[configuration.take("db")['engine']],
-            adapter_args={'safe': True},
+            migrate_enabled=True, migrate=False, fake_migrate_all=True, lazy_tables=True,
+            check_reserved=['mysql'], adapter_args={'safe': True},
             )
+
 
 #db._adapter.types = copy.copy(db._adapter.types)
 db._adapter.types['boolean']='TINYINT(1)'
