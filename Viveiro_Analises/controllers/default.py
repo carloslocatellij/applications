@@ -66,17 +66,18 @@ def download():
     http://..../[app]/default/download/[filename]
     """
     return response.download(request, db)
- 
+
+
 def Processos(): #Menu
     processo = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else None
     
     if f=='editar':
-        formprocess = SQLFORM(db.Requerimento, processo, showid=True )
+        formprocess = SQLFORM(db.Requerimentos, processo, showid=True, linkto=URL('Lista_de_Registros', args='db') )
     elif f=='ver':
-        formprocess = SQLFORM(db.Requerimento, processo, readonly=True, formstyle='table3cols')
+        formprocess = SQLFORM(db.Requerimentos, processo, readonly=True, formstyle='table3cols', linkto=URL('Lista_de_Registros', args='db'))
     else:
-        formprocess = SQLFORM(db.Requerimento)
+        formprocess = SQLFORM(db.Requerimentos)
 
     if formprocess.process().accepted:
         response.flash = f'Dados do protocolo atualizados' if processo else 'Protocolo Registrado'
@@ -87,17 +88,60 @@ def Processos(): #Menu
     else:
         pass
     
-    db.Requerimento.Endereco1.type = 'string'
-    db.Requerimento.Endereco = Field.Virtual('Endereco', lambda row: str(''.join([row.Requerimento.Endereco1, row.Requerimento.Numero1, row.Requerimento.Bairro])) )
-    db.Requerimento.Supressoes = Field.Virtual('Supressoes', lambda row: str(f'({row.Requerimento.qtd_ret1}) {row.Requerimento.especie_ret1} - ({row.Requerimento.qtd_ret2}) {row.Requerimento.especie_ret2}'))
+    db.Requerimentos.Endereco1.type = 'string'
+    db.Requerimentos.Endereco = Field.Virtual('Endereco',
+            lambda row: str(' '.join([row.Requerimentos.Endereco1,
+                                     row.Requerimentos.Numero1, row.Requerimentos.Bairro])) )
+    db.Requerimentos.Supressoes = Field.Virtual('Supressoes',
+            lambda row: str(f'({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} - ({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}'))
     
-    list_fields= [db.Requerimento.Protocolo, db.Requerimento.Requerente, db.Requerimento.Endereco, db.Requerimento.data_do_laudo, db.Requerimento.telefone1, db.Requerimento.Supressoes]
+    list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente, db.Requerimentos.Endereco1 , db.Requerimentos.Endereco, db.Requerimentos.data_do_laudo, db.Requerimentos.telefone1, db.Requerimentos.Supressoes]
     
-    formbusca = buscador('Requerimento',  #type: ignore
+    formbusca = buscador('Requerimentos',  # type: ignore
                          Protocolo={'label': 'Protocolo'},
-                         data_do_laudo={'label': 'Data'},
+                         data_do_laudo={'type': 'date' ,'label': 'Data'},
                          Requerente={'label': 'Requerente' },
                          Endereco1={'name':'Endereco1', 'label':'Endereço'},
                          cep= {'type':'integer',  'label':'cep'}, list_fields=list_fields )
         
     return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca))
+
+
+def Laudos(): #Menu
+    
+    laudo = request.args(0) or None
+    f = request.vars['f'] if request.vars['f']  else None
+    
+    if f=='editar':
+        form = SQLFORM(db.Laudos, laudo, showid=True )
+    elif f=='ver':
+        form = SQLFORM(db.Laudos, laudo, readonly=True, formstyle='table3cols')
+    else:
+        form = SQLFORM(db.Laudos)
+
+    if form.process().accepted:
+        response.flash = f'Dados do Laudo atualizados' if laudo else 'Laudo Registrado'
+        redirect(URL('default', 'Laudos', args=[form.vars.Protocolo], vars={'f':'ver'}))
+
+    elif form.errors:
+        response.flash = 'Corrija os Erros indicados'
+    else:
+        pass
+
+    return response.render(dict(form=form,))
+
+
+def Lista_de_Registros():
+    import re
+    REGEX = re.compile('^(\w+).(\w+).(\w+)\=\=(\d+)$')
+    match = REGEX.match(request.vars.query)
+    if not match:
+        redirect(URL('error'))
+
+    table, field, id = match.group(2), match.group(3), match.group(4)
+    records = db(db[table][field]==id)
+    links = [dict(header='Ver', body=lambda row: A('Ver', _href=URL(c=session.controller, f=table, args=row.id, vars={'f': 'ver'})))]
+
+    return dict(records=SQLFORM.grid(records,  links=links,user_signature=False, editable=False, searchable=False, deletable=False, create=False,csv=False,
+    represent_none='', maxtextlength = 120, _class="table"), table=table)
+

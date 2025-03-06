@@ -15,35 +15,38 @@ if 0 == 1:
 
 tabela_solicitacoes = "tab_Solicitacoes"
 
+
 Bairros = db.define_table('Bairros',
     Field('Bairro', 'string'),
     Field('Perimetro', 'string'),
     Field('Area', 'string'),
     Field('Regiao', 'string'),
     primarykey=['Bairro'],
-    format='Bairro'
+    format='Bairro',
+    migrate=True
     )
+
 
 Ruas = db.define_table('tab_Ruas',
     Field('ID', 'id'),
     Field('Endereco1'),
     Field('Denominacao', rname='DENOMINACAO'),
     primarykey=['ID'],
-    format='%(Endereco1)s - %(Denominacao)s'
+    format='%(Endereco1)s - %(Denominacao)s',
+    migrate=True
                        )
 
-
-Requerimentos = db.define_table('Requerimento',
+Requerimentos = db.define_table('Requerimentos',
     Field('Protocolo', requires=IS_INT_IN_RANGE('0','2025999999')),
     Field('Requerente'),
     Field('data_entrada', 'date', 
-            requires=IS_DATE(format=T('%d/%m/%Y'),
-            error_message='Deve ter o formato xx/xx/20xx'),
+            requires=IS_EMPTY_OR(IS_DATE(format=T('%d/%m/%Y'),
+            error_message='Deve ter o formato xx/xx/20xx')),
             rname='"Data de Entrada"'),
-    Field('Endereco1', 'string-reference tab_Ruas',
+    Field('Endereco1', 'string',
           requires=IS_IN_DB(db, 'tab_Ruas.Endereco1')),
     Field('Numero1'),
-    Field('Bairro', 'referece Bairros', 
+    Field('Bairro', 
           requires=IS_IN_DB(db, 'Bairros.Bairro', '%(Bairro)s')),
     Field('cpf_cnpj', rname= '"cpf-cnpj"'),
     Field('cep'),
@@ -82,7 +85,9 @@ Requerimentos = db.define_table('Requerimento',
     primarykey = ['Protocolo'],
     format='%(Protocolo)s',
     migrate=False,
-    fake_migrate=False)
+    fake_migrate=False
+    )
+
 
 Laudos = db.define_table('Laudos',
     Field('Protocolo',),
