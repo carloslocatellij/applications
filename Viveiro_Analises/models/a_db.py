@@ -6,11 +6,12 @@
 # -------------------------------------------------------------------------
 from gluon.contrib.appconfig import AppConfig # type: ignore
 from gluon.tools import Auth # type: ignore
-import copy
+#import copy
 
 if 0==1:
     from gluon import * # type: ignore
-    from gluon import db, IS_IN_SET, IS_UPPER,  DAL, IS_INT_IN_RANGE, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, IS_MATCH, a_db, db, auth, Auth, pegaDof # type: ignore
+    from gluon import (db, IS_IN_SET, IS_UPPER,  DAL, IS_INT_IN_RANGE, IS_EMPTY_OR, 
+    IS_IN_DB, IS_NOT_IN_DB, IS_MATCH, a_db, db, auth, Auth, pegaDof) # type: ignore
     request = current.request # type: ignore
     response = current.response # type: ignore
     session = current.session # type: ignore
@@ -43,15 +44,17 @@ configuration = AppConfig(reload=True)
 
 
 # - Banco Teste 
-# db = DAL(configuration.take("db")['uri'], #type: ignore
-#             pool_size=50,
-#             migrate_enabled=True, migrate=True, fake_migrate_all=True, lazy_tables=True,
-#             check_reserved=[configuration.take("db")['engine']],
-#             adapter_args={'safe': True},
-#             )
+if configuration.take("app")['production'] == 'false':
+    db = DAL(configuration.take("db")['uri'], #type: ignore
+                 pool_size=50,
+             migrate_enabled=True, migrate=False, fake_migrate_all=True, lazy_tables=True,
+                 #check_reserved=[configuration.take("db")['engine']],
+                 #adapter_args={'safe': True},
+            )
 
 # Banco Produção
-db = DAL('{}://{}:{}@{}/{}'.format(
+else:
+    db = DAL('{}://{}:{}@{}/{}'.format(
                 configuration.take("db")['engine'],
                 configuration.take("db")['username'],
                 configuration.take("db")['password'],

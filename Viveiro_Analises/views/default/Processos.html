@@ -5,7 +5,7 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
-           document.getElementById('Processos_Requerente').focus();})
+           document.getElementById('Requerimentos_Requerente').focus();})
      </script>
 
 <h2 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
@@ -23,11 +23,10 @@
         <table width="100%" >
                     <tr>
                         <tr>
-                            <td width="35%" align='left'>{{=A('Pessoa', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary', _style="height: 25px")}}: {{=A(B('+'), _class="btn btn-primary", _type="button", _style="height: 25px", _href='#{}'.format('NovaPessoa'), **atributo ),SPAN(_class="caret")}}
-                            <td width="20%" align='left'style="padding-inline: 20px;">{{=B('Cpf Cnpj:  ')}}<div align='left' class="card">{{=formprocess.custom.widget['cpf_cnpj']}}</td></div>
-                                <div align='left' class="card">{{=formprocess.custom.widget['Requerente']}}</div> </td> 
-                            <td width="20%" align='left' >{{=B('Protocolo:')}} <div align='center' class="card" style="border: 2px solid; padding:10px;word-wrap:break-word; color: darkgreen">{{=formprocess.custom.widget['Protocolo']}}</div></td>
-                            <td width="25%" align='left'> {{=B('Data de Entrada:     ')}} <div align='left' class="card">{{=formprocess.custom.widget['data_entrada']}}</td>
+                            <td width="35%" align='left'>{{=A('Requerente', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary', _style="height: 25px")}}:<div align='left' class="card">{{=formprocess.custom.widget['Requerente']}}</div> </td> 
+                            <td width="20%" align='left'>{{=B('Cpf Cnpj:  ')}}<div align='left' class="card">{{=formprocess.custom.widget['cpf_cnpj']}}</td></div>            
+                            <td width="20%" align='left'>{{=B('Protocolo:')}} <div align='center' class="card">{{=formprocess.custom.widget['Protocolo']}}</div></td>
+                            <td width="25%" align='left'>{{=B('Data de Entrada:')}} <div align='left' class="card">{{=formprocess.custom.widget['data_entrada']}}</div></td>
                         </tr> 
                     </tr>
                          <tr>
@@ -37,14 +36,26 @@
                         </tr>
                         <tr>
                             <table>
-                            <td width="25%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">{{=formprocess.custom.widget['especie_poda1']}}</td>
-                            <td width="25%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['especie_poda2']}}</td>
-                            <td width="25%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['especie_poda3']}}</td>
-                            <td width="25%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['especie_poda4']}}</td>
+                            
+                          <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
+                                    {{=formprocess.custom.widget['especie_poda1']}}</td>
+                          <td width="10%" align='left' style="padding-inline: 20px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
+                                    {{=formprocess.custom.widget['qtd_poda1']}}</td>
 
+                            <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
+                                    {{=formprocess.custom.widget['especie_poda2']}}</td>
+                            <td width="10%" align='left' style="padding-inline: 20px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
+                                    {{=formprocess.custom.widget['qtd_poda2']}}</tr>
+
+                            <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
+                                    {{=formprocess.custom.widget['especie_poda3']}}</td>
+                            <td width="10%" align='left' style="padding-inline: 20px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
+                                    {{=formprocess.custom.widget['qtd_poda3']}}</tr>
+
+                            <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
+                                    {{=formprocess.custom.widget['especie_poda4']}}</td>
+                            <td width="10%" align='left' style="padding-inline: 20px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
+                                    {{=formprocess.custom.widget['qtd_poda4']}}</tr>
                             </table>
                         </tr>
                             

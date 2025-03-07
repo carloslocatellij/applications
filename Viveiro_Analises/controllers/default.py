@@ -73,9 +73,11 @@ def Processos(): #Menu
     f = request.vars['f'] if request.vars['f']  else None
     
     if f=='editar':
-        formprocess = SQLFORM(db.Requerimentos, processo, showid=True, linkto=URL('Lista_de_Registros', args='db') ) # type: ignore
+        formprocess = SQLFORM(db.Requerimentos, processo, showid=True,
+                              linkto=URL('Lista_de_Registros', args='db') ) # type: ignore
     elif f=='ver':
-        formprocess = SQLFORM(db.Requerimentos, processo, readonly=True, formstyle='table3cols', linkto=URL('Lista_de_Registros', args='db')) # type: ignore
+        formprocess = SQLFORM(db.Requerimentos, processo, readonly=True,
+                              formstyle='table3cols', linkto=URL('Lista_de_Registros', args='db')) # type: ignore
     else:
         formprocess = SQLFORM(db.Requerimentos)
 
@@ -88,6 +90,9 @@ def Processos(): #Menu
     else:
         pass
     
+
+    db.Requerimentos.especie_ret2.show_if = (db.Requerimentos.especie_poda1!=None)
+   
     db.Requerimentos.Endereco1.type = 'string'
     db.Requerimentos.Endereco = Field.Virtual('Endereco',
             lambda row: str(' '.join([row.Requerimentos.Endereco1 or '' ,

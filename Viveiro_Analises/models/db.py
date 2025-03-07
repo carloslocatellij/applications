@@ -13,8 +13,16 @@ if 0 == 1:
     cache = current.cache # type: ignore
     T = current.T # type: ignore
 
-tabela_solicitacoes = '''tab Solicitacoes'''
-tabela_laudos = '''tab Protocolos'''
+
+if not configuration.take("app")['production']:
+    tabela_solicitacoes = '''tab Solicitacoes'''
+    tabela_laudos = '''tab Protocolos'''
+    tab_ruas = '''tab Ruas'''
+else:
+    tabela_solicitacoes= '''tab_Solicitacoes'''
+    tabela_laudos='''tab_Protocolos'''
+    tab_ruas= '''tab_Ruas'''
+
 
 Bairros = db.define_table('Bairros',
     Field('Bairro', 'string'),
@@ -31,7 +39,7 @@ Ruas = db.define_table('tab_Ruas',
     Field('ID', 'id'),
     Field('Endereco1'),
     Field('Denominacao', rname='DENOMINACAO'),
-    rname='`tab Ruas`',
+    rname='`{}`'.format(tab_ruas),
     primarykey=['ID'],
     format='%(Endereco1)s - %(Denominacao)s',
     migrate=True
