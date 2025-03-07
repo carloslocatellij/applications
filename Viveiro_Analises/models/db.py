@@ -3,7 +3,7 @@ from datetime import datetime
 
 if 0 == 1:
     from gluon import * # type: ignore
-    from gluon import (db, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
+    from gluon import (db, configuration, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
                        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01,  DAL, IS_INT_IN_RANGE, 
                        IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE,
                        IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC) # type: ignore
@@ -14,7 +14,7 @@ if 0 == 1:
     T = current.T # type: ignore
 
 
-if not configuration.take("app")['production']:
+if configuration.get('app.production'):
     tabela_solicitacoes = '''tab Solicitacoes'''
     tabela_laudos = '''tab Protocolos'''
     tab_ruas = '''tab Ruas'''
@@ -73,12 +73,12 @@ Requerimentos = db.define_table('Requerimentos',
     Field('especie_poda2', rname='`especie poda2`'),
     Field('especie_poda3', rname='`especie poda3`'),
     Field('especie_poda4', rname='`especie poda4`'),
-    Field('qtd_poda1', rname='`qtd poda1`'),
-    Field('qtd_poda2', rname='`qtd poda2`'),
-    Field('qtd_poda3', rname='`qtd poda3`'),
-    Field('qtd_poda4', rname='`qtd poda4`'),
+    Field('qtd_poda1', 'integer', rname='`qtd poda1`'),
+    Field('qtd_poda2', 'integer',rname='`qtd poda2`'),
+    Field('qtd_poda3', 'integer', rname='`qtd poda3`'),
+    Field('qtd_poda4', 'integer',rname='`qtd poda4`'),
     Field('podador_coleta', rname='`podador coleta`',
-          requires=IS_IN_SET(['Sim', 'Não'])),
+          requires=IS_IN_SET(['Sim', 'Não', ''])),
     Field('no_carteira', rname='`no. carteira`'),
     Field('data_do_laudo', 'date',  
             requires=IS_DATE(format=T('%d/%m/%Y'),
@@ -116,3 +116,23 @@ Laudos = db.define_table('Laudos',
     primarykey=['Protocolo'],
     rname = '`{}`'.format(tabela_laudos)
 )
+
+
+db.Requerimentos.Endereco1.type = 'string'
+db.Requerimentos.Endereco = Field.Virtual('Endereco',
+        lambda row: str(', '.join([f'Av./Rua {row.Requerimentos.Endereco1}' or '' ,
+                                    f'Nº {row.Requerimentos.Numero1}' or '', f'Bairro: {row.Requerimentos.Bairro}' or ''])) )
+
+db.Requerimentos.Supressoes = Field.Virtual('Supressoes',
+        lambda row: ''.join([f'({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} ' if row.Requerimentos.especie_ret1 else ''
+                                ,f'({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}' if row.Requerimentos.especie_ret2 else ''
+                                ,f'({row.Requerimentos.qtd_ret3}) {row.Requerimentos.especie_ret3} ' if row.Requerimentos.especie_ret3 else ''
+                                ,f'({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}' if row.Requerimentos.especie_ret4 else ''])
+        )
+
+db.Requerimentos.Podas = Field.Virtual('Podas',
+        lambda row: ''.join([f'({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1} ' if row.Requerimentos.especie_poda1 else ''
+                                ,f'({row.Requerimentos.qtd_poda2}) {row.Requerimentos.especie_poda2}' if row.Requerimentos.especie_poda2 else ''
+                                ,f'({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3} ' if row.Requerimentos.especie_poda3 else ''
+                                ,f'({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}' if row.Requerimentos.especie_poda4 else ''])
+        )

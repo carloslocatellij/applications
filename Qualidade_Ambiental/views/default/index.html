@@ -1,4 +1,5 @@
 {{extend 'layout.html'}}
+<script src="https://unpkg.com/vue@next"></script>
 
 {{block header}}
 
@@ -17,17 +18,14 @@
   <div class="col-md-12">
 
     <h2 align="center">{{='DEPARTAMENTO DE QUALIDADE AMBIENTAL - SÃO JOSÉ DO RIO PRETO'}}</h2>
-    <p class="lead">{{=T('Options')}}</p>
-    <ol style="word-wrap:break-word;">
-      <li>{{=T('')}}</li>
-      
-    </ol>
+    <p class="lead">{{=T('Números do Departamento: ')}}</p>
+      <ol style="word-wrap:break-word;">
+        {{for k, v in numeros_do_dpto.items():}}
+          {{=LI(' '.join(x.capitalize() for x in k.split('_')), ':  ', B(v)  )   }}
+        {{pass}}
+      </ol>
 
-    
 
-    {{=BEAUTIFY(response._vars)}}
-    {{pass}}
- 
 
   </div>
 

@@ -1,11 +1,7 @@
 {{extend 'layout.html'}}
 
-    <style>
-        #suggestions { position: relative; }
-        #suggestions{ z-index:1;}
-        .suggestions { background: white; border: solid 1px #55A6C8; }
-        .suggestions DIV { padding: 2px 4px 2px 4px; }
-        </style>
+
+
 {{block head}}
 
     {{end}}
@@ -17,7 +13,7 @@
 
     {{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
     <div class="container" {{if pessoa:}}style="border: 1px solid; padding-block: 2px;"{{pass}} >
-    {{=A('Editar', _href=URL(c='default',f='Pessoas', args=[pessoa], vars={'f':'editar'}), _class='btn btn-primary', ) if pessoa else ''}}
+    {{=A('Editar', _href=URL(c='default',f='Pessoas', args=[pessoa], vars={'f':'editar'}), _class='btn btn-primary') if pessoa else ''}}
     {{=A('Novo', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary',)if pessoa else ''}}
     </div>
     {{session.buscaNome = session.buscaCPF = session.buscaCNPJ = None}}
@@ -33,58 +29,53 @@
                         <tr>
                             <td>
                                 <div style="position: absolute;" id="suggestions" class="suggestions"></div>
-                            </td>    
-                        </tr>     
+                            </td>
+                        </tr>
                     </tr>
                     <tr>
-                        <td width="45%" align='left'>{{=A('Endereço', _href=URL(c='default',f='Enderecos',  vars={}), _class='btn btn-primary', _style="height: 25px")}}: {{=A(B('+'), _class="btn btn-primary", _type="button", _style="height: 25px", _href='#{}'.format('NovoEndereco'), **atributo ),SPAN(_class="caret")}}<div align='left' class="card">{{=formpessoa.custom.widget['IdEndereco']}}   
+                        <td width="45%" align='left'>{{=A('Endereço', _href=URL(c='default',f='Enderecos',  vars={}), _class='btn btn-primary', _style="height: 25px", _target="new")}}:
+                        <div align='left' class="card">{{=formpessoa.custom.widget['IdEndereco']}}
                         <td width="25%" align='left'>{{=B('Email:')}} <div align='left' class="card">{{=formpessoa.custom.widget['Email']}}</td>
-                        <tr>
-                            <td>
-                                {{=DIV(LOAD('default', 'Enderecos.load', ajax=True), _id='NovoEndereco', _class="collapse list-unstyled")}}
-                            </td>    
-                        </tr> 
+                        </tr>
                     <table width="50%">
                         <td width="15%" align='left'>{{=B('Telefone:')}} <div align='left' class="card">{{=formpessoa.custom.widget['Telefone']}}</td>
                         <td width="15%" align='left'>{{=B('Celular: ')}}<div align='left' class="card">{{=formpessoa.custom.widget['celular']}}</td>
+                        <td width="15%" align='left'>{{=B('Registro Prof.: ')}}<div align='left' class="card">{{=formpessoa.custom.widget['RegistroProf']}}</td>
                             <table class="jumbotron" style="border: 1px solid">
                                 <br/>
                                 <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}}
                                     <tr>
-                                    {{for k, v in formpessoa.custom.linkto.items():}}        
-                                    {{=TD(DIV(v, _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
-                                    {{pass}}</tr> 
+                                        {{for k, v in formpessoa.custom.linkto.items():}}
+                                            {{tabela, campo = k.split('__')}}
+                                            {{num_registros_links = db(db[tabela][campo]==pessoa).count()}}
+                                            {{=TD(DIV(B(v,' ' ,SPAN(num_registros_links,_class="badge badge-danger") if  num_registros_links > 0 else ''),
+                                                _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
+                                        {{pass}}
                                 </td>
                             </table>
                     </table>
                     </tr>
         </table>
-    </td>  
+    </td>
             <div>
-        {{=formpessoa.custom.submit}} 
+        {{=formpessoa.custom.submit}}
         </div>
-        
+
         {{=formpessoa.custom.end}}
     </div>
 
 	<br>
     {{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo ),SPAN(_class="caret") }}
-  
+
     {{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled")}}
 
     {{=grade}}
 
+
     <script type="text/javascript">
+
         $(document).ready(function(){
            document.getElementById('Pessoas_Nome').focus();
         });
 
-
-        $('#Pessoas_Nome').keyup(function(){ajax('{{=URL("default", "Pessoa_selector")}}', ['Nome'], target='suggestions')    });
-        $('#Pessoas_Nome').onblur(function(){$('#suggestions').slideToggle() });
-         
-        function botaosecreto(){
-            var pi = '3.14159265359'
-            $('#Pessoas_Nome').val(pi);
-        }
      </script>

@@ -6,7 +6,13 @@
 #---      APROVA DIGITAL        ---#
 #==================================#
 
-from bs4 import BeautifulSoup
+'''
+    "(C)" Carlos Augusto Locatelli Júnior 2022
+    Este programa é um software livre: você pode redistribuí-lo e/ou modificá-lo sob os termos da GNU General Public License conforme publicada pela Free Software Foundation.
+    Este programa é distribuído na esperança de que seja útil, mas SEM QUALQUER GARANTIA; Consulte <https://www.gnu.org/licenses/>.
+'''
+
+from bs4 import BeautifulSoup # type: ignore
 import os
 import re
 import urllib.request
@@ -29,7 +35,7 @@ def intro():
 def pega_numeracao_da_pasta():
     '''Função para achar o próximo número de pasta numerada na raiz indicada no caminho abaixo'''
 
-    caminho_pasta_hab = 'F:\Qualidade Ambiental\HABITE-SE 2022 - Digital'
+    caminho_pasta_hab = 'F:\Qualidade Ambiental\HABITE-SE - APROVA Digital 2023'
     pastas_de_hab = []
     pattern = '^\d+'
     for dir in os.listdir(caminho_pasta_hab):
@@ -41,11 +47,10 @@ def pega_numeracao_da_pasta():
     return str(max(pastas_de_hab)+1)
 
 
-
     '''
     Modulo de raspagem
 
-Infelizmente, devido ao proxy da empro bloquear o requests ou urllib de acessar a web, 
+Infelizmente, devido ao proxy da empro bloquear o requests ou urllib de acessar a web,
 o scrap deve ser feito em página.html salva no computador local (a ser passada para o servidor processar)
 Portanto, as funcionalidades acamba sendo limitadas. No entanto o código ainda pode automatizar diversos processo de obtenção de dados.
 
@@ -73,13 +78,13 @@ def raspa_aprova(url):
         except Exception as e:
             print (f'Erro:: {e}')
             print('')
-    
+
     dados = {}
-        
+
     try:
-        protocolo = soup.find(mattooltip="Este é o código de identificação deste processo")
+        protocolo = soup.find('div', class_='content-center max-w-full md:max-w-xs')
         try:
-            protocolo = protocolo.getText()
+            protocolo = protocolo.getText().strip()
         except AttributeError as ae:
             print (f'Protocolo não encontrado na página fornecida: {ae}')
             print('')
@@ -92,11 +97,16 @@ def raspa_aprova(url):
             tel = soup.find(text=re.compile('Telefone Fixo ou Celular do Proprietário'))
 
             dados_gerador = dict(
-                        Nome = Nome.parent.parent.next_sibling.get_text() if Nome == 'Nome do Proprietário' else '-',
-                        CPF = CPF.parent.parent.next_sibling.get_text() if CPF == 'CPF' else '',
-                        CNPJ = CNPJ.parent.parent.next_sibling.get_text() if CNPJ == 'CNPJ' else '',
-                        email = email.parent.parent.next_sibling.get_text() if email else '-',
-                        tel = ''.join(re.findall('\d+', tel.parent.parent.next_sibling.get_text())) if tel else '-'
+                        #Nome = Nome.parent.parent.next_sibling.get_text() if Nome == 'Nome do Proprietário' else '-',
+                        #CPF = CPF.parent.parent.next_sibling.get_text() if CPF == 'CPF' else '',
+                        #CNPJ = CNPJ.parent.parent.next_sibling.get_text() if CNPJ == 'CNPJ' else '',
+                        #email = email.parent.parent.next_sibling.get_text() if email else '-',
+                        #tel = ''.join(re.findall('\d+', tel.parent.parent.next_sibling.get_text())) if tel else '-'
+                        Nome = Nome.parent.parent.parent.contents[-1].get_text(),
+                        CPF = CPF.parent.parent.parent.contents[-1].get_text() if CPF == 'CPF' else '',
+                        CNPJ = CNPJ.parent.parent.parent.contents[-1].get_text() if CNPJ == 'CNPJ' else '',
+                        email = email.parent.parent.parent.contents[-1].get_text() if email else '-',
+                        tel = ''.join(re.findall('\d+', tel.parent.parent.parent.contents[-1].get_text())) if tel else '-'
             )
         except AttributeError as ae:
             print (f'Erro ao atribuir dados do Gerador: {ae}')
@@ -113,58 +123,103 @@ def raspa_aprova(url):
             Bairro = soup.find(text=re.compile(r'^Loteamento/Bairro da Obra$'))
             Cep = soup.find(text=re.compile(r'^CEP da Obra$'))
             endereco_obra = dict(
-                CadMunicipal = CadMunicipal.parent.parent.next_sibling.get_text().replace('.','').replace('/','') if CadMunicipal else print('sem Cad. Municipal'),
-                Logradouro = Logradouro.parent.parent.next_sibling.get_text() if Logradouro else print('sem Logradouro'),
-                Lote = re.sub('(?![A-z])(?!\d)(?! )(?!,)', '', Lote.parent.parent.next_sibling.get_text().strip().replace(' ',',')) if Lote else '',
-                Quadra = re.sub('(?![A-z])(?!\d)(?! )(?!,)', '',Quadra.parent.parent.next_sibling.get_text().strip().replace(' ','')) if Quadra else '',
-                Num = ''.join(re.findall('\d+',Num.parent.parent.next_sibling.get_text().replace('-','0'))) if Num else '0',
-                Compl = Compl.parent.parent.next_sibling.get_text() if Compl else '',
-                Bairro = Bairro.parent.parent.next_sibling.get_text() if Bairro else print('sem Bairro'),
-                Cep = Cep.parent.parent.next_sibling.get_text().replace('-','') if Cep else print('sem Cep.'))
+                # CadMunicipal = CadMunicipal.parent.parent.next_sibling.get_text().replace('.','').replace('/','') if CadMunicipal else print('sem Cad. Municipal'),
+                # Logradouro = Logradouro.parent.parent.next_sibling.get_text() if Logradouro else print('sem Logradouro'),
+                # Lote = re.sub('(?![A-z])(?!\d)(?! )(?!,)', '', Lote.parent.parent.next_sibling.get_text().strip().replace(' ',',')) if Lote else '',
+                # Quadra = re.sub('(?![A-z])(?!\d)(?! )(?!,)', '',Quadra.parent.parent.next_sibling.get_text().strip().replace(' ','')) if Quadra else '',
+                # Num = ''.join(re.findall('\d+',Num.parent.parent.next_sibling.get_text().replace('-','0'))) if Num else '0',
+                # Compl = Compl.parent.parent.next_sibling.get_text() if Compl else '',
+                # Bairro = Bairro.parent.parent.next_sibling.get_text() if Bairro else print('sem Bairro'),
+                # Cep = Cep.parent.parent.next_sibling.get_text().replace('-','') if Cep else print('sem Cep.'))
+                CadMunicipal = CadMunicipal.parent.parent.parent.contents[-1].get_text().replace('.','').replace('/','') if CadMunicipal else print('sem Cad. Municipal'),
+                Logradouro = Logradouro.parent.parent.parent.contents[-1].get_text() if Logradouro else print('sem Logradouro'),
+                Lote = re.sub('(?![A-z])(?!\d)(?! )(?!,)', '', Lote.parent.parent.parent.contents[-1].get_text().strip().replace(' ',',')) if Lote else '',
+                Quadra = re.sub('(?![A-z])(?!\d)(?! )(?!,)', '',Quadra.parent.parent.parent.contents[-1].get_text().strip().replace(' ','')) if Quadra else '',
+                Num = ''.join(re.findall('\d+',Num.parent.parent.parent.contents[-1].get_text().replace('-','0'))) if Num else '0',
+                Compl = Compl.parent.parent.parent.contents[-1].get_text() if Compl else '',
+                Bairro = Bairro.parent.parent.parent.contents[-1].get_text() if Bairro else print('sem Bairro'),
+                Cep = Cep.parent.parent.parent.contents[-1].get_text().replace('-','') if Cep else print('sem Cep.'))
 
         except AttributeError as ae:
             print ('Erro ao atribuir dados do endereço da obra: {ae}')
             print('')
-        
-        try:
-            area_do_terreno = soup.find(text=re.compile(r'^Área do Terreno$'))
-            area_existente = soup.find(text=re.compile(r'Total de Área Existente \(Aprovada com Alvará e Habite-se\)'))
-            area_construida_final = soup.find(text=re.compile(r'^Área Total Final da Edificação$'))
-            area_demolir = soup.find(text=re.compile(r'^Total de Área a Demolir$'))
-            finalidade = soup.find(text=re.compile(r'^Tipo de Uso$'))
-            pavimentos_sup = soup.find(text=re.compile(r'^Quantidade de Pavimentos$'))
-            pavimentos_sub = soup.find(text=re.compile(r'^Quantidade de Subsolos$'))
-            alvara= soup.find(text=re.compile(r'^Número do Alvará aprovado no modo físico'))
-            data_alvara = soup.find(text=re.compile(r'^Data de Expedição do Alvará$'))
-            data_alvara = data_alvara.parent.parent.next_sibling.get_text()
-            data_alvara = data_alvara if re.match('\d{8}', data_alvara.replace('/','').replace('-','')) else ''
 
-            dados_obra = dict(
-            alvara = ''.join(re.findall('\d+',alvara.parent.parent.next_sibling.get_text())) if alvara else '',
-            data_alvara = data_alvara,
-            area_do_terreno = area_do_terreno.parent.parent.next_sibling.get_text().replace(u'm²','').replace(',','.').replace(' ','') if area_do_terreno else '',
-            area_existente = area_existente.parent.parent.next_sibling.get_text().replace(u'm²','').replace(',','.').replace(' ','') if area_existente else '',
-            area_construida_final = area_construida_final.parent.parent.next_sibling.get_text().replace(u'm²','').replace(',','.').replace(' ','') if area_construida_final else '',
-            area_demolir = area_demolir.parent.parent.next_sibling.get_text().replace(u'm²','').replace(',','.').replace(' ','') if area_demolir else '',
-            finalidade = finalidade.parent.parent.next_sibling.get_text().upper() if finalidade else print('sem finalidade.'),
-            pavimentos_sup = pavimentos_sup.parent.parent.next_sibling.get_text().replace(u'Unidade(s)','') if pavimentos_sup else print('sem pavimentos_sup.'),
-            pavimentos_sub = pavimentos_sub.parent.parent.next_sibling.get_text().replace(u'Unidade(s)','') if pavimentos_sub else print('sem pavimentos_sub.'),)
 
-        except AttributeError as ae:
-            print (f'Erro ao atribuir dados de área da obra::   {ae}')
-            print('')
+        area_do_terreno = soup.find(text=re.compile(r'^Área do Terreno$'))
+        area_existente = soup.find(text=re.compile(r'Total de Área Existente \(Aprovada com Alvará e Habite-se\)'))
+        area_construida_final = soup.find(text=re.compile(r'^Área Total Final da Edificação$'))
+        area_demolir = soup.find(text=re.compile(r'^Total de Área a Demolir$'))
+        finalidade = soup.find(text=re.compile(r'^Tipo de Uso$'))
+        pavimentos_sup = soup.find(text=re.compile(r'^Quantidade de Pavimentos$'))
+        pavimentos_sub = soup.find(text=re.compile(r'^Quantidade de Subsolos$'))
+        modo = soup.find(text=re.compile(r'^Escolha a forma de aprovação do Alvará para o qual deseja solicitar Habite-se'))
+        modo = modo.parent.parent.parent.contents[-1].get_text()
+        if 'modo físico' in modo:
+            alvara = soup.find(text=re.compile(r'^Número do Alvará aprovado no modo físico'))
+        else:
+            alvara = soup.find(text=re.compile(r'^Número do Alvará aprovado pelo Aprova Digital'))
+
+        data_alvara = soup.find(text=re.compile(r'^Data de Expedição do Alvará$'))
+
+        try: data_alvara = data_alvara.parent.parent.parent.contents[-1].get_text()
+        except Exception as e: print (f'Erro ao atribuir dados de data_alvara::   {e}')
+        data_alvara = data_alvara if re.match('\d{8}', data_alvara.replace('/','').replace('-','')) else ''
+
+        try: alvara = ''.join(re.findall('\d+',alvara.parent.parent.parent.contents[-1].get_text() )) if alvara else '',
+        except Exception as e: print (f'Erro ao atribuir dados de alvara::   {e}')
+        try: area_do_terreno = area_do_terreno.parent.parent.parent.contents[-1].get_text()\
+            .replace(u'm²','').replace(',','.').replace(' ','') if area_do_terreno else ''
+        except Exception as e: print (f'Erro ao atribuir dados de area_do_terreno::   {e}')
+        try: area_existente = area_existente.parent.parent.parent.contents[-1].get_text()\
+            .replace(u'm²','').replace(',','.').replace(' ','') if area_do_terreno else ''
+        except Exception as e: print (f'Erro ao atribuir dados de area_existente::   {e}')
+        try: area_construida_final = area_construida_final.parent.parent.parent.contents[-1].get_text()\
+            .replace(u'm²','').replace(',','.').replace(' ','') if area_construida_final else ''
+        except Exception as e: print (f'Erro ao atribuir dados de area_construida_final::   {e}')
+        try: area_demolir = area_demolir.parent.parent.parent.contents[-1].get_text()\
+            .replace(u'm²','').replace(',','.').replace(' ','') if area_demolir else ''
+        except Exception as e: print (f'Erro ao atribuir dados de area_demolir::   {e}')
+        try: finalidade = finalidade.parent.parent.parent.contents[-1].get_text().upper() if finalidade else print('sem finalidade.')
+        except Exception as e: print (f'Erro ao atribuir dados de finalidade::   {e}')
+        try: pavimentos_sup = re.sub('[^0-9]', '', pavimentos_sup.parent.parent.parent.contents[-1].get_text())\
+            if pavimentos_sup else print('sem pavimentos_sup.')
+        except Exception as e: print (f'Erro ao atribuir dados de pavimentos_sup::   {e}')
+        try: pavimentos_sub = re.sub('[^0-9]', '', pavimentos_sub.parent.parent.parent.contents[-1].get_text() )\
+            if pavimentos_sub else print('sem pavimentos_sup.')
+        except Exception as e: print (f'Erro ao atribuir dados de pavimentos_sub::   {e}')
+
+        dados_obra = dict(
+        alvara = alvara, data_alvara = data_alvara, area_do_terreno = area_do_terreno,
+        area_existente= area_existente, area_construida_final= area_construida_final,
+        area_demolir = area_demolir, finalidade = finalidade,
+        pavimentos_sup=pavimentos_sup,pavimentos_sub= pavimentos_sub )
+
+        # alvara = ''.join(re.findall('\d+',alvara.parent.parent.next_sibling.get_text())) if alvara else '',
+        # data_alvara = data_alvara,
+        # area_do_terreno = area_do_terreno.parent.parent.next_sibling.get_text().replace(u'm²','').replace(',','.').replace(' ','') if area_do_terreno else '',
+        # area_existente = area_existente.parent.parent.next_sibling.get_text().replace(u'm²','').replace(',','.').replace(' ','') if area_existente else '',
+        # area_construida_final = area_construida_final.parent.parent.next_sibling.get_text().replace(u'm²','').replace(',','.').replace(' ','') if area_construida_final else '',
+        # area_demolir = area_demolir.parent.parent.next_sibling.get_text().replace(u'm²','').replace(',','.').replace(' ','') if area_demolir else '',
+        # finalidade = finalidade.parent.parent.next_sibling.get_text().upper() if finalidade else print('sem finalidade.'),
+        # pavimentos_sup = re.sub('[^0-9]', '', pavimentos_sup.parent.parent.next_sibling.get_text()) if pavimentos_sup else print('sem pavimentos_sup.'),
+        # pavimentos_sub = re.sub('[^0-9]', '', pavimentos_sub.parent.parent.next_sibling.get_text()) if pavimentos_sub else print('sem pavimentos_sup.'),)
+
 
         try:
             exigencia = soup.find(text=re.compile('Consta exigência, no alvará, da utilização de madeira legalizada\?'))
             material_cobertura = soup.find(text=re.compile(r'^Material utilizado:$'))
             declara = soup.find(text=re.compile(r'Declaro,\r\n para fins de Habite-se'))
             cobertura = dict(
-            exigencia = exigencia.parent.parent.next_sibling.getText() if exigencia else print('sem dado da exigência de DOF.'),
-            material_cobertura = material_cobertura.parent.parent.next_sibling.get_text() if material_cobertura else print('sem dado de material_cobertura.'),
+            # exigencia = exigencia.parent.parent.next_sibling.getText() if exigencia else print('sem dado da exigência de DOF.'),
+            # material_cobertura = material_cobertura.parent.parent.next_sibling.get_text() if material_cobertura else print('sem dado de material_cobertura.'),
+            # declara = declara.parent.get_text() if declara else 'Sem declaração',
+            # declarou = declara.parent.parent.next_sibling.get_text() if declara else ''
+            exigencia = exigencia.parent.parent.parent.contents[-1].get_text() if exigencia else print('sem dado da exigência de DOF.'),
+            material_cobertura = material_cobertura.parent.parent.parent.contents[-1].get_text()  if material_cobertura else print('sem dado de material_cobertura.'),
             declara = declara.parent.get_text() if declara else 'Sem declaração',
-            declarou = declara.parent.parent.next_sibling.get_text() if declara else ''
+            declarou = declara.parent.parent.parent.contents[-1].get_text()  if declara else ''
             )
-        
+
         except AttributeError as ae:
             print (f'Erro ao atribuir dados da cobertura da obra {ae}')
             print('')
@@ -190,24 +245,24 @@ def raspa_aprova(url):
 def criar_pasta_compartilhada(dados):
     dados_gerador = dados['dados_gerador']
     protocolo = dados['protocolo']
-    caminho_pasta_hab = 'F:\Qualidade Ambiental\HABITE-SE 2022 - Digital'
+    caminho_pasta_hab = 'F:\Qualidade Ambiental\HABITE-SE - APROVA Digital 2023'
 
     protocolo_existe = False
     for dir in os.listdir(caminho_pasta_hab):
         if os.path.isdir(os.path.join(caminho_pasta_hab,dir)):
             for d in os.listdir(os.path.join(caminho_pasta_hab,dir)):
                 if protocolo in str(d):
-                    protocolo_existe = True     
-                
+                    protocolo_existe = True
 
-    if __name__ == "__main__": 
+
+    if __name__ == "__main__":
         op_criar_pasta = str(input('Deseja criar a pasta: Digite(s/n): '))
         if op_criar_pasta == 's':
             if protocolo_existe:
                 print(f'Já existe pasta para o protocolo {protocolo}')
             else:
                 try:
-                    os.mkdir('F:\Qualidade Ambiental\HABITE-SE 2022 - Digital\A - RECEPÇÃO - AVALIAÇÃO\{}_{}_{}'.format(pega_numeracao_da_pasta(),str(dados_gerador['Nome'].replace('/','-')).upper(), protocolo))
+                    os.mkdir('F:\Qualidade Ambiental\HABITE-SE - APROVA Digital 2023\A - RECEPÇÃO - AVALIAÇÃO\{}_{}_{}'.format(pega_numeracao_da_pasta(),str(dados_gerador['Nome'].replace('/','-')).upper(), protocolo))
                     print('Pasta criada! {}_{} '.format(str(dados_gerador['Nome']).upper(), protocolo))
                 except Exception as e:
                     print (f'Ocorreu um erro ao criar a pasta:: {e}')
@@ -217,26 +272,26 @@ def criar_pasta_compartilhada(dados):
                 return 'Já existe pasta para este protocolo!'
         else:
             try:
-                os.mkdir('F:\Qualidade Ambiental\HABITE-SE 2022 - Digital\A - RECEPÇÃO - AVALIAÇÃO\{}_{}_{}'.format(pega_numeracao_da_pasta(),str(dados_gerador['Nome'].replace('/','-')).upper(), protocolo))
+                os.mkdir('F:\Qualidade Ambiental\HABITE-SE - APROVA Digital 2023\A - RECEPÇÃO - AVALIAÇÃO\{}_{}_{}'.format(pega_numeracao_da_pasta(),str(dados_gerador['Nome'].replace('/','-')).upper(), protocolo))
                 print('Pasta criada! {}_{} '.format(str(dados_gerador['Nome']).upper(), protocolo))
             except Exception as e:
                     print (f'Ocorreu um erro ao criar a pasta:: {e}')
-                    return e               
+                    return e
 
 
 def criar_atualizar_arq_de_dados(dados):
     pasta_do_proc = ''
-    caminho_pasta_hab = 'F:\Qualidade Ambiental\HABITE-SE 2022 - Digital'
+    caminho_pasta_hab = 'F:\Qualidade Ambiental\HABITE-SE - APROVA Digital 2023'
 
 
     for dir in os.listdir(caminho_pasta_hab):
         if os.path.isdir(os.path.join(caminho_pasta_hab,dir)):
             for d in os.listdir(os.path.join(caminho_pasta_hab,dir)):
                 if dados['protocolo'] in str(d):
-                    pasta_do_proc = os.path.join(dir, str(d)) 
-    
+                    pasta_do_proc = os.path.join(dir, str(d))
+
     try:
-        with open('F:\Qualidade Ambiental\HABITE-SE 2022 - Digital\{}\dados.csv'.format(pasta_do_proc), 'w', newline='') as f:
+        with open('F:\Qualidade Ambiental\HABITE-SE - APROVA Digital 2023\{}\dados.csv'.format(pasta_do_proc), 'w', newline='') as f:
             writer = csv.writer(f)
             for k, v in dados.items():
                 if k != 'protocolo':
@@ -245,7 +300,7 @@ def criar_atualizar_arq_de_dados(dados):
             f.close()
 
     except Exception as e:
-        print(f'Erro ao criar/atualizar arquivo de dados:: {e}') # Arquivo de dados não criado aqui   
+        print(f'Erro ao criar/atualizar arquivo de dados:: {e}') # Arquivo de dados não criado aqui
 
 
 if __name__ == "__main__":
@@ -254,12 +309,10 @@ if __name__ == "__main__":
     while True:
 
         opt = str(input('continuar: Digite(s/n): '))
-        
-        url = str(input('digite o caminho e nome do arquivo html do dof: '))    
+
+        url = str(input('digite o caminho e nome do arquivo html completo: '))
         if opt == 'n': break
 
         dados = raspa_aprova(url)
         criar_pasta_compartilhada(dados)
         criar_atualizar_arq_de_dados(dados)
- 
-

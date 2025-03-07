@@ -15,7 +15,7 @@
     {{=A('Editar', _href=URL(c='Transportadores',f='Cadastro_de_Transportador', args=[reg], vars={'f':'editar'}), _class='btn btn-primary', )
         if reg else ''}}
         {{=A('Novo', _href=URL(c='Transportadores',f='Cadastro_de_Transportador', vars={}), _class='btn btn-primary',)if reg else ''}}
-</div>    
+</div>
 
 <br>
 {{end}}
@@ -24,33 +24,33 @@
 {{=formtransp.custom.begin}}
 
 <div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
-<table width="100%" style="border: 1px solid; padding:10px;word-wrap:break-word;">    
+<table width="100%" style="border: 1px solid; padding:10px;word-wrap:break-word;">
     <tr>
         <div align='left' hidden="true">{{=formtransp.custom.widget['Id']}}</td>
             <td width="40%" align='left'>{{=A('Pessoa', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary', _style="height: 25px")}}: {{=A(DIV(B('+')), _class="btn btn-primary", _type="button", _style="height: 25px",  _href='#{}'.format('NovaPessoa'), **atributo ),SPAN(_class="caret")}}
                     <div align='left' class="card">{{=formtransp.custom.widget['IdPessoa']}}</div></td>
-            
+
             <td width="15%" align='left'>{{=B('NomeFantasia:      ')  }}<div align='left' class="card">{{=formtransp.custom.widget['NomeFantasia']}}</td>
-            <td width="15%" align='left'>{{=B('RazaoSocial: ')  }}<div align='left' class="card">{{=formtransp.custom.widget['RazaoSocial']}}</td>                    
+            <td width="15%" align='left'>{{=B('RazaoSocial: ')  }}<div align='left' class="card">{{=formtransp.custom.widget['RazaoSocial']}}</td>
             </tr>
         <tr>
             <td>
                 {{=DIV(LOAD('default', 'Pessoas.load', ajax=True), _id='NovaPessoa', _class="collapse list-unstyled")}}
-            </td> 
-        </tr>       
-    <tr>   
+            </td>
+        </tr>
+    <tr>
         <table>
             <td width="15%" align='left'>{{=B('CNPJ:')  }}<div align='left' class="card">{{=formtransp.custom.widget['CNPJ']}}</div></td>
             <td width="15%" align='left'>{{=B('Insc. Mun:  ')  }}<div align='left' class="card">{{=formtransp.custom.widget['IM']}}</div></td>
             <td width="15%" align='left'>{{=B('N. CTR:') }}<div align='left' class="card">{{=formtransp.custom.widget['Cadastro']}}</div></td>
             <td width="15%" align='left'>{{=B('Tipo:')}} <div align='left' class="card">{{=formtransp.custom.widget['Tipo']}}</div></td>
-            <td width="15%" align='left'>{{=B('Tel:')}} <div align='left' class="card">{{=formtransp.custom.widget['Tel']}}</div></td>         
-        </table>           
+            <td width="15%" align='left'>{{=B('Tel:')}} <div align='left' class="card">{{=formtransp.custom.widget['Tel']}}</div></td>
+        </table>
     </tr>
     <tr>
         <table>
             <td width="10%" align='left'>{{=B('email:')}} <div align='left' class="card">{{=formtransp.custom.widget['email']}}</div></td>
-            <td width="15%" align='left'>{{=B('Referencias.:')}} 
+            <td width="15%" align='left'>{{=B('Referencias.:')}}
                 {{for k, v in formtransp.custom.linkto.items():}}
                 <br/>
                 {{=TD(v)}}
@@ -67,9 +67,9 @@
 
 <br>
 <tr>
-    <td> 
+    <td>
         {{if reg:}}
-        {{=DIV(LOAD('Transportadores', 'Situacao_do_Transportador.load', ajax=True, args=[reg]), _id='Situacao_do_Transportador', _class='jumbotron', _style="border: 1px solid; padding:10px;word-wrap:break-word;")}}
+        {{=DIV(LOAD('Transportadores', 'Situacao_do_Transportador.load', ajax=True, args=[reg], vars={'reg': reg}), _id='Situacao_do_Transportador', _class='jumbotron', _style="border: 1px solid; padding:10px;word-wrap:break-word;")}}
         {{else:}}
         <br>
         {{=DIV(' --- Situação --- ')}}
@@ -83,3 +83,13 @@
 
 <br>
 {{=DIV(grade, _class="card", _align="center")}}
+
+{{if request.vars and request.vars.pessoa_id:}}
+<script>
+    function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    sleep(2000).then(() => { $('#Transportadores_IdPessoa').val("{{=request.vars.pessoa_id}}"); });
+</script>
+{{else:}}
+{{pass}}

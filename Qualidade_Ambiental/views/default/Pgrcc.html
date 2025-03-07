@@ -1,0 +1,274 @@
+{{extend 'layout.html'}}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        document.getElementById('Pgrcc_Protocolo').focus();
+    })
+</script>
+{{if request.vars and request.vars.pessoa_id:}}
+<script>
+    function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    sleep(2000).then(() => { $('#Pgrcc_resptecnico').val("{{=request.vars.pessoa_id}}"); });
+    sleep(2500).then(() => { $('#Pgrcc_resptecnico').val("{{=request.vars.pessoa_id}}"); });
+
+</script>
+{{else:}}
+{{pass}}
+<!-- <style>
+.card-analise {background-color:tomato}
+</style> -->
+
+{{block header}}
+
+<h2 class="card" style="padding:10px;word-wrap:break-word;">{{=' '.join(x.upper() for x in
+    request.function.split('_'))}}</h2>
+{{=A('Anterior', _href=URL(c='default',f='Pgrcc', args=[int(pgr) -1], vars={'f':'ver'}), _class='btn btn-primary',)if pgr else ''}}
+{{=A('Proximo', _href=URL(c='default',f='Pgrcc', args=[int(pgr)+1], vars={'f':'ver'}), _class='btn btn-primary',)if pgr else ''}}
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+<div class="container" {{if obra:}}style="border: 1px solid; padding-block: 2px;" {{pass}}>
+<br>
+    {{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo ),SPAN(_class="caret") }}
+      {{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled") }}
+
+
+
+    {{=A('Editar', _href=URL(c='default',f='Pgrcc', args=[pgr], vars={'f':'editar'}), _class='btn btn-primary', )
+    if pgr else ''}}
+    {{=A('Novo', _href=URL(c='default',f='Pgrcc', vars={}), _class='btn btn-primary',)}}
+</div>
+
+<br>
+{{end}}
+{{=formpgr.custom.begin}}
+
+<table width="100%" style="border: 1px solid">
+    <td width="45%" align='left'> {{=B('Gerador:')}}
+        <div class="input-group mb-3">
+             {{=formpgr.custom.widget['idgerador']}}
+        </div>
+    </td>
+    <td width="25%" align='left'> {{=B('Protocolo:')}}
+        <div class="input-group mb-3">
+            <div align='center' class="input-group-prepend">
+                 {{=A(B('Protocolo:'), _class="btn btn-primary", _type="button", _style="",
+                    _href=URL('default', 'Processos', args=[ protocolo ], vars={'f':'ver'} ) )}}</div>
+            <div align='left' class="card">{{=formpgr.custom.widget['protocolo']}}</div>
+        </div>
+    </td>
+    <td width="30%" align='left' style="padding: 5px;">{{=B('SiGor: ')}}
+        <div align='center' class="card">{{=formpgr.custom.widget['sigor']}}</div>
+        <div align='center' class="card">{{=linksigor}}</div>
+    </td>
+
+    <tr>
+        <table>
+            <tr>
+            <td width="50%" align='left' style="padding: 5px;"> {{=B('Obra: ')}}
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend" align='left'>
+                        {{=A(B('Obra'), _class="btn btn-primary", _type="button", _style="",
+                        _href=URL('default', 'Obras', args=[ obra ] ))}}</div>
+                    <div align='left' class="card">{{=formpgr.custom.widget['idobra']}}</div>
+                </div>
+
+            </td>
+            </tr>
+            <tr>
+            <td width="50%" align='left' style="padding: 5px;">{{=A(B('+Responsável'), _class="btn btn-primary", _type="button", _style="", _href='#{}'.format('NovaPessoa'), **atributo ), SPAN(_class="caret") }}
+                    <div align='left' class="card">{{=formpgr.custom.widget['resptecnico']}}</div>
+                        <tr>
+                             <td>
+                                    {{=DIV(LOAD('default', 'Pessoas.load', ajax=True, target='NovaPessoa', timeout=4500, times=2,
+                                    content='Carregando...', ), _id='NovaPessoa', _class="collapse list-unstyled")}}
+                             </td>
+                        </tr>
+            </td>
+        </tr>
+        </table>
+    </tr>
+    <tr>
+        <table>
+            <td width="65%" align='left' style="padding: 5px;">{{=B('Metodo Construtivo: ')}}
+                <div align='left' class="card">
+                    {{=formpgr.custom.widget['metodoconstrutivo']}}</div>
+            </td>
+            <td width="35%" align='left' style="padding: 5px;">{{=B('Obs: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['obs']}}</div>
+            </td>
+        </table>
+    </tr>
+</table>
+<div class="card" style="border: 1px solid; padding: 5px; color: darkslategray">{{=H4('Classe A')}}
+    <table>
+        <tr>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Concreto: ')}}<div align='center' class="card">
+                    {{=formpgr.custom.widget['concreto']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Argamassa: ')}}<div align='center' class="card">
+                    {{=formpgr.custom.widget['argamassa']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Alvenaria: ')}}<div align='center' class="card">
+                    {{=formpgr.custom.widget['alvenaria']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Cerâmica: ')}}<div align='center' class="card">
+                    {{=formpgr.custom.widget['ceramica']}}</div>
+            </td>
+        </tr>
+        <tr>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Outros: ')}}<div align='center' class="card">
+                    {{=formpgr.custom.widget['outros_ca']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Solo: ')}}<div align='center' class="card">
+                    {{=formpgr.custom.widget['solo']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Soma classe A: ')}}<div align='center'
+                    class="card">
+                    {{=cls_a}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Análise A: ')}}<div align='center' class="card-analise">
+                    {{=analise['A']}}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="card" style="border: 1px solid; padding: 5px; color: darkslategray">{{=H4('Classe B')}}
+    <table>
+        <tr>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Madeira: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['madeira']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Plástico: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['plastico']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Papel: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['papel']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Metal: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['metal']}}</div>
+            </td>
+        </tr>
+        <tr>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Vidro: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['vidro']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Gesso: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['gesso']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Outros: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['outros_cb']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Soma classe B: ')}}<div align='center'
+                    class="card">
+                    {{=cls_b}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Análise B: ')}}<div align='center' class="card-analise">
+                    {{=analise['B']}}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="card" style="border: 1px solid; padding: 5px; color: darkslategray">{{=H4('Classe C')}}
+    <table>
+        <tr>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Outros C: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['outros_cc']}}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="card" style="border: 1px solid; padding: 5px; color: darkslategray">{{=H4('Classe D')}}
+    <table>
+        <tr>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Tinta: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['tinta']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Solvente: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['solvente']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Óleo: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['oleo']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Outros: ')}}
+                <div align='center' class="card">
+                    {{=formpgr.custom.widget['outros_cd']}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Soma classe D: ')}}<div align='center'
+                    class="card">
+                    {{=cls_d}}</div>
+            </td>
+            <td width="12%" align='left' style="padding: 5px;">{{=B('Análise D: ')}}<div align='center' class="card-analise">
+                    {{=analise['D']}}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<table>
+    <table class="jumbotron" style="border: 1px solid">
+        <br />
+                                <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Ligações.:')}}
+                                    <tr>
+                                    {{for k, v in formpgr.custom.linkto.items():}}
+                                    {{tabela, campo = k.split('__')}}
+                                    {{num_registros_links = db(db[tabela][campo]==pgr).count()}}
+                                    {{=TD(DIV(B(v,' ' ,SPAN(num_registros_links,_class="badge badge-danger") if  num_registros_links > 0 else ''),
+                                     _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
+                                    {{pass}}
+                                    </tr>
+                                </td>
+    </table>
+
+</table>
+<div style="position: absolute;" id="suggestions" class="suggestions"></div>
+
+
+<div>
+    {{=formpgr.custom.submit}}
+</div>
+
+{{=formpgr.custom.end}}
+</div>
+
+ <script>
+function ordenarSelect(id_componente)
+{
+  var selectToSort = jQuery('#' + id_componente);
+  var optionActual = selectToSort.val();
+  selectToSort.html(selectToSort.children('option').sort(function (a, b) {
+    return a.text === b.text ? 0 : a.text < b.text ? -1 : 1;
+  })).val(optionActual);
+}
+
+
+$( document ).ready(function() {
+    if ($('#Pgrcc_idgerador').val() == "") {
+                                            ordenarSelect('Pgrcc_idgerador');
+                                            };
+     $('#Pgrcc_idgerador').keydown(ordenarSelect('Pgrcc_idgerador'));
+
+    if ($('#Pgrcc_resptecnico').val() == "" ) {
+                                            ordenarSelect('Pgrcc_resptecnico');
+                                             };
+     $('#Pgrcc_resptecnico').keydown(ordenarSelect('Pgrcc_idgerador'));
+
+                                }
+                    );
+</script>

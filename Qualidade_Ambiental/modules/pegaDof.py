@@ -1,9 +1,17 @@
+
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 #==================================#
 #---            DOF           -----#
 #==================================#
+'''
+    "(C)" Carlos Augusto Locatelli Júnior 2022
+    Este programa é um software livre: você pode redistribuí-lo e/ou modificá-lo sob os termos da GNU General Public License conforme publicada pela Free Software Foundation.
+    Este programa é distribuído na esperança de que seja útil, mas SEM QUALQUER GARANTIA; Consulte <https://www.gnu.org/licenses/>.
+
+'''
+
 
 import unicodedata
 import urllib
@@ -11,11 +19,10 @@ from bs4 import BeautifulSoup
 import re
 
 
-#urlexemplo =  "file:///C:/Users/clocatelli/Documents/DOFS/consulta_dof.php.htm"
-
+#urlexemplo =  "file:///C:\\Users\\clocatelli\\Downloads\\dof\\Documento de Origem Florestal - Ibama.htm"
 
 def intro():
-    print('''#=============================# 
+    print('''#=============================#
 
 #--           DOF            -#
 
@@ -27,56 +34,43 @@ def pegaquali(url):
     html = html.read()
     soup = BeautifulSoup(html, 'html.parser')
     def ndof():
-        iddof = ''
-        for i in range(1,5):
-            iddof = iddof + str(soup.find('input', id=f'cod_controle{i}').get('value'))
-            iddof = iddof + ' ' if i < 4 else iddof
-        return iddof
+        try:
+            cod = soup.find(id='codigo_controle').attrs.get('value')
+            if not ' ' in cod:
+                return f'{str(cod[0:4])} {str(cod[4:8])} {str(cod[8:12])} {str(cod[12:])}'
+            else:
+                return cod
+
+        except Exception as e:
+            print('Erro: {e}')
 
     try:
-        dados = soup.find('table', id='table_gride_itens').find_all('td')
-
+        #dados = soup.find('table', id='produtos').find_all('td')
+        dados = soup.find('table', id='produtos').find('table', border='1').find_all('span')
         blinkdof = ndof()
     except IndexError:
         return 'Não encontrado'
-    else:
-        itens = re.split('<span><center>.</center></span></td>,',str(dados))
+    finally:
+        itens = [str(x).replace('<span>','').replace('</span>','') for x in dados]
         listDof = []
         itensDof = {}
         Dofitens =  []
-        for x in itens[1:]:
-            pattern_letra_maiuscula = re.compile('[a-z]')
-            x = BeautifulSoup(x, 'html.parser').get_text()
-            listDof.append(x.encode('utf-8', 'ignore').decode('ascii', 'ignore'))
-            for i in listDof:
-                
-                tem_virg_no_produto = False if re.match(pattern_letra_maiuscula, i.split(',')[1][1]) else True
-                itensDof['Nº'] = listDof.index(i)
-                itensDof['Produto'] = i.split(',')[0] if tem_virg_no_produto else str(i.split(',')[0] + i.split(',')[1])
-                itensDof['Espécie'] = i.split(',')[1] if tem_virg_no_produto else  i.split(',')[2]
-                itensDof['Nome Popular'] = i.split(',')[2] if tem_virg_no_produto else  i.split(',')[3]
-                qtd = str(i.split(',')[3]+'.'+i.split(',')[4]) if tem_virg_no_produto else  str(i.split(',')[4]+'.'+i.split(',')[5])
-                itensDof['Quantidade'] = float(qtd)
-                itensDof['Unidade'] = i.split(',')[5].replace('.','').replace(' ','')  if tem_virg_no_produto else  i.split(',')[6]
-                itensDof['Valor Item'] = str((i.split(',')[6].replace('.','').replace(' ','')+','+i.split(',')[7].replace(']','')))  if tem_virg_no_produto else  str((i.split(',')[7].replace('.','').replace(' ','')+','+i.split(',')[8].replace(']','')))
+        for i in range(int(len(itens)/7)):
+            itensDof['Nº'] = itens[i*7]
+            itensDof['Espécie'] = itens[1+(i*7)]
+            itensDof['Nome Popular'] = itens[2+(i*7)]
+            itensDof['Produto'] = itens[3+(i*7)]
+            itensDof['Quantidade'] = itens[4+(i*7)]
+            itensDof['Unidade'] = itens[5+(i*7)]
+            itensDof['Valor Item'] = itens[6+(i*7)]
             Dofitens.append(itensDof)
             itensDof = {}
-        pattern = '\d'
-        blinkdof = re.findall(pattern, str(blinkdof))
-        iddof = ''
-        for c in blinkdof:
-            if len(iddof) == 4 or len(iddof) == 9 or  len(iddof) == 14:
-                iddof += ' ' + c
-            else:
-                iddof += c
 
-        #iddof = [c for c in blinkdof if c.isdigit()]
-        #iddof = iddof.to_str()
-        
-        print(iddof)
+
+        print(blinkdof)
         #print(Dofitens)
-        
-        return (Dofitens , iddof)
+
+        return (Dofitens , blinkdof)
 
 if __name__ == "__main__":
     print(intro())

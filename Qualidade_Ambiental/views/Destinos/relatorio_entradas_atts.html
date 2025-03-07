@@ -1,15 +1,12 @@
 {{extend 'layout.html'}}
 
-
 {{block header}}
-
   <div class="container center">
     <h2>{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
   </div>
 {{end}}
 
 {{=consulta}}
-
 
 {{=BEAUTIFY(query)}}
 

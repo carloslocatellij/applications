@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js" lang="{{=T.accepted_language or 'en'}}"> <!--<![endif]-->
+<html manifest="manifest.appcache"></html>
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js" lang="{{='pt-br'}}"> <!--<![endif]-->
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" lang="pt-br">
     <!-- www.phpied.com/conditional-comments-block-downloads/ -->
     <!-- Always force latest IE rendering engine
          (even in intranet) & Chrome Frame
@@ -20,10 +21,10 @@
          http://google.com/webmasters -->
     <meta name="google-site-verification" content="">
     <!-- include stylesheets -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="{{=URL('static', 'css/font-awesome-4.7.0/css/font-awesome.min.css')}}"/>
     <link rel="stylesheet" href="{{=URL('static','css/bootstrap.min.css')}}"/>
     <link rel="stylesheet" href="{{=URL('static','css/web2py-bootstrap4.css')}}"/>
-    <link rel="shortcut icon" href="{{=URL('static','images/favicon.ico')}}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{=URL('static','images/favicon.png')}}" type="image/x-icon">
     <link rel="apple-touch-icon" href="{{=URL('static','images/favicon.png')}}">
     <!-- All JavaScript at the bottom, except for Modernizr which enables
          HTML5 elements & feature detects -->
@@ -73,10 +74,10 @@
                         <a class="dropdown-item" href="{{=URL('default','user/profile')}}">{{=T('Profile')}}</a>
                           {{if 'change_password' not in auth.settings.actions_disabled:}}
                                  <a class="dropdown-item" href="{{=URL('default','user/change_password')}}">{{=T('Change Password')}}</a>
-                          {{pass}}  
+                          {{pass}}
                                   <a class="dropdown-item" href="{{=URL('default','user/logout')}}">{{=T('Logout')}}</a>
                           {{else:}}
-                          
+
                             <a class="dropdown-item" href="{{=URL('default','user/login')}}">{{=T('Login')}}</a>
                           {{if 'register' not in auth.settings.actions_disabled:}}
                                 <a class="dropdown-item" href="{{=URL('default','user/register')}}">{{=T('Sign up')}}</a>
@@ -91,46 +92,44 @@
           </ul>
         {{pass}}
       </div>
+
     </nav>
+
     <div class="jumbotron jumbotron-fluid background" style="background-color: #333; color:white; padding:10px;word-wrap:break-word;">
+
       <table>
       <div class="container center">
-          <td width='10%'>       
+          <td width='10%'>
                 <!-- Navbar ======================================= -->
                 <nav class="navbar navbar-light navbar-expand-md bg-faded bg-dark navbar-dark justify-content-center">
                   <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="{{=response.submenu[2]}}">{{=response.submenu[0]}}</button>
-                   
+
                     <div class="dropdown-menu dropdown-menu-left"> <span class="navbar-toggler-icon"></span>
-                      
+
                      {{for _item in response.submenu[3]:}}
                              {{if type(_item) == list:}}
-                                 {{if type(_item) == list:}} <a class="dropdown-item" type="button" href="{{=_item[2]}}" style="color: rgb(0, 156, 135); border-style: solid; " onmouseenter="style='background-color: lightblue'" onmouseleave="style='color: rgb(0, 156, 135)'">{{=_item[0]}}{{=SPAN(num_tarefas,_class="badge badge-danger") if _item[0]=='Lista de tarefas' and num_tarefas > 0 else ''}}{{pass}}</a>
+                                 {{if type(_item) == list:}} <a class="dropdown-item" type="button" href="{{=_item[2]}}" style="color: rgb(0, 156, 135); border-style: solid; " onmouseenter="style='background-color: lightblue'" onmouseleave="style='color: rgb(0, 156, 135)'">{{=_item[0]}}{{=SPAN(num_tarefas.count(),_class="badge badge-danger") if _item[0]=='Lista de tarefas' and num_tarefas.count() > 0 else ''}}{{pass}}</a>
                                   {{for _subitem in _item:}}
                                        {{if type(_subitem) == list:}} <a class="dropdown-item" type="button" href="{{=_subitem[2]}}" style="color: rgb(0, 156, 135);" >{{=_subitem[0]}}</a>{{pass}}
                                   {{pass}}
-                                       
+
                              {{pass}}
                       {{pass}}
-                    </div>   
+                    </div>
                     </div>
                   </div>
 
                 </nav>
           </td>
-          <td width='10%' align="center">{{=P(session.processo_protoc) if session.processo_id  else ''}} <div>{{=A('Criar Tarefa', _href=URL(c='default',f='Criar_Tarefa', args=[session.processo_id], ), _class='btn btn-success', _style="align: center") if session.processo_id  else ''}}</div></td>
+          <td width='10%' align="center">{{if len(request.args) > 0:}}{{=P(request.args[0]) if request.function == 'Processos'  else ''}}<div>{{=A('Criar Tarefa', _href=URL(c='default',f='Criar_Tarefa', args=request.args[0], ), _class='btn btn-success', _style="align: center") if request.function == 'Processos' and request.args[0]  else ''}}</div>{{pass}} </td>
           <td width='80%' align="right"><h1 class="display-5">{{=request.application.replace('_', ' ')}} </h1></td>
-          
+
         </table>
       </div>
-      
     </div>
     <!-- Masthead ===================================== -->
-
-    
-
     {{block header}}
-
     {{end}}
     <!-- Main ========================================= -->
     <!-- Begin page content -->
@@ -153,24 +152,21 @@
       </div>
     </footer>
     {{end}}
-    
+
     <!-- The javascript =============================== -->
     <script src="{{=URL('static','js/calendar.js')}}"></script>
     <script src="{{=URL('static','js/jquery.maskedinput.js')}}"></script>
-    
     <script src="{{=URL('static','js/jquery.mask.min.js')}}"></script>
-    <script type="text/javascript">
+
+  <script type="text/javascript">
       $(document).ready(function(){
-        //$('.date').mask('00/00/0000', {placeholder: "__/__/____"},);
-        $('.decimal').mask('00000.00000', { reverse: true });
-        $('#DofsObra_IdDof').mask('0000 0000 0000 0000', {placeholder: "____  ____  ____  ____"});
+        $('.date').mask('00/00/0000', {placeholder: "__/__/____"},);
         $('#Pessoas_CPF').mask('000.000.000-00', {placeholder: "___.___.___-__"}, {reverse: true});
         $('#Pessoas_CNPJ').mask('00.000.000/0000-00', {placeholder: "__.___.___/___-__"}, {reverse: true});
         $('#Pessoas_Telefone').mask('(00) 0000-0000');
-        $('#Pessoas_celular').mask('(00) 00000-0000');
-        
+        $('#Pessoas_celular').mask('(00) 00000-0000', {placeholder: "(  )      -     "});
       });
-      
+
       $(':input').keydown(function (e) {
     var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
     if (key == 13) {
@@ -182,22 +178,14 @@
             inputs.eq(inputs.index(this) + 1).focus();
     }
 });
-
-
 </script>
 
     <script src="{{=URL('static','js/bootstrap.bundle.min.js')}}"></script>
     <script src="{{=URL('static','js/web2py-bootstrap4.js')}}"></script>
-    {{block page_js}}{{end page_js}}
-    {{if response.google_analytics_id:}}
-    <!-- Analytics ==================================== -->
-    <script src="{{=URL('static','js/analytics.min.js')}}"></script>
-    <script type="text/javascript">
-      analytics.initialize({
-      'Google Analytics':{trackingId:'{{=response.google_analytics_id}}'}
-      });
-    </script>
+    {{block page_js}}
 
-    {{pass}}
+    {{end page_js}}
+
+
   </body>
 </html>

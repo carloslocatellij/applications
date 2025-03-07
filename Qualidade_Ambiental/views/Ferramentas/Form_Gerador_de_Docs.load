@@ -1,0 +1,14 @@
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+{{=formulario}}
+
+
+{{=A('Arquivo', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Arquivo'), **atributo ),SPAN(_class="caret") }}
+{{=DIV(arquivo_final, _id='Arquivo', _class="collapse list-unstyled") }}
+
+{{if session.nome_arquivo_final:}}
+    {{from pathlib import Path}}
+    {{=A(session.nome_arquivo_final, _href='''file:///{}/{}'''.format(pasta_de_modelos_do_servidor_de_arquivos,session.nome_arquivo_final ), _class='''btn btn-success''') }}
+{{else:}}
+{{pass}}

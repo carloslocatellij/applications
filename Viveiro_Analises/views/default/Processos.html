@@ -13,6 +13,10 @@
 {{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
 
 <div class="container">
+    <!-- {{=A('<<Anterior', _href=URL(c='default',f='Processos', args=[int(processo) -1], vars={'f':'ver'}), _class='btn btn-primary',)if
+    processo else ''}}
+    {{=A('Proximo>>', _href=URL(c='default',f='Processos', args=[int(processo) +1], vars={'f':'ver'}), _class='btn btn-primary',)if
+    processo else ''}} -->
 {{=A('Editar', _href=URL(c='default',f='Processos', args=[processo], vars={ 'f':'editar'}), _class='btn btn-primary', ) if processo else ''}}
 {{=A('Novo', _href=URL(c='default',f='Processos',  vars={}), _class='btn btn-primary',)if processo else ''}}
 </div>
@@ -23,42 +27,76 @@
         <table width="100%" >
                     <tr>
                         <tr>
-                            <td width="35%" align='left'>{{=A('Requerente', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary', _style="height: 25px")}}:<div align='left' class="card">{{=formprocess.custom.widget['Requerente']}}</div> </td> 
-                            <td width="20%" align='left'>{{=B('Cpf Cnpj:  ')}}<div align='left' class="card">{{=formprocess.custom.widget['cpf_cnpj']}}</td></div>            
-                            <td width="20%" align='left'>{{=B('Protocolo:')}} <div align='center' class="card">{{=formprocess.custom.widget['Protocolo']}}</div></td>
-                            <td width="25%" align='left'>{{=B('Data de Entrada:')}} <div align='left' class="card">{{=formprocess.custom.widget['data_entrada']}}</div></td>
+                            <td width="25%" align='left' style="padding-inline: 10px">{{=A('Requerente', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary', _style="height: 25px")}}:<div align='left' class="card">{{=formprocess.custom.widget['Requerente']}}</div> </td> 
+                            <td width="10%" align='left' style="padding-inline: 10px">{{=B('Cpf Cnpj:  ')}}<div align='left' class="card">{{=formprocess.custom.widget['cpf_cnpj']}}</td></div>            
+                            <td width="10%" align='left' style="padding-inline: 10px">{{=B('Protocolo:')}} <div align='center' class="card">{{=formprocess.custom.widget['Protocolo']}}</div></td>
+                            <td width="20%" align='left' style="padding-inline: 10px">{{=B('Data de Entrada:')}} <div align='left' class="card">{{=formprocess.custom.widget['data_entrada']}}</div></td>
                         </tr> 
                     </tr>
                          <tr>
-                            <td width="25%" align='left' style="padding-inline: 20px;">{{=B('Endereço: ')}}<div align='left' class="card">{{=formprocess.custom.widget['Endereco1']}}</td>
-                            <td width="5%" align='left'style="padding-inline: 20px;">{{=B('Numero:    ')}} <div align='left' class="card">{{=formprocess.custom.widget['Numero1']}}</td>
-                            <td width="35%" align='left'style="padding-inline: 20px;">{{=B('Bairro:    ')}} <div align='left' class="card">{{=formprocess.custom.widget['Bairro']}}</td>
+                            <td width="45%" align='left' style="padding-inline: 10px;">{{=B('Endereço: ')}}<div align='left' class="card">{{=formprocess.custom.widget['Endereco1']}}</td>
+                            <td width="5%" align='left'style="padding-inline: 10px;">{{=B('Numero:    ')}} <div align='left' class="card">{{=formprocess.custom.widget['Numero1']}}</td>
+                            <td width="35%" align='left'style="padding-inline: 10px;">{{=B('Bairro:    ')}} <div align='left' class="card">{{=formprocess.custom.widget['Bairro']}}</td>
                         </tr>
                         <tr>
                             <table>
-                            
-                          <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
+                          <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
                                     {{=formprocess.custom.widget['especie_poda1']}}</td>
-                          <td width="10%" align='left' style="padding-inline: 20px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
+                          <td width="10%" align='left' style="padding-inline: 10px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
                                     {{=formprocess.custom.widget['qtd_poda1']}}</td>
 
-                            <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
+                            <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
                                     {{=formprocess.custom.widget['especie_poda2']}}</td>
-                            <td width="10%" align='left' style="padding-inline: 20px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['qtd_poda2']}}</tr>
+                            <td width="10%" align='left' style="padding-inline: 10px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
+                                    {{=formprocess.custom.widget['qtd_poda2']}}</td>
 
-                            <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
+                            <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
                                     {{=formprocess.custom.widget['especie_poda3']}}</td>
-                            <td width="10%" align='left' style="padding-inline: 20px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['qtd_poda3']}}</tr>
+                            <td width="10%" align='left' style="padding-inline: 10px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
+                                    {{=formprocess.custom.widget['qtd_poda3']}}</td>
 
-                            <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
+                            <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
                                     {{=formprocess.custom.widget['especie_poda4']}}</td>
-                            <td width="10%" align='left' style="padding-inline: 20px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['qtd_poda4']}}</tr>
+                            <td width="10%" align='left' style="padding-inline: 10px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
+                                    {{=formprocess.custom.widget['qtd_poda4']}}</td>
                             </table>
                         </tr>
+                        <tr>
+                            <table>
+                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Retirada esp.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['especie_ret1']}}</td>
+                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('ret qtd.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['qtd_ret1']}}</td>
                             
+                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Retirada esp.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['especie_ret2']}}</td>
+                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('ret qtd.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['qtd_ret2']}}</td>
+                            
+                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Retirada esp.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['especie_ret3']}}</td>
+                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('ret qtd.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['qtd_ret3']}}</td>
+                            
+                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Retirada esp.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['especie_ret4']}}</td>
+                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('ret qtd.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['qtd_ret4']}}</td>
+                            </table>
+                        </tr>
+                            <tr>    
+                            <td width="20%" align='left'>{{=B('Despacho:')}} <div align='center' class="card">
+                                    {{=formprocess.custom.widget['Despacho']}}</div></td>
+                            <td width="20%" align='left'>{{=B('Data do Laudo:')}} <div align='center' class="card">
+                                    {{=formprocess.custom.widget['data_do_laudo']}}</div>
+                            </td>
+                            <td width="20%" align='left'>{{=B('Local da Árvore:')}} <div align='center' class="card">
+                                    {{=formprocess.custom.widget['local_arvore']}}</div>
+                            </td>
+                            <td width="20%" align='left'>{{=B('Tipo de Imóvel:')}} <div align='center' class="card">
+                                    {{=formprocess.custom.widget['tipo_imovel']}}</div>
+                            </td>
+                            </tr>
                             <table class="jumbotron" style="border: 1px solid">
                             <br/>
                             <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}} 
@@ -79,14 +117,19 @@
 
         <div>
         {{=formprocess.custom.submit}} 
-        </div>
-        
-        {{=formprocess.custom.end}}
+                <tr>
+                    {{=DIV(LOAD('default', 'Laudos.load',  args=[processo], content='Carregando...'),
+                    _id='Laudos', _class="jumbotron", _style="border: 1px solid; padding:10px;word-wrap:break-word;") if
+                    processo else None}}
+                </tr>
 </div>
+        {{=formprocess.custom.end}}
+        {{=A('Despacho', _href=URL(c='default',f='Despachar_Processos', vars={'processo': processo}), _class='btn btn-primary',)if processo else ''}}
+</div>
+
 
     <br>
     {{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo),SPAN(_class="caret") }}
-
     {{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled") }}
     
     <br>

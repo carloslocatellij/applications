@@ -1,27 +1,151 @@
-# coding: utf-8 
+# coding: utf-8
 #!/usr/bin/python3.8
 
+
+#### Este namespace serve apenas para a IDE enchergar e trabalhar com os itens abaixo
 if 0==1:
     from gluon import *
-    from gluon import db, SQLFORM, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, IS_MATCH, redirect, URL, XML, a_db, db, auth, Auth, buscador
+    from gluon import db, SQLFORM, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB,\
+     IS_MATCH, redirect, URL, FORM_CPF
+    from gluon import XML, a_db, db, auth, Auth, Field, buscador,\
+     analise_de_residuos_projedatos, geradocspy, scrap_aprova_dig_
     request = current.request
     response = current.response
     session = current.session
     cache = current.cache
     T = current.T
-    
+#### ----------------------------------------------------------------------------------
 
+mensagem_contrução = "Em Contrução! 🛠"
+
+
+import re
+
+
+labels = {'Obras.Protocolo':'Obra no Protoc.' , 'Obras.protocolo_dof': 'Obra com DOF',
+          'Obras.protocolo_grcc': 'Analise GRCC Obra' ,'Licenca.Protocolo': ' Licenças ',
+          'AnaliseTec.Protocolo': ' Análises ','TransportadorStatus.Protocolo':' Transportador ',
+          'Pgrcc.Protocolo':' PGRCC ', 'Tarefas.Protocolo': ' Tarefas ', 'Pgrcc.protocolo': 'PGRCC',
+          'Publicidades.Protocolo':  'Publicidades','Pgrcc.IdGerador': 'Gerador PGR', 'Pgrcc.RespTecnico':'R. Téc. PGR' ,
+          'UnidadeDestino.IdEmpreendedor':"Destinos", 'Transportadores.IdPessoa': 'Transportador',
+        'Obras.IdGerador':"Obras",'Processos.IdPessoa':"Processos" , 'Licenca.IdEmpresa': "Licenças", }
+
+
+class urlQuery:
+
+    def __init__(self, arg, **kargs):
+        self.args = arg.split('/')[-2:]
+        print(f'args = {self.args}')
+        self.argumento = ''
+        self.func = ''
+        self.kargs = kargs
+        print(f'kargs = {self.kargs}')
+
+        try:
+            argumentos = self.args[-1].split('?')
+        except Exception as e:
+            print(f'Não há elemento query: {e}')
+        else:
+            try:
+                self.argumento = str(int(argumentos[0])) if argumentos[0].startswith('?') else '/'+str(int(argumentos[0]))
+                self.func = self.args[0]
+            except:
+                self.func = argumentos[0]
+                itens = argumentos[-1].split('&')
+                for item in itens:
+                    self.kargs[item.split('=')[0]] =item.split('=')[-1]
+
+
+
+        print(f'função = {self.func}')
+
+        self.ctrl = request.env.HTTP_REFERER.split('/')[0] if request.controller != 'default' else ''
+        print(f'controler = {self.ctrl}')
+
+
+        self.string_kargs = '?'+'&'.join([f'{k}={v}' for k,v in self.kargs.items()]) if len(self.kargs) > 0 else ''
+        print(f'str kargs = {self.string_kargs}')
+
+    def __repr__(self):
+        str_final = '/'+self.func+self.argumento+self.string_kargs
+        print(f'str final = {str_final}')
+        return  str_final
+        #return  self.origem+'/'+self.ctrl+'/'+self.func+self.string_args+self.string_kargs
+
+
+def define_botao_processo(titulo, controlador, funcao, **kwargs):
+    return DIV(A("Registrar "+titulo, _href= URL(
+            c=controlador,
+            f=funcao, vars=kwargs),
+            _class="btn btn-success"))
+
+
+@auth.requires_login()
 def index():
     response.flash = T("Bem Vindo!")
-    return dict(sistema=T('Sistema de Dados do Dpto. de Qualidade Ambiental!'))
 
+    num_de_protoc = db(db.Processos.IdDpto == 1024412).count()
+    num_de_obras =  db(db.Obras.id > 0).count()
+    num_de_pgrccs = db(db.Pgrcc.id > 0).count()
+    num_de_dofs =   db(db.DofsObra.id > 0).count()
+
+    numeros_do_dpto = dict(número_de_processos=num_de_protoc ,número_de_obras=num_de_obras,
+                           número_de_pgrccs=num_de_pgrccs, número_de_dofs=num_de_dofs)
+
+
+    tabela_de_numeros = dict(Processos = TABLE(*[TR(line) for line in numeros_do_dpto.items()], ))
+
+
+    return dict(sistema=T('Sistema de Dados do Dpto. de Qualidade Ambiental!'), numeros_do_dpto=numeros_do_dpto)
+
+
+@auth.requires_login()
+def wiki():
+    from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
+    from gluon.contrib.markdown import WIKI as markdown
+    auth.wikimenu() # add the wiki to the menu
+#     """ ##
+#       [see](web2py.com/examples/static/sphinx/gluon/gluon.contrib.markdown.html)
+#       [Markdown see](https://groups.google.com/g/web2py/c/om9aXi3xg3Y/m/jE4t-KwpBQAJ)
+#     """
+    response.view = 'test_wiki.html'
+#     response.flash = T("Welcome!")
+#     my_md = '''## Welcome to the cov19cty App!
+# ### To generate County Comparison Charts:
+# 1. Click Menu >> Gen Chart >> Multi-County Input Form
+#   1. Add Your Counties to compare (state, county, typeOfData)
+#   2. Define Your Time Series
+# 2. Click Menu >> Gen Chart >> Show Multi-County Chart
+#     '''
+#     my_html = markdown(my_md)
+#     # return dict( message=my_html )
+#     return my_html
+
+    meu_mark ='''
+# Meu Titulo
+
+## Outro Titulo
+
+* <input type="checkbox" checked="checked" /> 1
+* <input type="checkbox" checked="checked" /> 2
+* <input type="checkbox" /> 3
+
+
+    '''
+    markdowner = Markdown2(html4tags=True, tab_width=4, )
+    meu_mark = markdowner.convert(meu_mark)
+
+
+    return dict(wiki = auth.wiki() ,mark = XML(meu_mark))
 
 # ---- API (example) -----
+
+
 @auth.requires_login()
 def api_get_user_email():
     if not request.env.request_method == 'GET': raise HTTP(403)
     return response.json({'status':'success', 'email':auth.user.email})
-    
+
 
 # ---- Smart Grid (example) -----
 #@auth.requires_membership('admin') # can only be accessed by members of admin groupd
@@ -33,10 +157,6 @@ def grid():
     grid = SQLFORM.smartgrid(db[tablename], args=[tablename], deletable=False, editable=False)
     return dict(grid=grid)
 
-# ---- Embedded wiki (example) ----
-def wiki():
-    auth.wikimenu() # add the wiki to the menu
-    return auth.wiki() 
 
 # ---- Action for login/register/etc (required for auth) -----
 def user():
@@ -57,34 +177,42 @@ def user():
     """
     return dict(form=auth())
 
+
 # ---- action to server uploaded static content (required) ---
-@cache.action()
-def download():
+@auth.requires_login()
+def  download():
     """
     allows downloading of uploaded files
     http://..../[app]/default/download/[filename]
     """
     return response.download(request, db)
 
-@cache.action()
-def Logradouros():
+
+
+
+@auth.requires_login()
+def Logradouros(): #Menu
     """
-    Formulário de logradouros, com função de registro e modificação, podendo ser chamado em outros formulários com Load()
+    Formulário de logradouros, com função de registro e modificação, podendo ser chamado
+     em outros formulários com Load()
     """
 
     logradouro = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else None
+
     if f=='editar':
         formlogr = SQLFORM(db.Logradouros, logradouro, )
     elif f=='ver':
-        formlogr = SQLFORM(db.Logradouros, logradouro, readonly=True, linkto=URL('Lista_de_Registros', args='db') , labels = {'Enderecos.IdLogradouro': 'Endereços'} )
+        formlogr = SQLFORM(db.Logradouros, logradouro, readonly=True, linkto=URL(c='acessorios',
+         f='Lista_de_Registros', args=['db', request.controller], ) ,
+        labels = {'Enderecos.IdLogradouro': 'Endereços'} )
     else:
         formlogr = SQLFORM(db.Logradouros, formstyle='bootstrap3_stacked' )
 
     if formlogr.process().accepted:
-        response.flash = f'Logradouro Atualizado' if logradouro else f'Logradouro Registrado'
+        session.flash = f'Logradouro Atualizado' if logradouro else f'Logradouro Registrado'
         logradouro = formlogr.vars.id
-        redirect(URL('default','Logradouros.html', vars=dict(logradouro=logradouro) ), client_side=True)
+        redirect(URL('default','Logradouros.html', args=[logradouro],vars={'f':'ver'} ), client_side=True)
     elif formlogr.errors:
         session.flash = f'Corrija os erros indicados'
     else:
@@ -92,100 +220,191 @@ def Logradouros():
 
     formxbusca = buscador( 'Logradouros', Logradouro={'label':'Logradouro'},
                          Cep= {'label':'CEP' },
-                         Bairro= {'label':'Bairro' })  
+                         IdBairro= {'label':'Bairro' })
 
-    return dict(formlogr=formlogr, logradouro=logradouro, formxbusca=formxbusca)
+    return response.render(dict(formlogr=formlogr, logradouro=logradouro, formxbusca=formxbusca))
 
 
-@cache.action(time_expire=3, cache_model=cache.ram, quick='VP')
-def Enderecos():
+@auth.requires_login()
+def Bairros(): #Menu
     """
-    .../default/Enderecos (Formulário de endereços, com função de registro) 
+    Formulário de Bairros, com função de registro e modificação, podendo ser chamado
+     em outros formulários com Load()
+    """
+
+    bairro = request.args(0) or None
+    f = request.vars['f'] if request.vars['f']  else None
+
+    db.Bairros.IdCidade.default = 9999
+
+    if f=='editar':
+        formbairro = SQLFORM(db.Bairros, bairro, formstyle='bootstrap3_stacked')
+    elif f=='ver':
+        formbairro = SQLFORM(db.Bairros, bairro, readonly=True, linkto=URL(c='acessorios',
+         f='Lista_de_Registros', args=['db', request.controller], ) ,
+         labels = {'Logradouros.IdBairro': 'Logradouros'}, formstyle='bootstrap3_stacked' )
+    else:
+        formbairro = SQLFORM(db.Bairros, formstyle='bootstrap3_stacked' )
+
+    if formbairro.process().accepted:
+        response.flash = f'Bairro Atualizado' if bairro else f'Bairro Registrado'
+        bairro = formbairro.vars.id
+        redirect(URL('default','Logradouros.html', vars={'f':'ver', 'bairro_id': formbairro.vars.id}, extension = '' ), client_side=True)
+    elif formbairro.errors:
+        session.flash = f'Corrija os erros indicados'
+    else:
+        pass
+
+    formbusca = buscador( 'Bairros', Bairro={'label':'Bairro'},
+                         Regiao= {'label':'Região' })
+
+    return response.render(dict(formbairro=formbairro, bairro=bairro, formbusca=formbusca))
+
+
+@auth.requires_login()
+def Enderecos(): #Menu
+    # session.connect(request, response, cookie_key=',.~~Grnt861@10.7.0.28',)
+    # session.secure()
+    # session.samesite('Strict')
+    """
+    .../default/Enderecos (Formulário de endereços, com função de registro)
     .../default/Enderecos/{id}?f=editar (função de edição de registro)
     .../default/Enderecos/{id}?f=ver (função de visualização de registro)
     Contém um buscador definido por formbusca = buscador('tabela', 'função',**campos) - definido em 0_estruct.py
     """
-    
-    endereco = request.args(0) if request.args(0) else None
-    f = request.vars['f'] if request.vars['f']  else None
+    import re
+
+    endereco = request.args(0) if request.args(0) else request.vars['endereco_id']
     logradouro = request.vars.logradouro
     if logradouro:
         db.Enderecos.IdLogradouro.default = logradouro
 
+    f = request.vars['f'] if request.vars['f']  else None
     if f=='editar':
-        form = SQLFORM(db.Enderecos, endereco,)
+        form = SQLFORM(db.Enderecos, endereco, formname='formendereco' , submit_button='Atualizar Endereço')
     elif f=='ver':
-        form = SQLFORM(db.Enderecos, endereco, readonly=True, linkto=URL('Lista_de_Registros', args='db') , labels = {'Pessoas.IdEndereco':"Pessoas",
-        'Obras.IdEndereco':"Obras", 'UnidadeDestino.IdEndereco': 'Destinos', 'Licenca.IdEndereco': "Licenças"} )
+        form = SQLFORM(db.Enderecos, endereco, formname='formendereco' ,  readonly=True, linkto=URL(c='acessorios',
+         f='Lista_de_Registros', args=['db', request.controller], ) ,
+         labels = {'Pessoas.IdEndereco':"Pessoas", 'Obras.IdEndereco':"Obras",
+         'UnidadeDestino.IdEndereco': 'Destinos', 'Licenca.IdEndereco': "Licenças"} )
     else:
-        form = SQLFORM(db.Enderecos )
+        form = SQLFORM(db.Enderecos, formname='formendereco', submit_button='Registrar Endereço')
 
-    if form.process().accepted:
-        session.endereco_id = form.vars.id
-        response.flash = f'Endereço Atualizado' if endereco else f'Endereço Registrado'
-        redirect(request.env.http_web2py_component_location, client_side=True)
+
+    if form.validate():
+
+        query = ( ( (db.Enderecos.IdLogradouro == form.vars.IdLogradouro) &
+        (db.Enderecos.Quadra == form.vars.Quadra) & (db.Enderecos.Lote == form.vars.Lote) & (db.Enderecos.Num == None)) |
+        ((db.Enderecos.IdLogradouro == form.vars.IdLogradouro) &
+        (db.Enderecos.Num == form.vars.Num) & (db.Enderecos.Quadra == None) &
+        (db.Enderecos.Lote == None)) |
+        ((db.Enderecos.IdLogradouro == form.vars.IdLogradouro) & (db.Enderecos.Quadra == form.vars.Quadra) &
+        (db.Enderecos.Lote == form.vars.Lote) & (db.Enderecos.Num == form.vars.Num)))
+
+        idx = db(query)
+        existe_registros = bool(len(idx.select()))
+
+        if endereco:
+            db.Enderecos.validate_and_update(db.Enderecos.id == endereco, **dict(form.vars))
+            db.commit()
+
+        else:
+            db.Enderecos.validate_and_update_or_insert(query, **dict(form.vars))
+            db.commit()
+
+
+        if request.env.HTTP_WEB2PY_COMPONENT_LOCATION != None:
+            if endereco:
+                session.flash = 'Dados atualizados'
+            elif existe_registros:
+                session.flash = 'Endereço já existente!, Dados atualizados! Considere acessar o registro já existente em "Ligações" para dar continuidade ao processo registrando os dados faltantes.'
+            else:
+                session.flash = 'Endereço Registrado. Aguarde a página recarregar!'
+
+            url = str(urlQuery(request.env.HTTP_REFERER, endereco_id = str(idx.select().first().id)))
+            x = re.split(r"(\d{1,3}.\d{1,2}.\d{1,2}.\d{1,2}:\d{3,4}/)",url)
+            xurl = ''.join(url)
+
+            redirect(xurl, client_side=True, )
+        else:
+            session.flash = 'Dados atualizados' if endereco else 'Endereço Registrado. Aguarde a página recarregar!'
+            request.vars['f'] = 'ver'
+
     elif form.errors:
-        response.flash= f'Corrija os erros indicados.'
+        response.flash = 'Corrija os dados indicados.'
     else:
         pass
 
-    formbusca = buscador('Enderecos',  Logradouro={'label':'Logradouro', 'table':'Logradouros'}, 
-                                       Cep= {'type':'integer',  'label':'CEP',  'table':'Logradouros'},  )   
+    formbusca = buscador('Enderecos',  Logradouro={'label':'Logradouro', 'table':'Logradouros'},
+                            Cep= {'type':'integer',  'label':'CEP',  'table':'Logradouros'},  )
 
     return response.render(dict(form=form, formbusca=formbusca, endereco=endereco))
 
-    
-@cache.action(time_expire=10 , cache_model=cache.ram, quick='VP')
-def Obras():
-    """Formulário de obras, com função de registro e modificação, contendo subformulários para pessoas e endereços"""
 
-    obra = request.args(0) or None
-    f = request.vars['f'] if request.vars['f']  else None
-    endereco = session.endereco_id or None
+@auth.requires_login()
+def Obras(): #Menu
+    """Formulário de obras, com função de registro e modificação, contendo subformulários para pessoas e endereços"""
+    # response.headers['Cache-Control'] = 'public, max-age=360'
+    # response.headers['Expires'] = (datetime.utcnow() + timedelta(hours=0.1)).strftime('%a, %d %b %Y %H:%M:%S GMT')
+
+    try:
+        obra = int(request.args(0))
+    except:
+        obra = None
+
+    f = request.vars['f'] or None
+    gerador_id = None
+    resptec = request.vars.pessoa_id
+    pessoa_id = resptec
+
+    db.Obras.Finalidade.requires = IS_IN_SET(['COMERCIAL','DIVERSIFICADA','EDIFICIO COMERCIAL','EDUCACIONAL',
+    'HOTELEIRA','LOTEAMENTO','RELIGIOSA','RESIDENCIAL MULTIFAMILIAR','RESIDENCIAL UNIFAMILIAR','SAUDE - MEDICINA'])
+    redirect_button_pgrcc = None
+    redirect_button_agrc = None
+
     if obra:
-        pessoa = db.Obras(db.Obras.id == obra).IdGerador 
-        protocolo_id = db.Obras((db.Obras.id == obra)).Protocolo or None
-        session.processo_id = db.Obras((db.Obras.id == obra)).Protocolo or None
-        session.processo_protoc = db.Processos(db.Processos.id == protocolo_id).Protocolo if protocolo_id else None
-        session.endereco = db.Obras((db.Obras.id == obra)).IdEndereco or None
+        query_obra = db.Obras(db.Obras.id == obra)
+        if query_obra:
+            gerador_id = query_obra.IdGerador
+            pessoa_id = query_obra.resptecnico
+            processo_id = query_obra.Protocolo or None
+            redirect_button_pgrcc = define_botao_processo('PGRCC', 'default', 'Pgrcc',
+            obra_id=obra,gerador_id=gerador_id, processo_id=processo_id)
+            redirect_button_agrc = define_botao_processo('Analise_GRCC', 'default', 'Analise_GRCC',
+            obra_id=obra,  processo_id=processo_id)
+            endereco_id = query_obra.IdEndereco or None
+        else:
+            session.flash = "Não encontrado!"
+            redirect(URL(c='default', f='Obras'))
 
     else:
-        pessoa = session.pessoa_id or request.vars.pessoa_id or None
-        protocolo_id = session.processo_id or request.vars.protocolo_id or None
-        endereco = session.endereco or request.vars.endereco or None
-
-    db.Obras.Finalidade.requires = IS_IN_SET(['COMERCIAL','DIVERSIFICADA','EDIFICIO COMERCIAL','EDUCACIONAL','HOTELEIRA','LOTEAMENTO',
-    'RELIGIOSA','RESIDENCIAL','RESIDENCIAL MULTIFAMILIAR','RESIDENCIAL UNIFAMILIAR','SAUDE - MEDICINA'])
+        resptec = request.vars.pessoa_id or resptec
+        gerador_id = db.Obras.IdGerador.default = request.vars.gerador_id  or  None
+        processo_id = db.Obras.Protocolo.default = request.vars.processo_id or None
+        endereco_id = db.Obras.IdEndereco.default = request.vars.endereco_id or  None
+        db.Obras.IdEndereco.writable = False if not obra else True
 
     if f=='editar':
-        formobra= SQLFORM(db.Obras, obra)
-        session.pessoa_id = None 
+        formobra= SQLFORM(db.Obras, obra, submit_button='Atualizar Obra')
     elif f=='ver':
-        formobra= SQLFORM(db.Obras,obra, readonly=True, linkto=URL('Lista_de_Registros', args='db') ,  labels = {'Pgrcc.IdObra': 'PGRCC', 'DofsObra.IdObra': 'DOFs' }) 
+        formobra= SQLFORM(db.Obras, obra, readonly=True, linkto=URL(c='acessorios',
+         f='Lista_de_Registros', args=['db', request.controller], ),
+         labels = {'Pgrcc.idobra': 'PGRCCs da Obra', 'DofsObra.IdObra': 'DOFs', 'Analise_GRCC.idobra': 'Análise dos Resíduos' })
     else:
-        db.Obras.IdGerador.default = int(pessoa) if pessoa else None
-        db.Obras.IdEndereco.default = int(endereco) if endereco else None
-        db.Obras.Protocolo.default = protocolo_id if protocolo_id else session.processo_protoc or None
-
-        formobra= SQLFORM(db.Obras,)
-        session.pessoa_id = None
-    
+        formobra= SQLFORM(db.Obras, submit_button= 'Registrar Obra')
 
     if formobra.process(keepvalues=True).accepted:
         response.flash =  f'Obra Registrada'
-        session.pessoa_id = pessoa = None
-        session.endereco_id = formobra.vars.IdEndereco
         redirect(URL(c='default', f='Obras', args=[formobra.vars.id], vars={'f': 'ver'}))
     elif formobra.errors:
         response.flash = f'Corrija os erros indicados.'
-    else:
-        pass
 
     formbusca = SQLFORM.factory(
         Field('Gerador'),
         Field('Alvara'),
         Field('Cadastro'),
         Field('Endereco'),
+        Field('Bairro'),
         Field('Protocolo'),
          formstyle='table3cols', formname='formbusca')
 
@@ -194,50 +413,104 @@ def Obras():
         session.buscaAlvara  = formbusca.vars.Alvara
         session.buscaCad = formbusca.vars.Cadastro
         session.buscaEndereco = formbusca.vars.Endereco
+        session.buscaBairro = formbusca.vars.Bairro
         session.buscaProtoc = formbusca.vars.Protocolo
         response.flash = 'Exibindo dados para: ',str(session.Nome)
     elif formbusca.errors:
         response.flash = 'Erro no formulário'
     else:
         pass
-    
+
     if session.buscaGerador:
-        busca = db((db.Obras.IdGerador == db.Pessoas.Id) & (db.Pessoas.Nome.contains(session.buscaGerador)))
+        busca = db((db.Obras.IdGerador == db.Pessoas.Id) & (
+        db.Pessoas.Nome.contains(session.buscaGerador.strip())))
         session.buscaGerador = None
     elif session.buscaAlvara:
-        busca = db((db.Obras.IdGerador == db.Pessoas.Id) & (db.Obras.Alvara == session.buscaAlvara))
+        busca = db((db.Obras.IdGerador == db.Pessoas.Id) & (
+        db.Obras.Alvara == session.buscaAlvara.strip()))
         session.buscaAlvara = None
     elif session.buscaCad:
-        busca = db((db.Obras.IdGerador == db.Pessoas.Id) & (db.Obras.CadMunicipal == session.buscaCad))
+        busca = db((db.Obras.IdGerador == db.Pessoas.Id) & (
+        db.Obras.CadMunicipal.contains(session.buscaCad[1:-3].strip() )))
         session.buscaCad = None
     elif session.buscaEndereco:
-        busca = db((db.Obras.IdEndereco == db.Enderecos.Id) & (db.Enderecos.IdLogradouro == db.Logradouros.Id) & (db.Logradouros.Logradouro.contains(session.buscaEndereco)))
+        busca = db((db.Obras.IdEndereco == db.Enderecos.Id) & (
+        db.Enderecos.IdLogradouro == db.Logradouros.Id) &
+        (db.Logradouros.Logradouro.contains(session.buscaEndereco.strip())))
         session.buscaEndereco = None
+    elif session.buscaBairro:
+        busca = db((db.Obras.id > 0) & (db.Obras.IdEndereco == db.Enderecos.id) &
+         (db.Enderecos.IdLogradouro == db.Logradouros.id ) &
+         (db.Logradouros.IdBairro == db.Bairros.Id) & (db.Bairros.Bairro.contains(session.buscaBairro.strip())))
+        session.buscaProtoc = None
     elif session.buscaProtoc:
-        busca = db((db.Obras.Protocolo == db.Processos.id) & (db.Processos.Protocolo.contains(session.buscaProtoc)))
+        busca = db(
+         (db.Processos.Protocolo.contains(session.buscaProtoc.strip()) ) &\
+         ((db.Obras.Protocolo == db.Processos.id) | (db.Obras.protocolo_dof == db.Processos.id) | (db.Obras.protocolo_grcc == db.Processos.id))
+        )
         session.buscaProtoc = None
     else:
         busca = db((db.Obras.IdGerador == db.Pessoas.Id) & (db.Obras.IdGerador < 0))
 
-    fields_grd= [db.Pessoas.Nome, db.Obras.CadMunicipal, db.Obras.Alvara, db.Obras.DataAlvara ,db.Obras.IdEndereco, db.Obras.AreaTerreno, db.Obras.AreaConstrExecutar, db.Obras.Finalidade]
+    fields_grd= [db.Pessoas.Nome, db.Obras.CadMunicipal ,db.Obras.IdEndereco,
+    db.Obras.AreaTerreno, db.Obras.AreaConstrExecutar, db.Obras.Finalidade]
 
-    links= [dict(header='Ver', body=lambda row: A('Ver', _href=URL(c='default', f='Obras', args=row.Obras.id if 'Obras' in row else row.id , vars={'f':'ver'})))]
+    links= [dict(header='Ver', body=lambda row: A('Ver', _href=URL(c='default', f='Obras',
+        args=row.Obras.id if 'Obras' in row else row.id , vars={'f':'ver'}, )))]
 
-    grade = SQLFORM.grid( busca, represent_none='',fields=fields_grd, links=links, editable=False, searchable=False, deletable=False, create=False, details=False,
-                         csv=False,  maxtextlength = 120, _class="table", user_signature=False, field_id=db.Obras.Id, )
+    grade = SQLFORM.grid( busca, represent_none='',fields=fields_grd, field_id=db.Obras.Id,
+     links=links, editable=False,     searchable=False, deletable=False, create=False,
+     details=False, csv=False,  maxtextlength = 120, _class="table", user_signature=False, )
 
-    request.get_vars.obra_id = obra
-    request.get_vars.gerador_id = pessoa
-    request.get_vars.endereco_id = endereco
 
-    return response.render(dict(formobra=formobra, formbusca=formbusca, grade=grade, obra=obra, f=f, pessoa=pessoa, endereco=endereco))
+    try:
+        botao_despacho = define_botao_processo('Despacho' ,'Ferramentas', 'Despachar_Processos', processo=processo_id)
+    except:
+        botao_despacho = None
 
-#@cache.action(time_expire=30, cache_model=cache.ram, quick='VP')
+
+    obra_no_endereco = db(db.Obras.IdEndereco == endereco_id).select().first() if endereco_id else ''
+    if obra_no_endereco:
+        obra_no_endereco = obra_no_endereco.id
+
+    return response.render(dict(formobra=formobra, formbusca=formbusca, grade=grade,
+        botao_despacho = botao_despacho , obra=obra or None, gerador_id=gerador_id,
+        pessoa_id=pessoa_id, processo_id=processo_id, endereco_id=endereco_id,
+        redirect_button_pgrcc = redirect_button_pgrcc if request.vars['f'] == 'ver' else None,
+        redirect_button_agrc = redirect_button_agrc if request.vars['f'] == 'ver' else None,
+        obra_no_endereco= obra_no_endereco),
+        stream=True)
+
+
 def DofsObras():
     """Formulário de DOFs por Obra (vinculado por Id), com função de registro e modificação,
      contendo subformulários para DOFs e Modulo para importar dados do arquivo html de dof salvo"""
 
-    import pegaDof
+
+    # DofsObra = db.define_table('DofsObra',
+    #     Field('id','id'),
+    #     Field('IdDof','string', notnull=True, unique=True, label='DOF' ),
+    #     Field('IdObra', 'reference Obras', requires=IS_IN_DB(db, 'Obras.Id',
+    #     db.Obras._format, )),
+    #     #auth.signature,
+    #     )
+
+
+    # MadeirasDof = db.define_table ('MadeirasDof',
+    #     Field('Id', 'id'),
+    #     Field('IdDof', 'string', requires=IS_IN_DB(db, 'DofsObra.IdDof',
+    #     db.DofsObra._format, ),  notnull=True),
+    #     Field('Item', 'integer',required=True),
+    #     Field('Produto', 'text', length=45, required=True),
+    #     Field('Especie', 'text', length=55, required=True),
+    #     Field('Popular', 'text', length=35, required=True),
+    #     Field('Qtd', 'decimal(10,4)',required=True ),
+    #     Field('Unidade', 'text', length=2, required=True),
+    #     Field('Valor', 'text', length=10, required=True),
+    #     #fake_migrate=True,
+    #     )
+
+    import pegaDof # type: ignore
     import os
     obra = request.args(0) or None
     dof = request.get_vars.dof
@@ -249,34 +522,37 @@ def DofsObras():
         session.iddof = formdof.vars.IdDof
         redirect(request.env.http_web2py_component_location, client_side=True,)
     elif formdof.errors:
-        response.flash = f'Corrija o(s) erro(s) indicados' 
+        response.flash = f'Corrija o(s) erro(s) indicados'
     else:
         pass
 
-    formarq = SQLFORM.factory(Field('arquivo', 'upload', label="Inserir a página html salva em seu computador."), formstyle='table3cols' )
+    formarq = SQLFORM.factory(Field('arquivo', 'upload',
+     label="Inserir a página html salva em seu computador."), formstyle='table3cols' )
 
     dofpego =''
-    
     if formarq.process().accepted:
         response.flash = 'Enviado, aguarde'
         session.arquivo = formarq.vars.arquivo
 
         try:
-            dofpego = pegaDof.pegaquali('file:///{}/{}'.format(str(os.path.join(request.folder, 'uploads')), session.arquivo))
+            dofpego = pegaDof.pegaquali('file:///{}/{}'.format(
+            str(os.path.join(request.folder, 'uploads')), session.arquivo))
         except:
             session.flash = 'Erro ao processar o arquivo enviado'
         try:
             os.remove('{}/{}'.format(str(os.path.join(request.folder, 'uploads')), session.arquivo))
         except OSError as e:
-            session.flash = "Erro na remoção do arquivo do server: Error:{} : {}".format( e.strerror, str(os.path.join(request.folder, 'uploads')), session.arquivo)
-      
+            session.flash = "Erro na remoção do arquivo do server: Error:{} : {}".format(e.strerror,
+             str(os.path.join(request.folder, 'uploads')), session.arquivo)
+
         for i in dofpego[0]:
             try:
-                db.MadeirasDof.insert(IdDof= dofpego[1], Item= i['Nº'], Produto= i['Produto'], Especie= i['Espécie'], Popular= i['Nome Popular'],
-                    Qtd= i['Quantidade'], Unidade= i['Unidade'], Valor= i['Valor Item'])
-            except:
+                db.MadeirasDof.insert(IdDof= dofpego[1], Item= int(i['Nº']), Produto= i['Produto'],
+                 Especie= i['Espécie'], Popular= i['Nome Popular'],
+                 Qtd= float(i['Quantidade'].replace(',','.')), Unidade= i['Unidade'], Valor= i['Valor Item'])
+            except Exception as e:
                 #session.flash = f"Erro com o Número do DOF:"
-                session.flash = "Erro ao inserir registro a partir do arquivo: Erro no item {}".format(i['Nº'])
+                session.flash = f"Erro ao inserir registro a partir do arquivo: Erro {e} no item {i['Nº']}"
                 redirect(request.env.http_web2py_component_location, client_side=True,)
             else:
                 response.flash = 'Madeiras Registradas.'
@@ -285,328 +561,141 @@ def DofsObras():
         response.flash = 'Ocorreu um erro'
     else:
         pass
-    
+
     def updatedof(dofsgrade):
         session.iddof =  dofsgrade.vars.IdDof
         redirect(request.env.http_web2py_component_location, client_side=True)
 
     if obra:
-        dofs = db(db.DofsObra.IdObra == obra )
-        madeiras = db((db.DofsObra.IdObra == obra ) & (db.DofsObra.IdDof == db.MadeirasDof.IdDof))
-        volume_mad =  db((db.DofsObra.IdObra == obra ) & (db.DofsObra.IdDof == db.MadeirasDof.IdDof)).select(db.MadeirasDof.Qtd.sum().with_alias('SomaMadeira'))
-        vol = volume_mad[0]['SomaMadeira'] 
-        fields = [db.MadeirasDof.IdDof, db.MadeirasDof.Item, db.MadeirasDof.Produto, db.MadeirasDof.Especie, db.MadeirasDof.Popular, db.MadeirasDof.Qtd, db.MadeirasDof.Unidade, db.MadeirasDof.Valor]
-        madeirasgrade = SQLFORM.grid(madeiras, fields=fields, orderby='IdObra', editable=False, searchable=False, deletable=False, create=False, details=False,
-        maxtextlength = 120, csv=False, user_signature=False, _class='table',  args = request.args[:1])
-        dofsgrade = SQLFORM.grid(dofs, fields=[db.DofsObra.IdDof], orderby='IdDof', editable=True, searchable=False, deletable=False, create=False, details=False, field_id=db.DofsObra.id,
-        maxtextlength = 120, csv=False, user_signature=False, _class='table', formargs = {'field_id': db.DofsObra.id}, onvalidation=updatedof,  args = request.args[:1] ) # args = request.args[:1]
+        dofs_da_obra = db.DofsObra.IdObra == obra
+        madeiras_do_dof = db.DofsObra.IdDof == db.MadeirasDof.IdDof
+        madeiras = db(dofs_da_obra & madeiras_do_dof)
+        volume_mad =  madeiras.select(db.MadeirasDof.Qtd.sum().with_alias('SomaMadeira'))
+        vol = volume_mad[0]['SomaMadeira']
+        fields = [db.MadeirasDof.IdDof, db.MadeirasDof.Item, db.MadeirasDof.Produto, db.MadeirasDof.Especie,
+            db.MadeirasDof.Popular, db.MadeirasDof.Qtd, db.MadeirasDof.Unidade, db.MadeirasDof.Valor]
 
+        madeirasgrade = SQLFORM.grid(madeiras, fields=fields,
+            orderby='IdObra', editable=False, searchable=False,
+            deletable=False, create=False, details=False, maxtextlength = 120,
+             csv=False, user_signature=False, _class='table',
+               args = request.args[:1])
+
+        dofsgrade = SQLFORM.grid(db(dofs_da_obra),
+            fields=[db.DofsObra.IdDof], orderby='IdDof', editable=True,
+            searchable=False, deletable=False, create=False, details=False,
+            field_id=db.DofsObra.id, maxtextlength = 120,
+            csv=False, user_signature=False, _class='table',
+            formargs = {'field_id': db.DofsObra.id}, onvalidation=updatedof,
+            args = request.args[:1] ) # args = request.args[:1]
 
     if obra:
-        return response.render(dict(formdof=formdof, dofsgrade=dofsgrade, madeirasgrade=madeirasgrade, obra=obra, vol=vol or '', formarq=formarq))
+        return response.render(dict(formdof=formdof, dofsgrade=dofsgrade, madeirasgrade=madeirasgrade,
+            obra=obra, vol=vol or '', formarq=formarq))
     else:
         return response.render(dict(formdof=formdof, iddof=session.iddof, ))
 
+
+
 @auth.requires_login()
-def Importar_do_Aprova():
-    import scrap_aprova_dig_
-    import os
-    import re
-    from gluon.contrib.pymysql.err import IntegrityError
-
-    formarqhtml = SQLFORM.factory(Field('arquivo', 'upload', label="Inserir a página html salva em seu computador."), formstyle='table3cols' )
-
-    dados_do_processo =''
-    process_errors = []
-
-    if formarqhtml.process().accepted:
-        session.flash = 'Enviado, aguarde'
-        session.arquivo = formarqhtml.vars.arquivo
-        try:
-            dados_do_processo = scrap_aprova_dig_.raspa_aprova('file:///{}/{}'.format(str(os.path.join(request.folder, 'uploads')), session.arquivo))
-        except OSError as e:
-            session.flash = "Erro ao enviar arquivo: Error:{} : {}".format( e.strerror, str(os.path.join(request.folder, 'uploads')), session.arquivo)
-            process_errors.append(e)
-        
-        except Exception as e:
-            session.flash = f'Erro ao processar o arquivo enviado: {e}'
-            process_errors.append(e)
-
-        else:
-            try:
-                os.remove('{}/{}'.format(str(os.path.join(request.folder, 'uploads')), session.arquivo))
-            except OSError as e:
-                session.flash = "Erro na remoção do arquivo do server: Error:{} : {}".format( e.strerror, str(os.path.join(request.folder, 'uploads')), session.arquivo)
-                process_errors.append(e)
-            except Exception as e:
-                session.flash = f'Erro na remoção do arquivo enviado: {e}'
-                process_errors.append(e)
-                      
-            try:
-                scrap_aprova_dig_.criar_pasta_compartilhada(dados_do_processo)
-            except Exception as e:
-                session.flash = f"Erro ao criar pasta:: {e}"
-                process_errors.append(e)
-
-            try:
-                scrap_aprova_dig_.criar_atualizar_arq_de_dados(dados_do_processo)
-            except Exception as e:
-                session.flash = f"Erro ao criar arquivo de dados:: {e}"
-
-        
-        if not  dados_do_processo['dados_gerador']['CNPJ'] == '' and db.Pessoas(db.Pessoas.CNPJ == dados_do_processo['dados_gerador']['CNPJ']) :
-            idpessoa = db.Pessoas(db.Pessoas.CNPJ == dados_do_processo['dados_gerador']['CNPJ']).id
-
-        elif  db.Pessoas(db.Pessoas.CNPJ == dados_do_processo['dados_gerador']['CNPJ'].replace('.','').replace('-','')) :
-            idpessoa = db.Pessoas(db.Pessoas.CNPJ == dados_do_processo['dados_gerador']['CNPJ'].replace('.','').replace('-','')).id
-
-        elif len(dados_do_processo['dados_gerador']['CNPJ']) > 0:
-            idpessoa = db.Pessoas.validate_and_insert(Nome=dados_do_processo['dados_gerador']['Nome'], 
-                CNPJ=dados_do_processo['dados_gerador']['CNPJ'].replace('.','').replace('/','').replace('-',''),
-                CPF=None,
-                Telefone=dados_do_processo['dados_gerador']['tel'],
-                Email=dados_do_processo['dados_gerador']['email'],)
-            process_errors.append(idpessoa)
-            idpessoa = idpessoa.id
-
-        elif dados_do_processo['dados_gerador']['CPF'] != '' and (db.Pessoas(db.Pessoas.CPF == dados_do_processo['dados_gerador']['CPF']) or db.Pessoas(db.Pessoas.CPF == dados_do_processo['dados_gerador']['CPF'].replace('.','').replace('-','')) ):
-            try:
-                idpessoa = db.Pessoas(db.Pessoas.CPF == dados_do_processo['dados_gerador']['CPF']).id
-            except:
-                idpessoa = db.Pessoas(db.Pessoas.CPF == dados_do_processo['dados_gerador']['CPF'].replace('.','').replace('-','')).id
-        else:
-            try:
-                idpessoa = db.Pessoas.validate_and_insert(Nome=dados_do_processo['dados_gerador']['Nome'], 
-                    CPF=dados_do_processo['dados_gerador']['CPF'],
-                    CNPJ=None,
-                    Telefone=dados_do_processo['dados_gerador']['tel'],
-                    Email=dados_do_processo['dados_gerador']['email'],)
-                idpessoa = idpessoa.id
-                process_errors.append(idpessoa)
-            except IntegrityError as ie:
-                session.flash= f'Esta Pessoa Já está Registrada. Erro: {ie.args}'
-        try:
-            assert db.Pessoas(db.Pessoas.Id == idpessoa) , 'Requerente Não Registrado'
-            try:
-                session.pessoa_id = idpessoa
-            except Exception as e:
-                print('Requerente Não Registrado')
-        except AssertionError as Ae:
-            session.flash = f"Erro ao registrar/encontrar o requerente apontado: {Ae}"
-        except Exception as e:
-            session.flash = f"Ocorreu um erro do tipo: {e}"
-        finally:
-
-            if db.Processos(db.Processos.Protocolo == dados_do_processo['protocolo']):
-                idproc = db.Processos(db.Processos.Protocolo == dados_do_processo['protocolo']).id
-            else:
-                try:
-                    idproc = db.Processos.validate_and_insert(Protocolo=dados_do_processo['protocolo'], 
-                        IdPessoa=idpessoa,
-                        IdDpto='1024412',
-                        IdTipo=3,)
-                    process_errors.append(idproc.errors)
-                    idproc = idproc.id
-                    session.processo_id = idproc
-                except IntegrityError as ie:
-                    response.flash = f'Este Processo já está registrado. Erro: {ie.args}'
-                except Exception as e:
-                    session.flash = f'{e}'
-                    redirect(URL('default', 'Processos'))
-
-        if db.Logradouros(db.Logradouros.Cep == dados_do_processo['endereco_obra']['Cep']):
-            idlogradouro = db.Logradouros(db.Logradouros.Cep == dados_do_processo['endereco_obra']['Cep']).id
-            try:
-                idendereco = db.Enderecos.validate_and_insert(IdLogradouro=idlogradouro,
-                    Num=dados_do_processo['endereco_obra']['Num'],
-                    Quadra=dados_do_processo['endereco_obra']['Quadra'],
-                    Lote=dados_do_processo['endereco_obra']['Lote'],
-                    Complemento=dados_do_processo['endereco_obra']['Compl'],)
-                process_errors.append(idendereco.errors)    
-                idendereco = idendereco.id
-            except IntegrityError as ie:
-                response.flash = f'Este Endereço já está Registrado. Erro: {ie.args}'
-            except Exception as e:
-                session.flash = f'{e}'
-                redirect(URL('default', 'Endereco'))
-        else:
-            nomebairro = re.sub(' - .*$', '' ,dados_do_processo['endereco_obra']['Bairro'])
-            if db.Bairros(db.Bairros.Bairro.contains(nomebairro)):
-                logradouro = re.sub('^\w+ ', '' ,dados_do_processo['endereco_obra']['Logradouro'])
-                denomin = re.sub(' .*$', '' ,dados_do_processo['endereco_obra']['Bairro'])
-                idbairro = db.Bairros(db.Bairros.Bairro.contains(nomebairro)).id
-                try:
-                    idlogradouro = db.Logradouros.validate_and_insert(Logradouro=logradouro,
-                        Cep=dados_do_processo['endereco_obra']['Cep'],
-                        Denominacao=denomin,
-                        IdBairro=idbairro,
-                        dCidade=9999)
-                    process_errors.append(idlogradouro.errors)
-                    idlogradouro = idlogradouro.id
-                except IntegrityError as ie:
-                    response.flash = f'Este Logradouro já está Registrado. Erro: {ie.args}'
-                except Exception as e:
-                    session.flash = "Erro ao cadastrar Logradouro"
-                    redirect(URL('default', 'Logradouro'))
-
-                if not idlogradouro == None:
-
-                    if db.Enderecos((db.Enderecos.IdLogradouro == idlogradouro) & 
-                    (db.Enderecos.Quadra == dados_do_processo['endereco_obra']['Quadra'] ) \
-                        & (db.Enderecos.Lote == dados_do_processo['endereco_obra']['Lote'] )):
-                        
-                        idendereco = db.Enderecos((db.Enderecos.IdLogradouro == idlogradouro) & 
-                        (db.Enderecos.Quadra == dados_do_processo['endereco_obra']['Quadra'] ) \
-                        & (db.Enderecos.Lote == dados_do_processo['endereco_obra']['Lote'] ))
-
-                    elif db.Enderecos((db.Enderecos.IdLogradouro == idlogradouro) & 
-                    (db.Enderecos.Num == dados_do_processo['endereco_obra']['Num'] )):
-
-                        idendereco = db.Enderecos((db.Enderecos.IdLogradouro == idlogradouro) & (db.Enderecos.Num == dados_do_processo['endereco_obra']['Num'] ))
-                    
-                    else:
-
-                        try:
-                            idendereco = db.Enderecos.validate_and_insert(IdLogradouro=idlogradouro,
-                                Num=dados_do_processo['endereco_obra']['Num'],
-                                Quadra=dados_do_processo['endereco_obra']['Quadra'],
-                                Lote=dados_do_processo['endereco_obra']['Lote'],
-                                Complemento=dados_do_processo['endereco_obra']['Compl'],)
-                            process_errors.append(idendereco.errors)
-                            idendereco = idendereco.id
-                        except IntegrityError as ie:
-                            session.flash = f'Este Endereço já está Registrado. Erro: {ie.args}'
-
-                        except Exception as e:
-                            session.flash = f'{e}'
-                            redirect(URL('default', 'Endereco'))
-                try:
-                    session.endereco = idendereco
-                except Exception:
-                    print('Endereço não encontrado')
-
-        try:
-            idobra = db.Obras(db.Obras.CadMunicipal == dados_do_processo['endereco_obra']['CadMunicipal']).Id
-        
-        except Exception as e:
-
-            try:
-                idobra = db.Obras.validate_and_insert(Protocolo=int(idproc),
-                        CadMunicipal=dados_do_processo['endereco_obra']['CadMunicipal'],
-                        Alvara=dados_do_processo['dados_obra']['alvara'],
-                        DataAlvara=dados_do_processo['dados_obra']['data_alvara'] ,
-                        IdGerador=idpessoa, IdEndereco=idendereco, 
-                        Finalidade=dados_do_processo['dados_obra']['finalidade'],
-                        AreaTerreno=dados_do_processo['dados_obra']['area_do_terreno'],
-                        AreaConstrExist=dados_do_processo['dados_obra']['area_existente'],
-                        AreaConstrDemolir=dados_do_processo['dados_obra']['area_demolir'],
-                        AreaConstrExecutar=dados_do_processo['dados_obra']['area_construida_final'],
-                        PavtosSubS=dados_do_processo['dados_obra']['pavimentos_sub'],
-                        PavtosSobreS=dados_do_processo['dados_obra']['pavimentos_sup'], safe=True 
-                        )
-                
-            except Exception as e:
-                session.flash = f'Ocorreu um erro: {e}'
-                redirect(URL('default', 'Importar_do_Aprova'))
-
-
-        if isinstance(idobra, int):
-            session.flash = f"Registros efetuados: Requerente, Processo, Endereço e Obra {process_errors}"
-            redirect(URL('default', 'Obras',  args=[idobra], vars={'f':'editar'}))
-
-
-        else:
-            try:
-                idobra = db.Obras(db.Obras.CadMunicipal == dados_do_processo['endereco_obra']['CadMunicipal']).Id
-                redirect(URL('default', 'Obras', args=[int(idobra)], vars={'f':'ver'}))
-                
-            except Exception as e:
-                print(e)
-                print(idobra)
-                redirect(URL('default', 'Obras', args=[int(idobra)], vars={'f':'ver'}))
-                session.flash = f'Obra não registrada e não encontrada {e.args}'
-
-    return dict(dados_do_processo=dados_do_processo, formarqhtml=formarqhtml, process_errors=process_errors)
-    
-
-def PGRCCs():
+def Pgrcc(): #Menu
     """Formulário de PGRCC, com função de registro e modificação"""
+    #TODO: a verificação de conformidade, atualmente é feita apenas para área a construir, deve considerar demolição
 
     pgr = request.args(0) or None
-    gerador = request.get_vars.pessoa_id or None
+    gerador = request.get_vars.gerador_id or None
     obra = request.get_vars.obra_id or None
     protocolo = request.get_vars.processo_id or None
-
-
+    resptec = request.get_vars.pessoa_id
     db.Pgrcc.idgerador.default = gerador
     db.Pgrcc.idobra.default = obra
-    db.Pgrcc.protocolo.default = session.processo_id
-
+    db.Pgrcc.protocolo.default = protocolo
+    db.Pgrcc.protocolo.writable = False if protocolo else True
+    db.Pgrcc.idobra.writable = False if obra else True
 
     f = request.vars['f'] if request.vars['f']  else None
+    sigor = None
+    if pgr:
+        sigor = db.Pgrcc(db.Pgrcc.id == int(pgr)).sigor
+
+    linksigor = A('Sigor' , _href=f'https://ctre.com.br/painel/fiscal/aprovacao-de-pgr-rcc-detalhes/{sigor}'
+    ) if sigor else None
 
     if f=='editar':
-        formpgr = SQLFORM(db.Pgrcc, pgr , detect_record_change=True, record_id=int(pgr), deletable=False, ignore_rw=False )
+        formpgr = SQLFORM(db.Pgrcc, pgr , detect_record_change=True,  deletable=False, ignore_rw=False )
     elif f =='ver':
-        formpgr = SQLFORM(db.Pgrcc, pgr , readonly=True, linkto=URL('Lista_de_Registros', args='db') ,  labels = {} )
+        formpgr = SQLFORM(db.Pgrcc, pgr , readonly=True, linkto=URL(c='acessorios',
+         f='Lista_de_Registros', args=['db', request.controller]),  labels = {} )
     else:
         formpgr = SQLFORM(db.Pgrcc )
-    
+    cls_a = ''
 
     if formpgr.process().accepted:
 
-        response.flash = f'PGRCC Atualizad0' if pgr else f'PGRCC Registrado'
-        redirect(URL('default', 'PGRCCs', args=[formpgr.vars.id], vars={'f':'ver'} ))
+        response.flash = f'PGRCC Atualizado' if pgr else f'PGRCC Registrado'
+        redirect(URL('default', 'Pgrcc', args=[formpgr.vars.id], vars={'f':'ver'} ))
     elif formpgr.errors:
         response.flash = f'Erro na Registro do PGRCC'
 
-    #TODO: Criar Buscador de PGRCCs
+    cls_a = db.Pgrcc(db.Pgrcc.id == int(pgr)).cls_a if pgr else None
+    cls_b = db.Pgrcc(db.Pgrcc.id == int(pgr)).cls_b if pgr else None
+    cls_d = db.Pgrcc(db.Pgrcc.id == int(pgr)).cls_d if pgr else None
 
-    return response.render(dict(formpgr=formpgr, obra=obra, pgr=pgr))
-
-
-@cache.action(time_expire=15, cache_model=cache.ram, quick='VP')
-def Pessoas():
-    """Formulário de Pessoas, com função de registro e modificação"""
-    
-    pessoa = db.Pessoas(request.args(0)).Id if request.args(0) else session.pessoa_id or None
-    f = request.vars['f'] if request.vars['f']  else None
-    fields = ['Id' ,'Nome', 'CPF', 'CNPJ', 'IdEndereco', 'Telefone', 'celular', 'Email']
-    endereco = session.endereco_id or None
-
-    if endereco:
-        db.Pessoas.IdEndereco.default = int(endereco)
-    
-    if f=='editar':
-        formpessoa = SQLFORM(db.Pessoas, pessoa)
-        session.endereco_id = None
-    elif f =='ver':
-        formpessoa = SQLFORM(db.Pessoas, pessoa , readonly=True, linkto=URL('Lista_de_Registros', args='db') ,  labels = {'Pgrcc.IdGerador': 'Gerador PGR',
-         'Pgrcc.RespTecnico':'R. Téc. PGR' ,'UnidadeDestino.IdEmpreendedor':"Destinos", 'Transportadores.IdPessoa': 'Transportador',
-        'Obras.IdGerador':"Obras",'Processos.IdPessoa':"Processos" , 'Licenca.IdEmpresa': "Licenças", } )
-        session.endereco_id = None
+    if pgr:
+        analise = analise_de_residuos_projedatos(pgr)
     else:
-        formpessoa = SQLFORM(db.Pessoas , fields=fields)
-        session.endereco_id = None
+        analise = {'analise_res':{'A':'','B':'','D':''}}
+
+    #TODO: Criar Buscador de Pgrcc
+    #TODO: Verificar se buscar por sigor funciona
+    formbusca = buscador('Pgrcc',  Protocolo={'label':'Protocolo', 'table':'Processos'},
+                                    sigor= {'type':'integer',  'label':'Sigor',  'table':'Pgrcc'},  )
+
+
+    return response.render(dict(formpgr=formpgr, obra=obra, pgr=pgr, cls_a=cls_a,
+     cls_b=cls_b, cls_d=cls_d,
+     analise=analise['analise_res']), formbusca=formbusca,  linksigor=linksigor,
+     protocolo=protocolo, obra=obra, pessoa=gerador)
+
+
+@auth.requires_login()
+def Pessoas(): #Menu
+    import re
+    """Formulário de Pessoas, com função de registro e modificação"""
+
+    if request.args(0):
+        pessoa = db.Pessoas(request.args(0)).id
+    elif request.vars.get('pessoa_id'):
+        pessoa = request.vars['pessoa_id']
+    else:
+        pessoa = None
+
+    f = request.vars.get('f') or None
+
+    if f =='editar':
+        formpessoa = SQLFORM(db.Pessoas, int(pessoa), formname='formpessoa', submit_button='Atualizar Pessoa')
+    elif f =='ver':
+        formpessoa = SQLFORM(db.Pessoas, pessoa , formname='formpessoa', readonly=True, linkto=URL(c='acessorios',
+        f='Lista_de_Registros', args=['db', request.controller], ) , labels = labels )
+    else:
+        formpessoa = SQLFORM(db.Pessoas, formname='formpessoa', submit_button='Registrar Pessoa')
 
     if formpessoa.process().accepted:
-        session.pessoa_id = formpessoa.vars.id
-        request.vars.pessoa_id = formpessoa.vars.id
-        session.flash = f'Dados atualizados' if pessoa else f'Pessoa Registrada'
-        # if 'Pessoas' in request.env.request_uri :
-        #     redirect(URL('default', 'Pessoas', args=[formpessoa.vars.id], vars={'f': 'ver'}))
-        # else:
-        #     #redirect(URL('default', request.function , vars={'pessoa_id': request.vars.pessoa_id}))
-        redirect(request.env.http_web2py_component_location, client_side=True,)
+        if request.env.HTTP_WEB2PY_COMPONENT_LOCATION != None:
+            session.flash = 'Dados atualizados' if pessoa else 'Pessoa Registrada. Aguarde a página recarregar!'
+            url = str(urlQuery(request.env.HTTP_REFERER, pessoa_id=formpessoa.vars.id))
+            x = re.split(r"(\d{1,3}.\d{1,2}.\d{1,2}.\d{1,2}:\d{3,4}/)",url)
+            xurl = ''.join(url)
+            redirect(xurl, client_side=True)
+        else:
+            session.flash = 'Dados atualizados' if pessoa else 'Pessoa Registrada. Aguarde a página recarregar!'
+            request.vars['f'] = 'ver'
 
     elif formpessoa.errors:
-        response.flash = f'Corrija os dados indicados.'
+        response.flash = 'Corrija os dados indicados.'
     else:
         pass
-    
-    # formbusca = buscador( 'Pessoas', Nome={'label':'Nome'},
-    #                      CPF= {'label':'CPF', 'requires' : IS_CPF_OR_CNPJ() },
-    #                      CNPJ= {'label':'CNPJ', 'represents': MASK_CNPJ() }) 
+
 
     formbusca = SQLFORM.factory(
         Field('Nome'),
@@ -622,12 +711,12 @@ def Pessoas():
         response.flash = 'Erro no formulário'
     else:
         pass
-    
+    #TODO: Verificar sanitização para melhorar as pesquisas tirando caracteres não alphanumericos
     if session.buscaNome:
-        busca = db(db.Pessoas.Nome.contains(session.buscaNome) ) 
+        busca = db(db.Pessoas.Nome.contains(session.buscaNome) )
         session.buscaNome = None
     elif session.buscaCPF:
-        busca = db(db.Pessoas.CPF.contains(session.buscaCPF)) #TODO: Verificar sanitização para melhorar as pesquisas tirando caracteres não alphanumericos
+        busca = db(db.Pessoas.CPF.contains(session.buscaCPF))
         session.buscaCPF = None
     elif session.buscaCNPJ:
         busca = db(db.Pessoas.CNPJ.contains(session.buscaCNPJ))
@@ -635,61 +724,112 @@ def Pessoas():
     else:
         busca = db(db.Pessoas.id < 0)
 
-    fields_grd= [db.Pessoas.Id, db.Pessoas.Nome,db.Pessoas.CPF, db.Pessoas.CNPJ, db.Pessoas.IdEndereco, db.Pessoas.Telefone, db.Pessoas.celular, db.Pessoas.Email, db.Pessoas.Categoria]
-    db.Pessoas.IdEndereco.readable = False
-    db.Pessoas.Id.readable = False
-    links= [
-            dict(header='Endereço', body=lambda row: A(db.Pessoas.IdEndereco.represent(row.IdEndereco), _href=URL(c='default',f='Enderecos', args=row.IdEndereco, vars={'f':'ver'}))),
-            dict(header='Ver', body=lambda row: A('Ver', _href=URL(c='default', f='Pessoas', args=row.Id, vars={'f':'ver'})))]
 
-    grade = SQLFORM.grid( busca, represent_none='',fields=fields_grd, links=links, editable=False, searchable=False, deletable=False, create=False, details=False,
-                         csv=False,  maxtextlength = 120, _class="table", user_signature=False,)
-    
-    return response.render(dict(formpessoa=formpessoa, pessoa=pessoa, formbusca=formbusca, grade=grade))
+    fields_grd= [db.Pessoas.Id, db.Pessoas.Nome, db.Pessoas.CPF ,
+     db.Pessoas.CNPJ, db.Pessoas.Telefone,
+      db.Pessoas.celular, db.Pessoas.Email,]
 
 
-def Processos():
-    processo = request.args(0) or None
-    f = request.vars['f'] if request.vars['f']  else None
-    pessoa_id = request.vars.pessoa_id or session.pessoa_id or None
+    links= [dict(header='Ver', body=lambda row: A('Ver',
+            _href=URL(c='default', f='Pessoas', args=row.Id, vars={'f':'ver'})))]
+
+
+    grade = SQLFORM.grid( busca, represent_none='',fields=fields_grd, links=links,
+        editable=False, searchable=False, deletable=False, create=False, details=False,
+        csv=False,  maxtextlength = 120, _class="table", user_signature=False)
+
+
+
+    return response.render(dict(formpessoa=formpessoa, pessoa=pessoa, formbusca=formbusca, grade=grade,))
+
+
+
+@auth.requires_login()
+def Processos(): #Menu
+    processo = request.args(0)
+    if processo:
+        try:
+            processo = int(processo)
+        except (ValueError, TypeError):
+            processo = None
+
+    pessoa_id = session.pessoa_id or request.vars['pessoa_id'] or  None
     fields = ['Protocolo','IdPessoa','DataReg', 'IdDpto', 'IdTipo', 'Assunto']
 
-    db.Processos.IdPessoa.default = pessoa_id or None
+    db.Processos.IdDpto.default = 1024412
 
-    if f=='editar':
-        formprocess = SQLFORM(db.Processos, processo, showid=True )
-        session.pessoa_id = None
-    elif f=='ver':
-        formprocess = SQLFORM(db.Processos, processo, readonly=True, showid=True, linkto=URL('Lista_de_Registros', args='db' ), labels = {'Obras.Protocolo':'Obras' ,'Licenca.Protocolo': ' Licenças ',
-         'AnaliseTec.Protocolo': ' Análises ', 'TransportadorStatus.Protocolo':' Transportador ', 'Pgrcc.Protocolo':' PGRCC ', 
-         'Tarefas.Protocolo': ' Tarefas '} )
-        session.pessoa_id = None
+    tipo_id = ''
+    f = request.vars.get('f') or None
+
+    if f=='editar' and processo:
+        formprocess = SQLFORM(db.Processos, record=db.Processos(processo),
+        url=URL('default', 'Processos', args=[processo], vars={'f':'editar'}, host=True),
+         linkto=URL(c='acessorios', f='Lista_de_Registros', args=['db', request.controller]),
+         labels = labels , _formname='formprocesso_edit',  submit_button='Atualizar Processo')
+
+    elif f=='ver' and processo:
+        formprocess = SQLFORM(db.Processos, record=db.Processos(processo),
+        url=URL('default', 'Processos', args=[processo], vars={'f':'ver'}, host=True),
+        readonly=True, showid=True,
+         linkto=URL(c='acessorios', f='Lista_de_Registros', args=['db', request.controller],  ),
+         labels = labels  , _formname='formprocesso_ver')
+    elif not processo:
+        formprocess = SQLFORM(db.Processos, fields=fields, _formname='formprocesso', submit_button='Registrar Processo')
     else:
-        formprocess = SQLFORM(db.Processos, fields=fields)
+        # Tratar caso o registro não seja encontrado
+        redirect(URL('error'))
+
+    # if processo:
+    #     tipo_id = db.Processos(db.Processos.id == request.args(0)).IdTipo
+    #     pessoa_id = db.Processos(db.Processos.id == request.args(0)).IdPessoa
 
 
-    if formprocess.process().accepted:
-        response.flash = f'Dados do protocolo atualizados' if processo else f'Protocolo Registrado'
-        if int(formprocess.vars.IdTipo) in [3 , 4 , 13 , 14]:
-            session.processo_id = formprocess.vars.id
-            redirect(URL(c='default', f='Obras', vars={'pessoa': formprocess.vars.IdPessoa}))
+    if formprocess.validate(dbio=False, keepvalues=True):
+        tipo_id = formprocess.vars.IdDpto
 
-        elif formprocess.vars.IdTipo == '15':
-            session.processo_id = formprocess.vars.id
-            redirect(URL(c='Transportadores', f='Cadastro_de_Transportador', vars={'pessoa': formprocess.vars.IdPessoa}))
-
-        elif int(formprocess.vars.IdTipo) in [18, 19, 20]:
-            session.processo_id = formprocess.vars.id
-            redirect(URL(c='Destinos', f='Registro_de_Licencas', vars={'pessoa': formprocess.vars.IdPessoa}))
-
+        if f == 'editar' and processo:
+            # Força atualização em vez de inserção
+            db(db.Processos.id == processo).update(**dict(
+                IdPessoa=formprocess.vars.IdPessoa,
+                Protocolo=formprocess.vars.Protocolo,
+                DataReg=formprocess.vars.DataReg,
+                IdDpto=formprocess.vars.IdDpto,
+                IdTipo=formprocess.vars.IdTipo,
+                Assunto=formprocess.vars.Assunto ))
         else:
-            session.processo_id = formprocess.vars.id
+            # Inserção normal
+            db.Processos.insert(**formprocess.vars)
+            response.flash = f'Dados do protocolo atualizados' if processo else f'Protocolo Registrado'
             redirect(URL('default', 'Processos', args=[formprocess.vars.id], vars={'f':'ver'}))
 
     elif formprocess.errors:
+        print("URL:", request.url)
+        print("Application:", request.application)
+        print("Controller:", request.controller)
+        print("Function:", request.function)
+        print("Args:", request.args)
+        print("Vars:", request.vars)
+        print("Form attributes:", formprocess.attributes)
         response.flash = 'Corrija os Erros indicados'
     else:
         pass
+
+    if tipo_id in [3 , 4 , 17]:
+        redirect_button = define_botao_processo('Obra', 'default', 'Obras',
+         gerador_id=pessoa_id, processo_id=processo)
+    elif tipo_id == 15:
+        redirect_button = define_botao_processo('Transportador', 'Transportadores', 'Cadastro_de_Transportador',
+         pessoa_id=pessoa_id, processo_id=processo)
+    elif tipo_id in [18, 19, 20]:
+        redirect_button = define_botao_processo('Licença de Destino', 'Destinos', 'Registro_de_Licencas',
+         pessoa_id=pessoa_id, processo_id=processo)
+    elif tipo_id == 16:
+        redirect_button = define_botao_processo('Licença de Publicidade', 'default', 'Publicidades',
+         processo_id=processo)
+
+    else:
+        session.processo_id = formprocess.vars.id
+        redirect_button = None
 
     formbusca = SQLFORM.factory(
         Field('Pessoa'),
@@ -700,69 +840,127 @@ def Processos():
     if formbusca.process().accepted:
         session.buscaPessoa =  formbusca.vars.Pessoa
         session.buscaProtocolo  = formbusca.vars.Protocolo
-        response.flash = 'Exibindo dados para: ',str(session.Pessoa) 
-    
+        #session.buscaTipo = formbusca.vars.Tipo
+        response.flash = 'Exibindo dados para: ',str(session.Pessoa)
+
     if session.buscaPessoa:
-        busca = db((db.Processos.IdPessoa == db.Pessoas.Id) & (db.Pessoas.Nome.contains(session.buscaPessoa) ) )
-        session.buscaPessoa = None
+        busca = db((db.Processos.IdPessoa == db.Pessoas.Id) & (
+        db.Pessoas.Nome.contains(session.buscaPessoa.strip() ) ) )
+        if 'buscaPessoa' in session:
+            del(session.buscaPessoa, session.buscaProtocolo)
     elif session.buscaProtocolo:
-        busca = db((db.Processos.IdPessoa == db.Pessoas.Id) & (db.Processos.Protocolo.contains(session.buscaProtocolo)))
-        session.buscaProtocolo = None
+        busca = db((db.Processos.IdPessoa == db.Pessoas.Id) & (
+        db.Processos.Protocolo.contains(session.buscaProtocolo.strip() )))
+        if 'buscaPessoa' in session:
+            del(session.buscaPessoa, session.buscaProtocolo)
     else:
         busca = db(db.Processos.Protocolo == '')
+        if 'buscaPessoa' in session:
+            del(session.buscaPessoa, session.buscaProtocolo)
 
-    fields_grd= [db.Processos.id ,db.Processos.Protocolo, db.Processos.IdPessoa, db.Pessoas.Telefone, db.Processos.IdTipo, db.Processos.DataReg ]
+    fields_grd= [db.Processos.id ,db.Processos.Protocolo, db.Processos.IdPessoa,
+    db.Pessoas.Telefone, db.Processos.IdTipo, db.Processos.DataReg ]
 
     links= [
-        dict(header='Pessoa', body=lambda row: A('Pessoa', _href=URL(c='default', f='Pessoas', args=row.Processos.IdPessoa, vars={'f':'ver'}))) ,
-        dict(header='Ver', body=lambda row: A('Ver', _href=URL(c='default', f='Processos', args=row.Processos.id, vars={'f':'ver'})))] 
+        dict(header='Pessoa', body=lambda row: A('Pessoa', _href=URL(c='default',
+         f='Pessoas', args=row.Processos.IdPessoa, vars={'f':'ver'}))),
+        dict(header='Ver',    body=lambda row: A('Ver', _href=URL(c='default',
+         f='Processos', args=row.Processos.id, vars={'f':'ver'})))]
+
+    grade = SQLFORM.grid( busca, represent_none='',fields=fields_grd, links=links,
+     editable=False, searchable=False, deletable=False, create=False, details=False,
+      csv=False,  maxtextlength = 120, _class="table", user_signature=False,)
+
+    return response.render(dict(formprocess=formprocess, processo=processo,
+     formbusca=formbusca, grade=grade, pessoa_id= pessoa_id,
+     redirect_button = redirect_button if request.vars['f'] == 'ver' else None))
 
 
-    grade = SQLFORM.grid( busca, represent_none='',fields=fields_grd, links=links, editable=False, searchable=False, deletable=False, create=False, details=False, csv=False,  maxtextlength = 120, _class="table", user_signature=False,)
-        
-    return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca, grade=grade))
+@auth.requires_login()
+def Publicidades(): #Menu
+
+    #TODO: id do Endereco não está sendo pega pelo campo no form
+    #TODO: Busca por protocolo não está funcionando
+    #TODO: id do Resp. tec não está sendo pega pelo campo do form
+    #TODO: O editor está alterando o padrão (tipo do dado) das dimensões e isto quebra o registro
+
+    publicidade = request.args(0) or None
+    f = request.vars['f'] if request.vars['f']  else None
+    processo_id = request.vars.processo_id or session.processo_id or None
+    session.processo_id = cache.ram('processo_id', lambda: processo_id, time_expire=35)
+    pessoa_id = request.vars.pessoa_id or session.pessoa_id or None
+    session.pessoa_id = cache.ram('pessoa_id', lambda: pessoa_id, time_expire=35)
+    endereco_id = request.vars.endereco_id or session.endereco_id or None
+    session.endereco_id = cache.ram('endereco_id', lambda: endereco_id, time_expire=35)
+    db.Publicidades.Protocolo.default = processo_id or None
+    db.Publicidades.IdEndereco.default = endereco_id or None
+    db.Publicidades.resptecnico.default = pessoa_id or None
+
+    if f=='editar':
+        formpublicidade = SQLFORM(db.Publicidades, publicidade, showid=True )
+
+    elif f=='ver':
+        formpublicidade = SQLFORM(db.Publicidades, publicidade, readonly=True, showid=True,
+         linkto=URL(c='acessorios', f='Lista_de_Registros', args=['db', request.controller],  ),
+         labels = {'Tarefas.Protocolo': ' Tarefas '} )
+
+    else:
+        formpublicidade = SQLFORM(db.Publicidades)
+
+
+    if formpublicidade.process().accepted:
+        response.flash = f'Dados da publicidade atualizados' if publicidade else f'Publicidade Registrada'
+        redirect(URL('default', 'Publicidades', args=[formpublicidade.vars.id], vars={'f':'ver'}))
+
+    elif formpublicidade.errors:
+        response.flash = 'Corrija os Erros indicados'
+    else:
+        pass
+    formbusca = buscador( 'Publicidades', Protocolo = {'label':'Protocolo'},
+                                          resptecnico = {'label':'Responsável Técnico' })
+
+    return response.render(dict(formpublicidade=formpublicidade, formbusca=formbusca, publicidade=publicidade))
 
 
 @auth.requires_login()
 def Criar_Tarefa():
-    
     id_do_processo = request.args(0) or None
-
     protoc = db.Processos(db.Processos.id == id_do_processo).Protocolo
-    user= db.auth_user(db.auth_user.id == auth.user_id).id
+    user= auth.user_id or db.auth_user(db.auth_user.id == auth.user_id).id
     tipo = db.Processos(db.Processos.id == id_do_processo).IdTipo
-    interessado =  db((db.Pessoas.id == db.Processos.IdPessoa) & (db.Processos.id == id_do_processo)).select(db.Pessoas.Nome).last().Nome
+    interessado =  db((db.Pessoas.id == db.Processos.IdPessoa) &
+     (db.Processos.id == id_do_processo)).select(db.Pessoas.Nome).last().Nome
     tarefa_nome = '{} - {}'.format(interessado, protoc)
-
-    inexiste = db(db.Tarefas.Protocolo == id_do_processo).isempty() 
+    inexiste = db(db.Tarefas.Protocolo == id_do_processo).isempty()
 
     if inexiste is False:
         session.flash = 'Já existe uma Tarefa para o Protocolo {}'.format(protoc)
         redirect(URL('default', 'Processos', args=[id_do_processo], vars={'f':'ver'} ))
     if id_do_processo and inexiste:
-        id = db.Tarefas.insert(Titulo=tarefa_nome ,Protocolo=id_do_processo, Responsavel=user, Tipo=tipo)
+        id = db.Tarefas.insert(Titulo=tarefa_nome ,Protocolo=id_do_processo,
+        Responsavel=user, Tipo=tipo)
         session.processo_id = None
         redirect(URL('default', 'Tarefas', args=[id]))
 
 
-
-def Lista_de_Tarefas():
-
+@auth.requires_login()
+def Lista_de_Tarefas(): #Menu
+    user = auth.user_id
     tipos = db(db.Servicos.Dpto == db.auth_user.IdDepto)
 
-    # tarefas = db((db.Tarefas)).select(db.Tarefas.Protocolo, db.Tarefas.Responsavel, db.Tarefas.DataFim, db.Tarefas.Tipo, db.Tarefas.checklist, db.Tarefas.Status, distinct=True)
+    tarefas = [ db((db.Tarefas.Protocolo == db.Processos.id) & (db.Tarefas.Tipo == tipo ) &
+       (db.Processos.IdPessoa == db.Pessoas.Id) & (db.Tarefas.Responsavel == user) )\
+        for tipo in tipos.select('Servicos.id',  distinct=True,
+        ) if not db(db.Tarefas.Tipo == tipo).isempty()]
 
-    tarefas = [ db((db.Tarefas.Protocolo == db.Processos.id) & (db.Tarefas.Tipo == tipo ) & (db.Processos.IdPessoa == db.Pessoas.Id) )\
-          for tipo in tipos.select('Servicos.id',  distinct=True,) if not db(db.Tarefas.Tipo == tipo).isempty()]
-    
-    # return dict(tarefas=tarefas, tipos=tipos.select( 'Servicos.id', distinct=True)) 
-    headers = {'Tarefas.Protocolo': 'Protocolo', 'Pessoas.Nome': 'Nome', 'Tarefas.Responsavel': 'Responsável', 'Tarefas.DataFim': 'Data Final',
-     'Tarefas.Tipo': 'Tipo', 'Tarefas.checklist': 'Check-list', 'Tarefas.Status': 'Status', 'Ver':'Ver'}
-    fields = [db.Tarefas.id, db.Tarefas.Protocolo, db.Pessoas.Nome, db.Tarefas.Responsavel, db.Tarefas.DataFim,
-     db.Tarefas.Tipo, db.Tarefas.checklist, db.Tarefas.Status]
-    
+    headers = {'Tarefas.Protocolo': 'Protocolo', 'Pessoas.Nome': 'Nome',
+    'Tarefas.Responsavel': 'Responsável', 'Tarefas.DataFim': 'Data Final',
+    'Tarefas.Tipo': 'Tipo', 'Tarefas.checklist': 'Check-list',
+    'Tarefas.Status': 'Status', 'Ver':'Ver'}
+    fields = [db.Tarefas.id, db.Tarefas.Protocolo, db.Pessoas.Nome, db.Tarefas.Responsavel,
+     db.Tarefas.DataFim, db.Tarefas.Tipo, db.Tarefas.checklist, db.Tarefas.Status]
     db.Tarefas.Status.readable = False
-    
+
     def estilo_do_status(status):
         if status == 'Concluida':
             return "background-color: #0a2; border: solid 1px; text-align: center"
@@ -776,50 +974,49 @@ def Lista_de_Tarefas():
             return "background-color: #fff; border: solid 1px"
 
     show_all = request.vars['show_all'] or None
-    links= [dict(header='Editar', body=lambda row: A('Editar', _href=URL(c='default', f='Tarefas', args=row.Tarefas.id , vars={'f':'editar'}))),
-            dict(header='Estado', body=lambda row: A(B(row.Tarefas.Status), _class='card', _align="center" ,_style= estilo_do_status(row.Tarefas.Status))) ]
+    links= [dict(header='Editar', body=lambda row: A('Editar', _href=URL(c='default', f='Tarefas',
+     args=row.Tarefas.id , vars={'f':'editar'}))),
+            dict(header='Estado', body=lambda row: A(B(row.Tarefas.Status), _class='card',
+             _align="center" ,_style= estilo_do_status(row.Tarefas.Status))) ]
 
-    tabelas_tarefas =  [DIV(B(tarefa.select(db.Tarefas.Tipo, distinct=True ) , A('Ver Todos', _href=URL(c='default', f='Lista_de_Tarefas',  vars={'show_all':'True' if not show_all else None}))) ,  DIV(SQLFORM.grid(tarefa , links=links,  editable=False,
-        searchable=True, deletable=False, create=False, details=False,  csv=False, orderby=~db.Tarefas.Status,
-        headers=headers, fields=fields, maxtextlength = 80, paginate=20 if not show_all else None,_class="web2py_grid"),_class="flex-box" ) , _class="card") for  tarefa in tarefas]
+    tabelas_tarefas =  [DIV(B(tarefa.select(db.Tarefas.Tipo, distinct=True ) ,
+     #A('Ver Todos', _href=URL(c='default', f='Lista_de_Tarefas',  vars={'show_all':'True' if not show_all else None}))
+     ),
+     DIV(SQLFORM.grid(tarefa , links=links,  editable=False,
+        searchable=True, deletable=False, create=False, details=False,  csv=False,
+         orderby=~db.Tarefas.Status,   headers=headers, fields=fields,
+         maxtextlength = 80, paginate=15 if not show_all else None,_class="web2py_grid"),
+        _class="flex-box" ) ,  _class="card") for  tarefa in tarefas]
 
-
-    # tabelas_tarefas =  [DIV(tarefa.select(db.Tarefas.Tipo, distinct=True ) ,
-    #  SQLTABLE(tarefa.select(db.Tarefas.Protocolo, db.Tarefas.Protocolo, db.Pessoas.Nome, db.Tarefas.Responsavel,
-    #   db.Tarefas.DataFim, db.Tarefas.Tipo, db.Tarefas.checklist, db.Tarefas.Status, distinct=True), 
-    #   selectid=db.Tarefas.Protocolo ,
-    #       headers=headers, truncate = 80, _class="web2py_grid"))  for tarefa in tarefas]
-
-    return dict(tabelas_tarefas=tabelas_tarefas)
-
-
+    return response.render(tabelas_tarefas=tabelas_tarefas)
 
 
-
-def Tarefas():
-    id_da_tarefa = request.args(0) or None #redirect(URL('default', 'Processos'))
+@auth.requires_login()
+def Tarefas(): #Menu
+    id_da_tarefa = request.args(0) or None
     request.vars.id_da_tarefa = id_da_tarefa
+
     if id_da_tarefa:
         id_do_processo = db.Tarefas(db.Tarefas.id == id_da_tarefa).Protocolo or None
         request.vars.id_do_processo = id_do_processo
         protoc_tarefa = db.Processos(db.Processos.id == int(id_do_processo)).Protocolo or None
         request.vars.protoc_tarefa = protoc_tarefa
+
         if id_do_processo:
-            dados_obra = db(db.Obras.Protocolo == id_do_processo).select( 'CadMunicipal', 'AreaTerreno', 'AreaConstrExist', 'AreaConstrDemolir', 'AreaConstrExecutar', cache=(cache.ram, 900) )
-            headers=dict(CadMunicipal='CadMunicipal', AreaTerreno='Área do Terreno', AreaConstrExist='Área Existente', AreaConstrDemolir='Área a demolir', AreaConstrExecutar='Área a Executar')
-            dados_obra=SQLTABLE(dados_obra,  headers=headers, _class="table" , _style="border: 2px solid; padding: 5px; word-wrap:break-word; color: darkslategray;",)
-            # dados_pgr = db(db.Pgrcc.Protocolo == id_do_processo)
-            # if dados_pgr:
-            #     dados_pgr = SQLFORM.grid(dados_pgr)
+            dados_obra = db(db.Obras.Protocolo == id_do_processo).select( 'CadMunicipal', 'AreaTerreno',
+             'AreaConstrExist', 'AreaConstrDemolir', 'AreaConstrExecutar', cache=(cache.ram, 900) )
+            headers=dict(CadMunicipal='CadMunicipal', AreaTerreno='Área do Terreno',
+             AreaConstrExist='Área Existente', AreaConstrDemolir='Área a demolir',
+             AreaConstrExecutar='Área a Executar')
+            dados_obra=SQLTABLE(dados_obra,  headers=headers, _class="table" ,
+            _style="border: 2px solid; padding: 5px; word-wrap:break-word; color: darkslategray;",)
         else:
             dados_pgr = ''
             dados_obra = ''
 
     id_da_analise = request.args(1) or None
     request.vars.id_da_analise = id_da_analise
-
-    f = request.vars['f'] or None   
-
+    f = request.vars['f'] or None
 
     if id_da_tarefa:
         lst_requer = [(0,'')]
@@ -831,7 +1028,7 @@ def Tarefas():
         if requer:
             db.Tarefas.checklist.requires = IS_IN_SET((lst_requer),  multiple=(1, len(lst_requer)) )
 
-    db.Tarefas.Responsavel.writable = False  
+    db.Tarefas.Responsavel.writable = False
     db.Tarefas.Protocolo.writable = False
 
     if f == 'ver':
@@ -842,7 +1039,8 @@ def Tarefas():
         db.Tarefas.Tipo.writable = False
         db.Tarefas.Descricao.writable = False
 
-        formtarefa=SQLFORM(db.Tarefas, id_da_tarefa,  linkto=URL('Lista_de_Registros', args='db' ), labels={} )
+        formtarefa=SQLFORM(db.Tarefas, id_da_tarefa,  linkto=URL( c='acessorios',
+         f='Lista_de_Registros', args=['db', request.controller],  ), labels={} )
     else:
         db.Tarefas.checklist.show_if = (db.Tarefas.Tipo==3)
         formtarefa=SQLFORM(db.Tarefas, id_da_tarefa)
@@ -853,10 +1051,8 @@ def Tarefas():
     elif formtarefa.errors:
         response.flash = f'Erro na tarefa - {formtarefa.errors}'
 
-
-    
     atributo = {'up-submit':'',  'up-target':"#grade"}
-    
+
     formbusca = SQLFORM.factory(
         Field('Tarefa'), buttons=[TAG.button('Busca',  _class="btn btn-primary",)],
          formstyle='table3cols', formname='formbusca', _id='formbusca', **atributo)
@@ -870,28 +1066,28 @@ def Tarefas():
     else:
         pass
 
-    busca = db(db.Tarefas.Titulo.contains(session.buscaTarefa)) if session.buscaTarefa else db(db.Tarefas.id <0)
+    busca = db(db.Tarefas.Titulo.contains(session.buscaTarefa)
+    ) if session.buscaTarefa else db(db.Tarefas.id <0)
     db.Tarefas.id.readable = False
     db.Tarefas.Protocolo.readable = False
     db.Tarefas.checklist.readable = False
 
+    links = [dict(header='Ver', body=lambda row: A('Ver', _href=URL(c='default', f='Tarefas',
+     args=row.id, vars={'f': 'ver'})))]
 
-    links = [
-        dict(header='Ver', body=lambda row: A('Ver', _href=URL(c='default', f='Tarefas', args=row.id, vars={'f': 'ver'})))]
-
-    grade = SQLFORM.grid(busca, represent_none='', links=links, editable=False, searchable=False, deletable=False, create=False, details=False,
-                         csv=False,  maxtextlength=120, _class="table", user_signature=False,)
-
-
+    grade = SQLFORM.grid(busca, represent_none='', links=links, editable=False,
+     searchable=False, deletable=False, create=False, details=False, csv=False,
+     maxtextlength=120, _class="table", user_signature=False,)
 
     if id_da_tarefa:
-        return dict(formtarefa=formtarefa, formbusca=formbusca, grade=grade,  id_do_processo=id_do_processo,
-     id_da_tarefa=id_da_tarefa, id_da_analise=id_da_analise, dados_obra=dados_obra)
+        return dict(formtarefa=formtarefa, formbusca=formbusca, grade=grade,
+         id_do_processo=id_do_processo, id_da_tarefa=id_da_tarefa,
+         id_da_analise=id_da_analise, dados_obra=dados_obra)
     else:
         return dict(formtarefa=formtarefa, formbusca=formbusca, grade=grade)
-        
 
-@cache.action() 
+
+@auth.requires_login()
 def Analises():
     id_da_analise= request.args(0) or None
     id_do_processo =  request.get_vars['id_do_processo'] or request.vars.id_do_processo or None
@@ -901,7 +1097,7 @@ def Analises():
 
     if f=='editar':
         formanalise = SQLFORM(db.AnaliseTec, int(id_da_analise), showid=False, )
-    elif f=='ver':      
+    elif f=='ver':
         formanalise = SQLFORM(db.AnaliseTec, int(id_da_analise), readonly=True , showid=False,
          formstyle='table3cols')
     else:
@@ -916,94 +1112,92 @@ def Analises():
     else:
         pass
 
-    busca = db((db.AnaliseTec.Protocolo == id_do_processo) & (db.AnaliseTec.Protocolo == db.Processos.id) & (db.Tarefas.Protocolo == db.Processos.id) )
+    busca = db((db.AnaliseTec.Protocolo == id_do_processo) & (
+    db.AnaliseTec.Protocolo == db.Processos.id) & (db.Tarefas.Protocolo == db.Processos.id) )
 
-    fields_grd= [db.AnaliseTec.id, db.Processos.id, db.AnaliseTec.Protocolo, db.AnaliseTec.DocsProcesso,  db.AnaliseTec.CamposProcesso, db.AnaliseTec.TipoAnalise, db.AnaliseTec.Obs ]
+    fields_grd= [db.AnaliseTec.id, db.Processos.id, db.AnaliseTec.Protocolo,
+      db.AnaliseTec.DocsProcesso, db.AnaliseTec.CamposProcesso,
+      db.AnaliseTec.TipoAnalise, db.AnaliseTec.Obs ]
     db.AnaliseTec.id.readable = False
     db.Processos.id.readable = False
 
     links= [
-        dict(header='Processos', body=lambda row: A('Processo', _href=URL(c='default', f='Processos', 
+        dict(header='Processos', body=lambda row: A('Processo', _href=URL(c='default', f='Processos',
         args=row.Processos.id, vars={'f':'ver'}))) ,
         dict(header='Ver', body=lambda row: A('Ver', _href=URL(c='default', f='Analises',
-         args=row.AnaliseTec.id, vars={'f':'ver', 'id_do_processo': id_do_processo}),    cid=request.cid, client_side=True))] 
+         args=row.AnaliseTec.id, vars={'f':'ver', 'id_do_processo': id_do_processo}),
+         cid=request.cid, client_side=True))]
 
-    grade = SQLFORM.grid( busca, represent_none='',fields=fields_grd, links=links, editable=False, 
-                        searchable=False, deletable=False, create=False, details=False,
-                         csv=False,  maxtextlength = 140, _class="table", user_signature=False, args=request.args[:1], paginate=10)
-
+    grade = SQLFORM.grid( busca, represent_none='',fields=fields_grd, links=links,
+                 editable=False, searchable=False, deletable=False, create=False,
+                 details=False, csv=False, maxtextlength = 140, _class="table",
+                 user_signature=False, args=request.args[:1], paginate=10)
 
     if id_do_processo:
-        return response.render(dict(formanalise=formanalise, id_da_tarefa=id_da_tarefa, id_da_analise=id_da_analise, id_do_processo=id_do_processo , grade=grade))
+        return response.render(dict(formanalise=formanalise, id_da_tarefa=id_da_tarefa,
+         id_da_analise=id_da_analise, id_do_processo=id_do_processo, grade=grade))
     else:
-        return response.render(dict(formanalise=formanalise, id_da_tarefa=id_da_tarefa, id_da_analise=id_da_analise, grade=grade))
+        return response.render(dict(formanalise=formanalise, id_da_tarefa=id_da_tarefa,
+        id_da_analise=id_da_analise, grade=grade))
 
 
-@cache.action()
-def Lista_de_Registros():
-    import re
-    REGEX = re.compile('^(\w+).(\w+).(\w+)\=\=(\d+)$')
-    match = REGEX.match(request.vars.query)
-    if not match:
-        redirect(URL('error'))
-
-    table, field, id = match.group(2), match.group(3), match.group(4)
-    records = db(db[table][field]==id)
-    links = [dict(header='Ver', body=lambda row: A('Ver', _href=URL(c=session.controller, f=table, args=row.id, vars={'f': 'ver'})))]
-
-    return dict(records=SQLFORM.grid(records,  links=links,user_signature=False, editable=False, searchable=False, deletable=False, create=False,csv=False,
-    represent_none='', maxtextlength = 120, _class="table"), table=table)
 
 
-def Gerador_de_Docs():
-    import geradocspy
-    import os
-    from pathlib import Path
-    
-    formmodarq = SQLFORM.factory(Field('Arq_mod', type='upload', label='Procurar Modelo'), table_name='formmodarq'
-        )
+def Analise_GRCC(): #Menu
 
-    tables = [tab for tab in db.tables if not 'auth' in tab]
+    analise_grcc = request.args(0) or request.vars['analise_grcc'] or None
+    f = request.vars['f'] if request.vars['f']  else None
+    obra = request.get_vars.obra_id or None
 
-    formprocessos = SQLFORM.factory( Field('Protocolo', requires=IS_IN_DB(db, 'Processos.id', db.Processos._format)), table_name='formprocessos')
+    if not analise_grcc:
+        protocolo = request.get_vars.processo_id or None
+        #db.Pgrcc(db.Pgrcc.idobra == obra)
+        db.Analise_GRCC.idobra.default = obra
+        #db.Analise_GRCC.idpgrcc.default = protocolo
+    else:
+        obra = db.Analise_GRCC(db.Analise_GRCC.id == analise_grcc).idobra
+        protocolo = db.Analise_GRCC(db.Analise_GRCC.id == analise_grcc).idpgrcc
 
-    formregis = ''
 
-    if formprocessos.process(tablename='formprocessos' ).accepted:
+    if f=='editar':
+        formanalise_grcc = SQLFORM(db.Analise_GRCC, analise_grcc, formstyle='bootstrap3_stacked', submit_button="Salvar")
+    elif f=='ver':
+        formanalise_grcc = SQLFORM(db.Analise_GRCC, analise_grcc, readonly=True, linkto=URL(c='acessorios',
+         f='Lista_de_Registros', args=['db', request.controller], ) ,
+         labels = {}, formstyle='bootstrap3_stacked', separator=':___')
+    else:
+        formanalise_grcc = SQLFORM(db.Analise_GRCC, formstyle='bootstrap3_stacked' )
+
+    if formanalise_grcc.process(keepvalues=True).accepted:
+        response.flash = f'Análise Atualizada' if  analise_grcc == request.args(0) else None
+        analise_grcc = formanalise_grcc.vars.id
+        redirect(URL('default','Analise_GRCC.html', vars={'f':'ver', 'analise_grcc': formanalise_grcc.vars.id}, extension = '' ), client_side=True)
+    elif formanalise_grcc.errors:
+        session.flash = f'Corrija os erros indicados'
+    else:
         pass
 
-    if formmodarq.process(tablename='formmodarq').accepted:
-        pasta = Path(request.folder,)
-        arquivo_mod = Path(pasta,  'uploads', Path(formmodarq.vars.Arq_mod))
-        session.Arq_mod = arquivo_mod
-        response.flash = "Enviando Arquivo de Modelo."
-        try:
-            conteudo = geradocspy.ler_o_arq_modelo(session.Arq_mod)
-            campos = geradocspy.pegar_campos_do_modelo(conteudo)
-            campos_form = [A(c.replace('{', '').replace('}', '') ) for c in campos]
-            #formulario = SQLFORM.factory(*campos_form, formstyle='table3cols', formname='formbusca')
-            formulario = UL(*campos_form)
+    formbusca = buscador( 'Analise_GRCC', idpgrcc={'label':'Protocolo PGRCC'},)
 
-        except OSError as e:
-            session.flash = "Erro ao enviar arquivo: Error:{} : {}".format(pasta, session.Arq_mod)
-
-
-        
-
-    return dict(formmodarq=formmodarq, formprocessos=formprocessos, formregis=formregis) if not 'formulario' in locals() else \
-        dict(formmodarq=formmodarq, formulario=formulario, formprocessos=formprocessos, formregis= formregis)
+    return dict(formanalise_grcc=formanalise_grcc, analise_grcc=analise_grcc, formbusca=formbusca, obra_id=obra, protocolo=protocolo)
 
 
 
-# def Pessoa_selector():
-#     if not request.vars['Nome']:
-#         return ''  
-#     pattern= request.vars['Nome']
-#     selected= [row.Nome for row in db(db.Pessoas.Nome.contains(pattern)).select(limitby=(0, 10))]
 
-#     return DIV(*[DIV(k,
-#                  _onclick="jQuery('#Pessoas_Nome').val('%s')" % k,
-#                  _onmouseover="this.style.backgroundColor='yellow'",
-#                  _onmouseout="this.style.backgroundColor='white'"
-#                  ) for k in selected], )
+def solo_a_destinar(): #Menu
+    pgrs_vol = db((db.Pgrcc.idobra == db.Obras.Id) & (db.Obras.Corte > db.Obras.Aterro) &
+     (db.Processos.id == db.Obras.Protocolo) & (db.Enderecos.Id == db.Obras.IdEndereco))
 
+    fields = [db.Obras.Protocolo, db.Obras.IdGerador, db.Obras.CadMunicipal ,
+    db.Obras.Corte, db.Obras.Aterro ,db.Processos.DataReg, db.Obras.IdEndereco]
+    links = [dict(header='Ver',
+    body = lambda row: A('Maps', _href=
+    f'https://www.google.com/maps/search/{endereco_represent(row.Obras.IdEndereco)}' )), # type: ignore
+    dict(header='Vol', body= lambda row: (row.Obras.Aterro - row.Obras.Corte))
+    ]
+
+    table = SQLFORM.grid(pgrs_vol, links=links, fields=fields,user_signature=False,
+    editable=False, searchable=False, details=False,  deletable=False, create=False,
+    csv=True, represent_none='', maxtextlength = 120, paginate=50, _class="table")
+
+    return response.render(dict(table=table))

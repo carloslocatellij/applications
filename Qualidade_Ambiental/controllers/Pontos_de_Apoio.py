@@ -23,29 +23,6 @@ def Pontos_de_Apoio():
 	response.flash = T("Bem Vindo!")
 	return response.render(dict(message=T('Sitema Web do Dept. de Qualidade Ambiental')))
 
-@auth.requires_login()
-def grafico_por_ponto():
-	import datetime
-	import plotador
-	ctrlgrf = SQLFORM.factory(
-		Field('IdPonto',db.EntradaPonto.IdPonto, label='Ponto', requires=IS_IN_DB(db((db.UnidadeDestino.Tipo=='Ponto de Apoio')) , 'UnidadeDestino.Id', db.UnidadeDestino._format)),
-		Field('Inicio', label='Inicio', type='date', requires= IS_DATE_IN_RANGE(format=T('%d/%m/%Y'),minimum=datetime.date(2019, 6, 1), maximum=datetime.date.today(), error_message='deve ser ANO-Mês-Dia valido!'),),
-		Field('Fim', label='Fim', type='date', requires=IS_DATE_IN_RANGE(format=T('%d/%m/%Y'),minimum=datetime.date(2019, 6, 1), maximum=datetime.date.today(), error_message='deve ser ANO-Mês-Dia valido!'),),
-		table_name='EntradaPonto',
-		formstyle='table3cols',
-		buttons = [INPUT(_name='Gerar', _class='btn btn-primary btn-lg',_type="submit", value='Gerar', _value="Gerar", _onclick="this.form.action.value=Gerar;this.form.submit()")])
-
-	if ctrlgrf.process().accepted:
-		session.IdPonto = ctrlgrf.vars.IdPonto
-		session.pontoformat = db(UnidadeDestino.id == session.IdPonto).select(UnidadeDestino.Atividade).as_list()
-		session.pontoformat = session.pontoformat[0]['Atividade']
-		session.Inicio = ctrlgrf.vars.Inicio
-		session.Fim = ctrlgrf.vars.Fim
-		response.flash = 'Exibindo dados para: ',str(session.pontoformat),str(session.Inicio),str(session.Fim)
-	elif ctrlgrf.errors:
-		response.flash = 'Erro no formulario'
-
-	return dict(ctrlgrf=ctrlgrf)
 
 @auth.requires_login()
 def Relatorio_dos_Pontos_de_Apoio():
@@ -143,14 +120,14 @@ def Formulario_de_Entrada_Ponto():
 
 
 	if form.process().accepted:
-		itenresiduo = []
+		itemresiduo = []
 		for k, v in request.vars.items():
 			if v == 'on':
-				itenresiduo.append(k)
+				itemresiduo.append(k)
 			if k == 'Outros' and v != None:
-				itenresiduo.append(v)
+				itemresiduo.append(v)
 
-		response.flash = 'REGISTRADO! \t - {} ,  {} ,  {}m³, {} '.format(request.vars.Placa, request.vars.Data, request.vars.Volume, str(itenresiduo))
+		response.flash = 'REGISTRADO! \t - {} ,  {} ,  {}m³, {} '.format(request.vars.Placa, request.vars.Data, request.vars.Volume, str(itemresiduo))
 		session.campospersits={'IdPonto':form.vars.IdPonto,'Data':form.vars.Data}
 		#redirect(URL('FormEntradaPonto', args=form.vars.id))
 	elif form.errors:
@@ -162,19 +139,45 @@ def Formulario_de_Entrada_Ponto():
 
 @auth.requires_login()
 def Grade_de_Entrada_Ponto():
-	grid = SQLFORM.smartgrid(db.EntradaPonto, fields=[db.EntradaPonto.Placa,  db.EntradaPonto.Data , db.EntradaPonto.IdPonto] \
-		,editable=True, deletable=True, orderby=~db.EntradaPonto.Id , field_id=db.EntradaPonto.Id \
-		,links = dict(header='Placa',body= lambda ids : A(URL('Pontos_de_Apoio', 'Grade_de_Entrada_Ponto', Placa=ids))), user_signature=False)
+	
+	grid = SQLFORM.smartgrid( db.EntradaPonto, left=db.auth_user.on(db.EntradaPonto.created_by == db.auth_user.id), \
+		fields=[db.EntradaPonto.Placa,  db.EntradaPonto.Data , db.EntradaPonto.Id, db.auth_user.username] \
+		,editable=True, deletable=True, ignore_common_filters =False, orderby=~db.EntradaPonto.Id , field_id=db.EntradaPonto.Id \
+		, maxtextlength=20, showbuttontext=False )
 	return locals() #dict(grid=grid)
+
+
+@auth.requires_login()
+def grafico_por_ponto():
+
+	ctrlgrf = SQLFORM.factory(
+		Field('IdPonto',db.EntradaPonto.IdPonto, label='Ponto', requires=IS_IN_DB(db((db.UnidadeDestino.Tipo=='Ponto de Apoio')) , 'UnidadeDestino.Id', db.UnidadeDestino._format)),
+		Field('Inicio', label='Inicio', type='date', requires=IS_DATE(format=T(f'%d/%m/%Y'))),
+		Field('Fim', label='Fim', type='date', requires=IS_DATE(format=T(f'%d/%m/%Y'))),
+		table_name='EntradaPonto',
+		formstyle='table3cols',
+		buttons = [INPUT(_name='Gerar', _class='btn btn-primary btn-lg',_type="submit", value='Gerar', _value="Gerar", _onclick="this.form.action.value=Gerar;this.form.submit()")])
+
+	if ctrlgrf.process().accepted:
+		session.IdPonto = ctrlgrf.vars.IdPonto
+		session.pontoformat = db(UnidadeDestino.id == session.IdPonto).select(UnidadeDestino.Atividade).as_list()
+		session.pontoformat = session.pontoformat[0]['Atividade']
+		session.Inicio = ctrlgrf.vars.Inicio
+		session.Fim = ctrlgrf.vars.Fim
+		response.flash = 'Exibindo dados para: ',str(session.pontoformat),str(session.Inicio),str(session.Fim)
+	elif ctrlgrf.errors:
+		response.flash = 'Erro no formulario'
+
+	return dict(ctrlgrf=ctrlgrf)
+
 
 @auth.requires_login()
 def grafico_por_residuo():
 	import datetime
-	import plotador
 	ctrlresiduo = SQLFORM.factory(
-		Field('Residuo', requires=IS_IN_SET(['Volume total', 'Entulho', 'Poda','Moveis', 'Ferro', 'Plastico/ Papel', 'Eletronico' ]), label=u'Resíduo'),
-		Field('Inicio', label='Inicio', type='date', requires= IS_DATE_IN_RANGE(format=T('%Y-%m-%d'),minimum=datetime.date(2019, 6, 1), maximum=datetime.date.today(), error_message='deve ser YYYY-MM-DD!')),
-		Field('Fim', label='Fim', type='date', requires=IS_DATE_IN_RANGE(format=T('%Y-%m-%d'),minimum=datetime.date(2019, 6, 1), maximum=datetime.date.today(), error_message='deve ser YYYY-MM-DD!')),
+		Field('Residuo', label='Tipo de Resíduo', requires=IS_IN_SET(['Volume total', 'Entulho', 'Poda','Moveis', 'Ferro', 'Plastico/ Papel', 'Eletronico' ])),
+		Field('Inicio', label='Data de Inicio', type='date', requires=IS_DATE(format=T(f'%d/%m/%Y'))),
+		Field('Fim', label='Data de Fim', type='date', requires=IS_DATE(format=T(f'%d/%m/%Y'))),
 		table_name='EntrResiduo',
 		formstyle='table3cols',
 		buttons = [INPUT(_name='Gerar', _class='btn btn-primary btn-lg',_type="submit", value='Gerar', _value="Gerar", _onclick="this.form.action.value=Gerar;this.form.submit()")])

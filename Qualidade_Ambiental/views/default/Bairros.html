@@ -1,0 +1,41 @@
+{{extend 'layout.html'}}
+    {{block head}}
+    {{end}}
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+           document.getElementById('Logradouros_Logradouro').focus();})
+     </script>
+
+<h2 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+    <br>
+    {{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo ),SPAN(_class="caret") }}
+      {{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled") }}
+
+
+    <div class="container" {{if bairro:}}style="border: 1px solid; padding-block: 2px;"{{pass}}>
+    {{=A('Editar', _href=URL(c='default',f='Bairros', args=[bairro], vars={'f':'editar'}), _class='btn btn-primary', ) if bairro else ''}}
+    {{=A('Novo', _href=URL(c='default',f='Bairros',  vars={}), _class='btn btn-primary',)if bairro else ''}}
+    </div>
+
+
+{{=BEAUTIFY(formbairro)}}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#grade").modal({ show: false });
+
+
+        up.compiler($("#formbusca").submit(function () {
+            $("#formbusca").submit();
+        })).done($("#grade").modal({ show: true }))
+
+
+    });
+
+</script>

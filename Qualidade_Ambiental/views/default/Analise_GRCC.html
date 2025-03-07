@@ -1,0 +1,96 @@
+{{extend 'layout.html'}}
+{{"""
+
+You should not modify this file.
+It is used as default when a view is not provided for your controllers
+
+"""}}
+
+
+<h2 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+    <br>
+    {{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo ),SPAN(_class="caret") }}
+      {{=DIV(BEAUTIFY(formbusca), _id='Busca',_class="collapse list-unstyled" ) }}
+
+
+<div class="container">
+{{=A('Editar', _href=URL(c='default',f='Analise_GRCC', args=[analise_grcc], vars={ 'f':'editar'}), _class='btn btn-primary', ) if analise_grcc else ''}}
+{{=A('Novo', _href=URL(c='default',f='Analise_GRCC',  vars={}), _class='btn btn-primary',)if analise_grcc else ''}}
+</div>
+
+<div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+
+    {{=formanalise_grcc.custom.begin}}
+        <table width="100%" >
+                    <tr>
+                        <tr>
+                            <td width="45%" align='left'>{{=A('Obra', _href=URL(c='default',f='Obras', args=[obra_id], vars={'f':'ver'}),
+                             _class='btn btn-primary', _style="height: 25px", _target="new")}}:
+                                <div align='left' class="card">{{=formanalise_grcc.custom.widget['idobra']}}</div> </td>
+                            <td width="25%" align='left' >{{=B('Protocolo PGRCC:')}} <div align='left' class="card">{{=formanalise_grcc.custom.widget['idpgrcc']}}</td>
+                            <tr>
+                                <td>
+                                </td>
+                            </tr>
+                        </tr>
+                    </tr>
+                    <tr>
+                        <table width="100%">
+                            <td width="20%" align='left' style="padding-inline: 20px;">{{=B('Resíduo Classe A:')}}
+                            <div align='center' class="decimal form-control" style="border: 2px solid; padding:10px;word-wrap:break-word; color: darkgreen">{{=formanalise_grcc.custom.widget['r_cls_a']}}</td>
+                            <td width="20%" align='left' style="padding-inline: 20px;">{{=B('Resíduo Classe B:')}}
+                            <div align='center' class="decimal form-control" style="border: 2px solid; padding:10px;word-wrap:break-word; color: darkgreen">{{=formanalise_grcc.custom.widget['r_cls_b']}}</td>
+                            <td width="20%" align='left' style="padding-inline: 20px;">{{=B('Resíduo Classe C:')}}
+                            <div align='center' class="decimal form-control" style="border: 2px solid; padding:10px;word-wrap:break-word; color: darkgreen">{{=formanalise_grcc.custom.widget['r_cls_c']}}</td>
+                            <td width="20%" align='left' style="padding-inline: 20px;">{{=B('Resíduo Classe D:')}}
+                            <div align='center' class="decimal form-control" style="border: 2px solid; padding:10px;word-wrap:break-word; color: darkgreen">{{=formanalise_grcc.custom.widget['r_cls_d']}}</td></div>
+                            <td width="20%" align='left'style="padding-inline: 20px;">{{=B('Solo: ')}}
+                            <div align='center' class="decimal form-control" style="border: 2px solid; padding:10px;word-wrap:break-word; color: darkgreen">{{=formanalise_grcc.custom.widget['solo']}}</td></div>
+                            </table>
+                            <td align='left'>{{=B('Observações:') }}<div align='left' class="card">{{=formanalise_grcc.custom.widget['Obs']}}</td>
+                            <table class="jumbotron" style="border: 1px solid">
+                                <br/>
+                                <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Ligações.:')}}
+                                    <tr>
+                                    {{for k, v in formanalise_grcc.custom.linkto.items():}}
+                                    {{tabela, campo = k.split('__')}}
+                                    {{num_registros_links = db(db[tabela][campo]==analise_grcc).count()}}
+                                    {{=TD(DIV(B(v,' ' ,SPAN(num_registros_links,_class="badge badge-danger") if  num_registros_links > 0 else ''),
+                                     _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
+                                    {{pass}}
+                                    </tr>
+                                </td>
+
+                            </table>
+                        </tr>
+                        <div style="position: absolute;" id="suggestions" class="suggestions"></div>
+
+        </table>
+    </td>
+
+
+        <div>
+        {{=formanalise_grcc.custom.submit}}
+        </div>
+
+        {{=formanalise_grcc.custom.end}}
+</div>
+
+
+
+
+
+<script type="text/javascript">
+
+$(document).ready(function abreModal() {
+  $("#grade").modal({
+    show: false
+  });
+  setTimeout(abreModal, 1000);
+}
+
+    );
+
+</script>

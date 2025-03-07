@@ -2,21 +2,24 @@
 # -*- coding: utf-8 -*-
 
 #=====================================================#
-###     	SISTEMA DE GESTÃO DA QUALIDADE DO AR    ###              
+###     	SISTEMA DE GESTÃO DA QUALIDADE DO AR    ###
 #=====================================================#
 
+session.forget(response)
+
+mensagem_contrução = "Em Contrução! 🛠"
 
 def Qualidade_do_Ar():
 
 	ItensPlanoQualidadeAr = {'Qualidade_do_Ar':['Formulario_opacidade', 'Emissões Moveis'], 'Mobilidade':'', 'Queimadas': ['Urbanas', 'Rurais'], 'Clima':'', 'Produção_e_Consumo':'' }
-	
-	return dict(sistema=T('Sistema de Dados de Qualidade do Ar!'), ItensPlanoQualidadeAr = ItensPlanoQualidadeAr)
+	msg = DIV(mensagem_contrução, _class="jumbotron")
+	return dict(sistema=T('Sistema de Dados de Qualidade do Ar!'), ItensPlanoQualidadeAr = ItensPlanoQualidadeAr, msg=msg)
 
 
 
 def Formulario_opacidade():
 	form = SQLFORM( db.MedicoesOpac, formstyle='table3cols', editable=True)
-	
+
 	if form.process().accepted:
 		response.flash = 'Registrado'
 
@@ -25,11 +28,11 @@ def Formulario_opacidade():
 
 	else:
 		response.flash = 'Preencher valores indicados'
-		
+
 		return dict(form=form)
 
 
-		
+
 def Grade_opacidade():
 	grid = SQLFORM.smartgrid(db.MedicoesOpac, fields=[db.MedicoesOpac.ID, db.MedicoesOpac.PM, db.MedicoesOpac.Placa,  db.MedicoesOpac.Data , db.MedicoesOpac.Hora, db.MedicoesOpac.NvRingelmann]\
 		,editable=True, deletable=False, orderby=~db.MedicoesOpac.ID , field_id=db.MedicoesOpac.ID \

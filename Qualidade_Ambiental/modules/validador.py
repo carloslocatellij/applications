@@ -78,13 +78,3 @@ class IS_CPF(object):
 
         except:
             return (value, 'algum erro' + str(value))
-
-#def formatter(self, value):
-        #if value ==11:
-#        formatado = value[0:3] + '.' + value[3:6] + '.' + value[6:9] + '-' + value[9:11]
-        #else:
-        #    formatado=value
-        #formatado = value
-#	return formatado '''
-
-

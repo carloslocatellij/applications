@@ -6,10 +6,12 @@
 # -------------------------------------------------------------------------
 from gluon.contrib.appconfig import AppConfig
 from gluon.tools import Auth
+import copy
 
 if 0==1:
     from gluon import *
-    from gluon import db, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, IS_MATCH, a_db, db, auth, Auth, pegaDof
+    from gluon import db, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, IS_MATCH,\
+     a_db, db, auth, Auth, pegaDof
     request = current.request
     response = current.response
     session = current.session
@@ -21,8 +23,8 @@ if 0==1:
 # File is released under public domain and you can use without limitations
 # -------------------------------------------------------------------------
 
-if request.global_settings.web2py_version < "2.15.5":
-    raise HTTP(500, "Requires web2py 2.15.5 or newer")
+#if request.global_settings.web2py_version < "2.15.5":
+#    raise HTTP(500, "Requires web2py 2.15.5 or newer")
 
 # -------------------------------------------------------------------------
 # if SSL/HTTPS is properly configured and you want all HTTP requests to
@@ -35,43 +37,37 @@ if request.global_settings.web2py_version < "2.15.5":
 # -------------------------------------------------------------------------
 configuration = AppConfig(reload=False)
 
-session.secure()
-session.connect(request, response, cookie_key=',.~~Grnt861@10.7.0.28', compression_level=None)
 
-if not request.env.web2py_runtime_gae:
-    # ---------------------------------------------------------------------
-    # if NOT running on Google App Engine use SQLite or other DB
-    # ---------------------------------------------------------------------
-    db = DAL('mysql://DBGrnt:,.~~Grnt861@10.7.0.28/Tconect' ,
-             pool_size=configuration.get('db.pool_size'),
-             migrate_enabled=False,
-             fake_migrate_all=True,
-             #lazy_tables=True)
-             check_reserved=['mysql'], adapter_args={'safe': True},)
+# session.connect(request, response, cookie_key=configuration.take("db")['password'],)
+# session.secure()
+# session.samesite('Strict')
 
-else:
-    # ---------------------------------------------------------------------
-    # connect to Google BigTable (optional 'google:datastore://namespace')
-    # ---------------------------------------------------------------------
-    db = DAL(u'google:datastore+ndb')
-    # ---------------------------------------------------------------------
-    # store sessions and tickets there
-    # ---------------------------------------------------------------------
-    session.connect(request, response, db=db)
-    # ---------------------------------------------------------------------
-    # or store session in Memcache, Redis, etc.
-    # from gluon.contrib.memdb import MEMDB
-    # from google.appengine.api.memcache import Client
-    # session.connect(request, response, db = MEMDB(Client()))
-    # ---------------------------------------------------------------------
+
+
+db = DAL('{}://{}:{}@{}/{}'.format(
+                configuration.take("db")['engine'],
+                configuration.take("db")['username'],
+                configuration.take("db")['password'],
+                configuration.take("db")['uri'],
+                configuration.take("db")['database'] ) ,
+            pool_size=50,
+            migrate_enabled=True, migrate=False, fake_migrate_all=True, lazy_tables=True,
+            check_reserved=['mysql'], adapter_args={'safe': True},
+            )
+
+#db._adapter.types = copy.copy(db._adapter.types)
+db._adapter.types['boolean']='TINYINT(1)'
+db._adapter.TRUE = 1
+db._adapter.FALSE = 0
 
 # -------------------------------------------------------------------------
 # by default give a view/generic.extension to all actions from localhost
 # none otherwise. a pattern can be 'controller/function.extension'
 # -------------------------------------------------------------------------
-response.generic_patterns = [] 
-if request.is_local and not configuration.get('app.production'):
-    response.generic_patterns.append('*')
+response.generic_patterns = []
+#if request.is_local and not configuration.get('app.production'):
+
+#response.generic_patterns.append('*')
 
 # -------------------------------------------------------------------------
 # choose a style for forms
@@ -102,7 +98,7 @@ response.optimize_js = 'concat,minify,inline'
 
 # host names must be a list of allowed host names (glob syntax allowed)
 auth = Auth(
-    db, host_names=configuration.get('host.names'),     
+    db, host_names=configuration.get('host.names'),
      )
 
 # -------------------------------------------------------------------------
@@ -125,22 +121,53 @@ auth.settings.update_fields = [ 'first_name', 'last_name', 'username', 'email', 
 # -------------------------------------------------------------------------
 # configure email
 # -------------------------------------------------------------------------
+
+from gluon.tools import Mail
+from gluon.html import XML
+
+# Crie uma nova classe de Mail que herda da original
+# class CustomMail(Mail):
+#     def send(self, to, subject, message, **kwargs):
+#         if hasattr(subject, 'xml'):  # Se for lazyT
+#             subject = str(subject)
+#         if hasattr(message, 'xml'):  # Se for lazyT
+#             message = str(message)
+#         return super().send(to, subject, message, **kwargs)
+
+# # Configure o auth para usar o novo mailer
+# auth.settings.mailer = CustomMail()
+
+import smtplib
+import logging
+
+class DebugMail(Mail):
+    def send(self, to, subject, message, **kwargs):
+        try:
+            result = super().send(to, subject, message, **kwargs)
+            logging.info(f"Email sent successfully to {to}")
+            return result
+        except Exception as e:
+            logging.error(f"Failed to send email: {str(e)}")
+            raise
+
+auth.settings.mailer = DebugMail()
+
 mail = auth.settings.mailer
-mail.settings.server = configuration.get('smtp.server') # 'logging' if request.is_local else 
+mail.settings.server = configuration.get('smtp.server') # 'logging' if request.is_local else
 mail.settings.sender = configuration.get('smtp.sender')
-mail.settings.login = configuration.get('smtp.login')
-mail.settings.tls = configuration.get('smtp.tls') or False
-mail.settings.ssl = configuration.get('smtp.ssl') or False
+mail.settings.login = f"{configuration.get('smtp.username')}:{configuration.get('smtp.password')}" #configuration.get('smtp.login')
+mail.settings.tls = True
+mail.settings.ssl = False
 
 # -------------------------------------------------------------------------
 # configure auth policy
 # -------------------------------------------------------------------------
-# auth.settings.registration_requires_verification = True
-# auth.settings.registration_requires_approval = False
-# auth.settings.reset_password_requires_verification = True
+auth.settings.registration_requires_verification = True
+auth.settings.registration_requires_approval = False
+auth.settings.reset_password_requires_verification = True
 
-# -------------------------------------------------------------------------  
-# read more at http://dev.w3.org/html5/markup/meta.name.html               
+# -------------------------------------------------------------------------
+# read more at http://dev.w3.org/html5/markup/meta.name.html
 # -------------------------------------------------------------------------
 response.meta.author = configuration.get('app.author')
 response.meta.description = configuration.get('app.description')
@@ -149,16 +176,16 @@ response.meta.generator = configuration.get('app.generator')
 response.show_toolbar = configuration.get('app.toolbar')
 
 # -------------------------------------------------------------------------
-# your http://google.com/analytics id                                      
+# your http://google.com/analytics id
 # -------------------------------------------------------------------------
-response.google_analytics_id = configuration.get('google.analytics_id')
+#response.google_analytics_id = configuration.get('google.analytics_id')
 
 # -------------------------------------------------------------------------
 # maybe use the scheduler
 # -------------------------------------------------------------------------
-if configuration.get('scheduler.enabled'):
-    from gluon.scheduler import Scheduler
-    scheduler = Scheduler(db, heartbeat=configuration.get('scheduler.heartbeat'))
+# if configuration.get('scheduler.enabled'):
+#     from gluon.scheduler import Scheduler
+#     scheduler = Scheduler(db, heartbeat=configuration.get('scheduler.heartbeat'))
 
 # -------------------------------------------------------------------------
 # Define your tables below (or better in another model file) for example
@@ -176,9 +203,3 @@ if configuration.get('scheduler.enabled'):
 # >>> rows = db(db.mytable.myfield == 'value').select(db.mytable.ALL)
 # >>> for row in rows: print row.id, row.myfield
 # -------------------------------------------------------------------------
-
-# -------------------------------------------------------------------------
-# after defining tables, uncomment below to enable auditing
-# -------------------------------------------------------------------------
-# auth.enable_record_versioning(db)
-

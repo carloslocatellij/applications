@@ -68,7 +68,9 @@ def download():
     return response.download(request, db)
 
 
+
 def Processos(): #Menu
+    
     processo = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else None
     
@@ -82,7 +84,7 @@ def Processos(): #Menu
         formprocess = SQLFORM(db.Requerimentos)
 
     if formprocess.process().accepted:
-        response.flash = f'Dados do protocolo atualizados' if processo else 'Protocolo Registrado'
+        session.flash = f'Dados do protocolo atualizados' if processo else 'Protocolo Registrado'
         redirect(URL('default', 'Processos', args=[formprocess.vars.Protocolo], vars={'f':'ver'})) # type: ignore
 
     elif formprocess.errors:
@@ -90,27 +92,8 @@ def Processos(): #Menu
     else:
         pass
     
-
     db.Requerimentos.especie_ret2.show_if = (db.Requerimentos.especie_poda1!=None)
-   
-    db.Requerimentos.Endereco1.type = 'string'
-    db.Requerimentos.Endereco = Field.Virtual('Endereco',
-            lambda row: str(' '.join([row.Requerimentos.Endereco1 or '' ,
-                                     row.Requerimentos.Numero1 or '', row.Requerimentos.Bairro or ''])) )
-    
-    db.Requerimentos.Supressoes = Field.Virtual('Supressoes',
-            lambda row: ''.join([f'({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} ' if row.Requerimentos.especie_ret1 else ''
-                                 ,f'({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}' if row.Requerimentos.especie_ret2 else ''
-                                 ,f'({row.Requerimentos.qtd_ret3}) {row.Requerimentos.especie_ret3} ' if row.Requerimentos.especie_ret3 else ''
-                                 ,f'({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}' if row.Requerimentos.especie_ret4 else ''])
-            )
-    
-    db.Requerimentos.Podas = Field.Virtual('Podas',
-            lambda row: ''.join([f'({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1} ' if row.Requerimentos.especie_poda1 else ''
-                                 ,f'({row.Requerimentos.qtd_poda2}) {row.Requerimentos.especie_poda2}' if row.Requerimentos.especie_poda2 else ''
-                                 ,f'({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3} ' if row.Requerimentos.especie_poda3 else ''
-                                 ,f'({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}' if row.Requerimentos.especie_poda4 else ''])
-            )
+ 
     
     list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente,
                   db.Requerimentos.Endereco, db.Requerimentos.data_do_laudo, db.Requerimentos.telefone1,
@@ -131,14 +114,16 @@ def Processos(): #Menu
 def Laudos(): #Menu
     
     laudo = request.args(0) or None
+    
     f = request.vars['f'] if request.vars['f']  else None
     
     if f=='editar':
-        form = SQLFORM(db.Laudos, laudo, showid=True )
+        form = SQLFORM(db.Laudos, laudo, showid=True, formstyle='table3cols')
     elif f=='ver':
         form = SQLFORM(db.Laudos, laudo, readonly=True, formstyle='table3cols')
     else:
         form = SQLFORM(db.Laudos)
+        
 
     if form.process().accepted:
         response.flash = f'Dados do Laudo atualizados' if laudo else 'Laudo Registrado'
@@ -154,6 +139,7 @@ def Laudos(): #Menu
 
 def Lista_de_Registros():
     import re
+    
     REGEX = re.compile('^(\w+).(\w+).(\w+)\=\=(\d+)$')
     match = REGEX.match(request.vars.query)
     if not match:
@@ -166,3 +152,19 @@ def Lista_de_Registros():
     return dict(records=SQLFORM.grid(records,  links=links,user_signature=False, editable=False, searchable=False, deletable=False, create=False,csv=False,
     represent_none='', maxtextlength = 120, _class="table"), table=table)
 
+
+def Despachar_Processos(): #Menu
+    from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2 # type: ignore
+    from despachos import Despacho_Poda_Particular  # type: ignore
+
+    processo = int(request.vars.processo)
+    
+    query = db(db.Requerimentos.Protocolo == processo).select().render(0).as_dict()
+    #query_obra = db.Obras(db.Obras.id == query.get('Id'))
+    texto_despacho = Despacho_Poda_Particular(query)
+
+    markdowner = Markdown2(html4tags=True, tab_width=4, )
+    texto_md = markdowner.convert(texto_despacho) or None
+
+
+    return dict(conteudo = XML(texto_md)) # type: ignore

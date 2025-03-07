@@ -283,7 +283,11 @@
             doc.ajaxSuccess(function (e, xhr) {
                 var redirect = xhr.getResponseHeader('web2py-redirect-location');
                 if (redirect !== null) {
-                    window.location = redirect;
+                    if (!redirect.endsWith('#')) {
+                        window.location.href = redirect;
+                    } else {
+                        window.location.reload();
+                    }
                 }
                 /* run this here only if this Ajax request is NOT for a web2py component. */
                 if (xhr.getResponseHeader('web2py-component-content') === null) {
@@ -335,7 +339,7 @@
                     } else {
                         formData = form.serialize(); // Fallback for older browsers.
                     }
-                    web2py.ajax_page('post', url, formData, target, form);
+                    web2py.ajax_page('post', url, formData, target);
 
                     e.preventDefault();
                 });
@@ -367,6 +371,24 @@
                     'data': data,
                     'processData': !isFormData,
                     'contentType': contentType,
+                    'xhr': function() {
+                        var xhr = new window.XMLHttpRequest();
+
+                        xhr.upload.addEventListener("progress", function(evt) {
+                            if (evt.lengthComputable) {
+                                var percentComplete = evt.loaded / evt.total;
+                                percentComplete = parseInt(percentComplete * 100);
+                                web2py.fire(element, 'w2p:uploadProgress', [percentComplete], target);
+
+                                if (percentComplete === 100) {
+                                    web2py.fire(element, 'w2p:uploadComplete', [], target);
+                                }
+
+                            }
+                        }, false);
+
+                        return xhr;
+                    },
                     'beforeSend': function (xhr, settings) {
                         xhr.setRequestHeader('web2py-component-location', document.location);
                         xhr.setRequestHeader('web2py-component-element', target);
@@ -673,7 +695,7 @@
             }
             if (confirm_message) {
                 if (confirm_message == 'default') {
-                    confirm_message = !web2py.isUndefined(w2p_ajax_confirm_message) ?  
+                    confirm_message = !web2py.isUndefined(w2p_ajax_confirm_message) ?
                     w2p_ajax_confirm_message : 'Are you sure you want to delete this object?';
                 }
                 if (!web2py.confirm(confirm_message)) {
@@ -826,64 +848,3 @@ web2py_trap_link = jQuery.web2py.trap_link;
 web2py_calc_entropy = jQuery.web2py.calc_entropy;
 */
 /* compatibility code - end*/
-Calendar.LANG("pt-br", "Portugues", {
-
-        fdow: 1,                // first day of week for this locale; 0 = Sunday, 1 = Monday, etc.
-
-        goToday: "Go Today",
-
-        today: "Hoje",         // appears in bottom bar
-
-        wk: "s",
-
-        weekend: "0,6",         // 0 = Sunday, 1 = Monday, etc.
-
-        AM: "am",
-
-        PM: "pm",
-
-        mn : [ "Janeiro",
-               "Fevereiro",
-               "Março",
-               "Abril",
-               "Maio",
-               "Junho",
-               "Julho",
-               "Agosto",
-               "Setembro",
-               "Outubro",
-               "Novembro",
-               "Dezembro" ],
-
-        smn : [ "Jan",
-                "Feb",
-                "Mar",
-                "Apr",
-                "May",
-                "Jun",
-                "Jul",
-                "Aug",
-                "Sep",
-                "Oct",
-                "Nov",
-                "Dec" ],
-
-        dn : [ "Sunday",
-               "Monday",
-               "Tuesday",
-               "Wednesday",
-               "Thursday",
-               "Friday",
-               "Saturday",
-               "Sunday" ],
-
-        sdn : [ "Su",
-                "Mo",
-                "Tu",
-                "We",
-                "Th",
-                "Fr",
-                "Sa",
-                "Su" ]
-
-});

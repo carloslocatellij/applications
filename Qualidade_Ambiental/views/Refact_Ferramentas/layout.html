@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js" lang="{{='pt-br'}}"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8" lang="pt-br">
+    <!-- www.phpied.com/conditional-comments-block-downloads/ -->
+    <!-- Always force latest IE rendering engine
+         (even in intranet) & Chrome Frame
+         Remove this if you use the .htaccess -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge{{=not request.is_local and ',chrome=1' or ''}}">
+    <!--  Mobile Viewport Fix
+          j.mp/mobileviewport & davidbcalhoun.com/2010/viewport-metatag
+          device-width: Occupy full width of the screen in its current orientation
+          initial-scale = 1.0 retains dimensions instead of zooming out if page height > device height
+          user-scalable = yes allows the user to zoom in -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{=response.title or request.application}}</title>
+    <!-- http://dev.w3.org/html5/markup/meta.name.html -->
+    <meta name="application-name" content="{{=request.application}}">
+    <!-- Speaking of Google, don't forget to set your site up:
+         http://google.com/webmasters -->
+    <meta name="google-site-verification" content="">
+    <!-- include stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="{{=URL('static','css/bootstrap.min.css')}}"/>
+    <link rel="stylesheet" href="{{=URL('static','css/web2py-bootstrap4.css')}}"/>
+    <link rel="shortcut icon" href="{{=URL('static','images/favicon.ico')}}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{{=URL('static','images/favicon.png')}}">
+    <!-- All JavaScript at the bottom, except for Modernizr which enables
+         HTML5 elements & feature detects -->
+    <script src="{{=URL('static','js/modernizr-2.8.3.min.js')}}"></script>
+    <!-- Favicons -->
+    {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
+    {{block head}}{{end}}
+  </head>
+  <body>
+    <div class="w2p_flash alert alert-dismissable">{{=response.flash or ''}}</div>
+    <!-- Navbar ======================================= -->
+    <nav class="navbar navbar-light navbar-expand-md bg-faded bg-dark navbar-dark justify-content-center">
+       <a href="https://www.riopreto.sp.gov.br" class="navbar-brand d-flex w-50 mr-auto">S. J. Rio Preto</a>
+       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+         <span class="navbar-toggler-icon"></span>
+       </button>
+       <div class="navbar-collapse collapse w-100" id="navbarNavDropdown">
+         <ul class="navbar-nav w-100 justify-content-center">
+          {{for _item in response.menu or []:}}
+            {{if len(_item) < 4 or not _item[3]:}}
+              <li class="nav-item {{if _item[1]:}}active{{pass}}">
+               <a class="nav-link" href="{{=_item[2]}}">{{=_item[0]}}</a>
+              </li>
+            {{else:}}
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="{{=_item[2]}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{=_item[0]}}</a>
+                  <div class="dropdown-menu">
+                    {{for _subitem in _item[3]:}}
+                      <a class="dropdown-item" href="{{=_subitem[2]}}">{{=_subitem[0]}}</a>
+                    {{pass}}
+                  </div>
+                </li>
+            {{pass}}
+          {{pass}}
+        </ul>
+        <!--<form class="form-inline my-2 my-lg-0">
+        <input class="form-control mr-sm-2" type="text" placeholder="Search">
+        </form> -->
+        {{if 'auth' in globals():}}
+          <ul class="nav navbar-nav ml-auto w-100 justify-content-end">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{if auth.user:}}{{=auth.user.first_name}}{{else:}}LOGIN{{pass}}
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    {{if auth.user:}}
+                        <a class="dropdown-item" href="{{=URL('default','user/profile')}}">{{=T('Profile')}}</a>
+                          {{if 'change_password' not in auth.settings.actions_disabled:}}
+                                 <a class="dropdown-item" href="{{=URL('default','user/change_password')}}">{{=T('Change Password')}}</a>
+                          {{pass}}
+                                  <a class="dropdown-item" href="{{=URL('default','user/logout')}}">{{=T('Logout')}}</a>
+                          {{else:}}
+
+                            <a class="dropdown-item" href="{{=URL('default','user/login')}}">{{=T('Login')}}</a>
+                          {{if 'register' not in auth.settings.actions_disabled:}}
+                                <a class="dropdown-item" href="{{=URL('default','user/register')}}">{{=T('Sign up')}}</a>
+                          {{pass}}
+                          {{if 'retrieve_password' not in auth.settings.actions_disabled:}}
+                              <a class="dropdown-item" href="{{=URL('default','user/retrieve_password')}}">{{=T('Lost Password')}}</a>
+                          {{pass}}
+                      {{pass}}
+                {{pass}}
+              </div>
+            </li>
+          </ul>
+        {{pass}}
+      </div>
+
+    </nav>
+
+    <div class="jumbotron jumbotron-fluid background" style="background-color: #333; color:white; padding:10px;word-wrap:break-word;">
+
+      <table>
+      <div class="container center">
+          <td width='10%'>
+                <!-- Navbar ======================================= -->
+                <nav class="navbar navbar-light navbar-expand-md bg-faded bg-dark navbar-dark justify-content-center">
+                  <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="{{=response.submenu[2]}}">{{=response.submenu[0]}}</button>
+
+                    <div class="dropdown-menu dropdown-menu-left"> <span class="navbar-toggler-icon"></span>
+
+                     {{for _item in response.submenu[3]:}}
+                             {{if type(_item) == list:}}
+                                 {{if type(_item) == list:}} <a class="dropdown-item" type="button" href="{{=_item[2]}}" style="color: rgb(0, 156, 135); border-style: solid; " onmouseenter="style='background-color: lightblue'" onmouseleave="style='color: rgb(0, 156, 135)'">{{=_item[0]}}{{=SPAN(num_tarefas,_class="badge badge-danger") if _item[0]=='Lista de tarefas' and num_tarefas > 0 else ''}}{{pass}}</a>
+                                  {{for _subitem in _item:}}
+                                       {{if type(_subitem) == list:}} <a class="dropdown-item" type="button" href="{{=_subitem[2]}}" style="color: rgb(0, 156, 135);" >{{=_subitem[0]}}</a>{{pass}}
+                                  {{pass}}
+
+                             {{pass}}
+                      {{pass}}
+                    </div>
+                    </div>
+                  </div>
+
+                </nav>
+          </td>
+          <td width='10%' align="center">{{=P(session.processo_protoc) if session.processo_id  else ''}} <div>{{=A('Criar Tarefa', _href=URL(c='default',f='Criar_Tarefa', args=[session.processo_id], ), _class='btn btn-success', _style="align: center") if session.processo_id  else ''}}</div></td>
+          <td width='80%' align="right"><h1 class="display-5">{{=request.application.replace('_', ' ')}} </h1></td>
+
+        </table>
+      </div>
+
+    </div>
+    <!-- Masthead ===================================== -->
+
+
+
+    {{block header}}
+
+    {{end}}
+    <!-- Main ========================================= -->
+    <!-- Begin page content -->
+    <div class="container-fluid main-container">
+      {{include}}
+      {{=response.toolbar() if response.show_toolbar else ''}}
+
+    </div>
+
+    {{block footer}} <!-- this is default footer -->
+    <footer class="footer container-fluid">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="copyright pull-left">{{=T('Copyright')}} &#169; {{=request.now.year}}</div>
+          <div id="poweredBy" class="pull-right">
+            {{=('. . .')}}
+            <a href="http://www.web2py.com/">. . .</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+    {{end}}
+
+    <!-- The javascript =============================== -->
+    <script src="{{=URL('static','js/calendar.js')}}"></script>
+    <script src="{{=URL('static','js/jquery.maskedinput.js')}}"></script>
+
+    <script src="{{=URL('static','js/jquery.mask.min.js')}}"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $('.date').mask('00/00/0000', {placeholder: "__/__/____"},);
+        $('#DofsObra_IdDof').mask('0000 0000 0000 0000', {placeholder: "____  ____  ____  ____"});
+        $('#Pessoas_CPF').mask('000.000.000-00', {placeholder: "___.___.___-__"}, {reverse: true});
+        $('#Pessoas_CNPJ').mask('00.000.000/0000-00', {placeholder: "__.___.___/___-__"}, {reverse: true});
+        $('#Pessoas_Telefone').mask('(00) 0000-0000');
+        $('#Pessoas_celular').mask('(00) 00000-0000');
+
+      });
+
+      // $('.form-control decimal').keyup(function () {
+      // $(this).replace('/\,/g', '.').reverse();});
+
+      $(':input').keydown(function (e) {
+    var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+    if (key == 13) {
+        e.preventDefault();
+        var inputs = $(this).closest('form').find(':input:visible:enabled');
+        if ((inputs.length-1) == inputs.index(this))
+            $(':input:enabled:visible:first').focus();
+        else
+            inputs.eq(inputs.index(this) + 1).focus();
+    }
+});
+
+
+</script>
+
+    <script src="{{=URL('static','js/bootstrap.bundle.min.js')}}"></script>
+    <script src="{{=URL('static','js/web2py-bootstrap4.js')}}"></script>
+    {{block page_js}}{{end page_js}}
+
+    {{if response.google_analytics_id:}}
+    <!-- Analytics ==================================== -->
+    <script src="{{=URL('static','js/analytics.min.js')}}"></script>
+    <script type="text/javascript">
+      analytics.initialize({
+      'Google Analytics':{trackingId:'{{=response.google_analytics_id}}'}
+      });
+    </script>
+
+    {{pass}}
+  </body>
+</html>

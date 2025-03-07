@@ -1,9 +1,22 @@
 import re
+import unicodedata
 
-patern = re.compile('([^\d]+)')
+patern = re.compile('([^[0-9]]+)')
 
-def UNMASK(num): 
+def UNMASK(num):
     return re.sub(patern, '', num or '')
+
+
+class Remove_Acentos():
+
+    def __init__(self, error_message='Erro!'):
+        self.err = error_message
+
+    def __call__(self, value, erro=None):
+        try:
+            return (''.join(ch for ch in unicodedata.normalize('NFKD', value) if not unicodedata.combining(ch)).strip(), None)
+        except:
+            return (''.join(ch for ch in unicodedata.normalize('NFKD', value) if not unicodedata.combining(ch)).strip() , self.err)
 
 
 class IS_CHKBOX01:
@@ -13,14 +26,18 @@ class IS_CHKBOX01:
         self.e = error_message
 
     def parsed(self, value):
-        return self._on if value == 'on' else self._off
+        return self._on if value == 'on' or value == 1 else self._off
 
     def __call__(self, value):
 
-        if value in (None, 'on', 'off'):
+        if value in (None, 'on', 'off', 1, 0):
             return (self.parsed(value), None)
 
         return (value, self.e)
+
+    def formatter(self, value):
+        return 'on' if value == 'on' or value == 1 else self._off
+
 
 class MASK_CPF(object):
     """
@@ -46,21 +63,16 @@ class MASK_CPF(object):
         if isinstance(cpf, str):
             cpf = UNMASK(cpf)
             cpf = '0' * (11 - len(cpf)) + cpf
-        return '{}{}{}.***.***-**'.format(*cpf)
+        return f'{cpf[0]}{cpf[1]}{cpf[2]}.***.***-**'
 
 
 class MASK_CNPJ(object):
     """
     Edit the a CNPJ code mask
-
     example::
-
         db.mytable.mycolumn.represent = lambda value, row: MASK_CNPJ()(value)
-
-        >>> MASK_CNPJ()('12345678000195')
-        '12.345.678/0001-95'
         >>> MASK_CNPJ()('123456000149')
-        '00.123.456/0001-49'
+        '00.***.***/****-49'
     """
 
     def __init__(self):
@@ -72,10 +84,10 @@ class MASK_CNPJ(object):
         if isinstance(cnpj, str):
             cnpj = UNMASK(cnpj)
             cnpj = '0' * (14 - len(cnpj)) + cnpj
-        return '{}{}.{}{}{}.{}{}{}/{}{}{}{}-{}{}'.format(*cnpj)
+        return f'{cnpj[0]}{cnpj[1]}.***.***/****-{cnpj[-2]}{cnpj[-1]}'
 
 
-    
+
 class IS_CPF(object):
     def __init__(self, format=True, error_message='Digite apenas os numeros!'):
         self.format = format
@@ -144,6 +156,13 @@ class IS_CPF(object):
 #	return formatado '''
 
 
+
+
+
+def formatter(value):
+    formatado = value.replace('.', '').replace('/','').replace('-','')
+    return formatado
+
 class IS_CPF_OR_CNPJ(object):
     def __init__(self, format=True, error_message='Digite apenas os números!'):
         self.format = format
@@ -207,13 +226,14 @@ class IS_CPF_OR_CNPJ(object):
                         # return (value, 'cpf incorreto'+str(cl))
                         if len(cl) == 11:
                             if valida(cl)[0] == True:
-                                return (value, None)
+                                return (formatter(value), None)
                             else:
                                 return (value, 'cpf inválido')
                         elif len(cl) < 11:
                             return (value, 'cpf incompleto')
                         else:
                             return (value, 'cpf tem mais de 11 dígitos')
+
                         if cpf[3] != '.' or cpf[7] != '.' or cpf[11] != '-':
                             return (value, 'cpf deve estar no formato 000.000.000-00'+cpf[11])
                     else:
@@ -221,10 +241,12 @@ class IS_CPF_OR_CNPJ(object):
                     # return(cpf,'aquiok'+str(len(cpf)==11))
                 except:
                     return (value, 'algum erro '+str(value))
+
+
             elif cnpj:
 
                 """ Pega apenas os 12 primeiros dígitos do CNPJ e gera os 2 dígitos que faltam """
-                inteiros = [int(s) for s in cnpj if s.isdigit()]     
+                inteiros = [int(s) for s in cnpj if s.isdigit()]
                 novoCnpj = inteiros[:12]
 
                 prod = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
@@ -249,16 +271,32 @@ class IS_CPF_OR_CNPJ(object):
         except:
             return (value, 'algum erro'+str(value))
 
-    def formatter(self, value):
-        # if len(value) == 11:
-        #     formatado = value[0:3]+'.'+value[3:6] + \
-        #         '.'+value[6:9]+'-'+value[9:11]
-        # elif len(value) == 14:
-        #     formatado = value[0:2]+'.'+value[2:5]+'.' + \
-        #         value[5:8]+'/'+value[8:12]+'-'+value[12:14]
-        # else:
-        #     formatado = value
-        formatado = value.replace('.', '').replace('/','').replace('-','')
 
-        return formatado
 
+
+
+class FORM_CPF(object):
+    """
+    Edit the a CPF code mask
+
+    example::
+
+        valor_recebido = lambda val, row: MASK_CPF()(value)
+
+        >>> FORM_CPF()('12345678909')
+        '123.456.789-09'
+        >>> MASK_CPF()('123456797')
+        '001.234.567-97'
+
+    """
+    def __init__(self):
+        pass
+
+
+    def __call__(self, cpf):
+        if not isinstance(cpf, (list, str)):
+            cpf = str(cpf)
+        if isinstance(cpf, str):
+            cpf = UNMASK(cpf)
+            cpf = '0' * (11 - len(cpf)) + cpf
+        return '{}{}{}.{}{}{}.{}{}{}-{}{}'.format(*cpf)

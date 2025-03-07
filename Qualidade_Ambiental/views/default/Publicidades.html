@@ -1,0 +1,88 @@
+{{extend 'layout.html'}}
+<!-- Incluir a biblioteca do Unpoly -->
+<script src="https://unpoly.com/unpoly/latest/unpoly.js" up-module="core"></script>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+       document.getElementById('Publicidades_IdEndereco').focus();})
+ </script>
+
+{{block header}}
+
+
+<h2 class="card" style="padding:10px;word-wrap:break-word;">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+{{=A('Anterior', _href=URL(c='default',f='Publicidades', args=[int(publicidade) -1], vars={'f':'ver'}), _class='btn btn-primary',)if publicidade else ''}}
+{{=A('Proximo', _href=URL(c='default',f='Publicidades', args=[int(publicidade)+1], vars={'f':'ver'}), _class='btn btn-primary',)if publicidade else ''}}
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+<div class="container"  {{if publicidade:}}style="border: 1px solid; padding-block: 2px;"{{pass}} >
+    {{=A('Editar', _href=URL(c='default',f='Publicidades', args=[publicidade], vars={'f':'editar'}), _class='btn btn-primary', )
+        if publicidade else ''}}
+        {{=A('Novo', _href=URL(c='default',f='Publicidades', vars={}), _class='btn btn-primary',)if publicidade else ''}}
+</div>
+
+<br>
+{{end}}
+{{=formpublicidade.custom.begin}}
+
+
+<div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word; " >
+<table width="100%" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+    <tr>
+        <div align='left' hidden="true">{{=formpublicidade.custom.widget['id']}}</td>
+            <td width="40%" align='left'>{{=A('Protocolo', _href=URL(c='default',f='Processos',  vars={}), _class='btn btn-primary', _style="height: 25px", _target="new")}}: {{=A(DIV(B('+')), _class="btn btn-primary", _type="button", _style="height: 25px",  _href='#{}'.format('Novaprocessos'), **atributo ),SPAN(_class="caret")}}
+                    <div align='left' class="card">{{=formpublicidade.custom.widget['Protocolo']}}</div></td>
+            <td width="30%" align='left'>{{=A('Endereço', _href=URL(c='default',f='Enderecos', args=[session.endereco if session.endereco else None],
+                 vars={'f':'editar' if session.endereco else None}), _class='btn btn-primary', _style="height: 25px", _target="new")}}: {{=A('+', _class="btn btn-primary", _type="button", _style="height: 25px",  _href='#{}'.format('NovoEndereco'), **atributo ),SPAN(_class="caret")}}{{=A('limpa', callback=URL('limpar_sessao'), _style="height: 25px",  _class='btn btn-warning')}}
+                    <div align='left' class="card">{{=formpublicidade.custom.widget['IdEndereco']}} </div></td>
+            <td width="40%" align='left'>{{=A('Responsável Téc.', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary', _style="height: 25px", _target="new")}}: {{=A(DIV(B('+')), _class="btn btn-primary", _type="button", _style="height: 25px",  _href='#{}'.format('Novapessoa'), **atributo ),SPAN(_class="caret")}}
+                    <div align='left' class="card">{{=formpublicidade.custom.widget['resptecnico']}}</div></td>
+            </tr>
+        <tr>
+            <td>
+                {{=DIV(LOAD('default', 'Processos.load', ajax=True, vars={'f':'editar' if session.processos_id else None,'reload_div':'map'}), _id='Novaprocessos', _class="collapse list-unstyled")}}
+            </td>
+            <td>
+            {{=DIV(LOAD('default', 'Enderecos.load', ajax=True, args=[session.endereco if session.endereco else None],
+             vars={'f':'editar' if session.endereco else None, 'reload_div':'NovoEndereco'} ), _id='NovoEndereco', _class="collapse list-unstyled")}}
+           </td>
+            <td>
+                {{=DIV(LOAD('default', 'Pessoas.load', ajax=True, vars={'f':'editar' if session.resptecnico else None,'reload_div':'map'}), _id='Novapessoa', _class="collapse list-unstyled")}}
+            </td>
+        </tr>
+    <tr>
+        <table>
+            <td width="15%" align='left'>{{=B('Descrição:')  }}<div align='left' class="card">{{=formpublicidade.custom.widget['Descricao']}}</div></td>
+            <td width="15%" align='left'>{{=B('Materiais:')  }}<div align='left' class="card">{{=formpublicidade.custom.widget['Materiais']}}</div></td>
+            <td width="15%" align='left'>{{=B('Dimensões:  ')  }}<div align='left' class="card">{{=formpublicidade.custom.widget['Dimensoes']}}</div></td>
+            <td width="15%" align='left'>{{=B('Área total:  ')  }}<div align='left' class="card">{{=formpublicidade.custom.widget['area_total']}}</div></td>
+        </table>
+    </tr>
+    <tr>
+
+        <table class="jumbotron" style="border: 1px solid">
+            <br/>
+            <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}}
+                <tr>
+                {{for k, v in formpublicidade.custom.linkto.items():}}
+                {{=TD(DIV(v, _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
+                {{pass}}
+                </tr>
+            </td>
+        </table>
+
+    </tr>
+
+</table>
+</div>
+{{=formpublicidade.custom.submit}}
+
+{{=formpublicidade.custom.end}}
+
+
+
+<br>
+{{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo ),SPAN(_class="caret") }}
+  {{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled")}}
