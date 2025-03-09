@@ -73,13 +73,14 @@ def Processos(): #Menu
     
     processo = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else None
-    
+
+    tem_laudo =  db(db.Laudos.Protocolo == processo).select()
+
     if f=='editar':
-        formprocess = SQLFORM(db.Requerimentos, processo, showid=True,
-                              linkto=URL('Lista_de_Registros', args='db') ) # type: ignore
+        formprocess = SQLFORM(db.Requerimentos, processo ) # type: ignore
     elif f=='ver':
         formprocess = SQLFORM(db.Requerimentos, processo, readonly=True,
-                              formstyle='table3cols', linkto=URL('Lista_de_Registros', args='db')) # type: ignore
+                              formstyle='table3cols') # type: ignore
     else:
         formprocess = SQLFORM(db.Requerimentos)
 
@@ -108,13 +109,22 @@ def Processos(): #Menu
                          Endereco1={'name':'Endereco1', 'label':'Endereço'},
                          cep= {'type':'integer',  'label':'cep'}, list_fields=list_fields )
         
-    return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca))
+    return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca, tem_laudo=tem_laudo))
 
+
+def Registrar_Laudo():
+    protoc = request.args(0)
+
+    db.Laudos.validate_and_insert(Protocolo = protoc)
+
+    session.edit_laudo = True
+
+    redirect(URL('default','Processos.html', args=[protoc], vars={'reg': True} )) # type: ignore
+    
 
 def Laudos(): #Menu
     
     laudo = request.args(0) or None
-    
     f = request.vars['f'] if request.vars['f']  else None
     
     if f=='editar':
@@ -122,19 +132,17 @@ def Laudos(): #Menu
     elif f=='ver':
         form = SQLFORM(db.Laudos, laudo, readonly=True, formstyle='table3cols')
     else:
-        form = SQLFORM(db.Laudos)
+        form = SQLFORM(db.Laudos, laudo)
         
-
     if form.process().accepted:
         response.flash = f'Dados do Laudo atualizados' if laudo else 'Laudo Registrado'
         redirect(URL('default', 'Laudos', args=[form.vars.Protocolo], vars={'f':'ver'})) # type: ignore
-
     elif form.errors:
         response.flash = 'Corrija os Erros indicados'
     else:
         pass
 
-    return response.render(dict(form=form,))
+    return response.render(dict(form=form, laudo=laudo))
 
 
 def Lista_de_Registros():

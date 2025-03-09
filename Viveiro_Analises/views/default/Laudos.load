@@ -1,5 +1,10 @@
 
 
+
+<div class="container">
+<h3 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h3>
+</div>
+
 {{=form}}
 
-{{=response.toolbar()}}
+{{#response.toolbar()}}

@@ -114,18 +114,21 @@
         </table>
     </td>  
 
+        {{=A('Registrar Laudo', _href=URL(c='default',f='Registrar_Laudo',  args=[request.args(0)]), _class='btn btn-primary',) if not len(tem_laudo) > 0 else None}}
+
 
         <div>
         {{=formprocess.custom.submit}} 
                 <tr>
-                    {{=DIV(LOAD('default', 'Laudos.load',  args=[processo], content='Carregando...'),
+                    {{=DIV(LOAD('default', 'Laudos.load',  args=[request.args(0)], vars={'f': 'editar' if session.edit_laudo else 'ver'}, content='Carregando...', ajax=True),
                     _id='Laudos', _class="jumbotron", _style="border: 1px solid; padding:10px;word-wrap:break-word;") if
-                    processo else None}}
+                    len(tem_laudo) > 0 else None}}
                 </tr>
-</div>
+        </div>
+
         {{=formprocess.custom.end}}
         {{=A('Despacho', _href=URL(c='default',f='Despachar_Processos', vars={'processo': processo}), _class='btn btn-primary',)if processo else ''}}
-</div>
+
 
 
     <br>
