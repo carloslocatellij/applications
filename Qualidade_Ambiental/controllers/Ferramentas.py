@@ -569,23 +569,22 @@ def Gerador_de_Docs(): #Menu
     campos = {}
     if form_arquivo_processo.process(keepvalues = True).accepted:
         encontrado = db.Processos(db.Processos.Protocolo.contains(form_arquivo_processo.vars.Protocolo.strip()))
-        session.protoc = encontrado.id
-        session.Arq_mod = form_arquivo_processo.vars.Arq_mod
-        if not encontrado:
+        try:
+            session.protoc = encontrado.id
+        except:
             session.flash = f"Protocolo {form_arquivo_processo.vars.Protocolo} não encontrado no Banco de Dados."
             redirect(URL('Ferramentas', 'Gerador_de_Docs'))
-        else:
-            form_arquivo_processo.vars.Protocolo = encontrado.id
-            if form_arquivo_processo.vars.Salvar_modelo == True and form_arquivo_processo.vars.Arq_mod!= None:
-                nome_do_arq_modelo = request.vars.Arq_mod.filename
-                arquivo_id = db.Modelos_de_docs.update_or_insert(
-                db.Modelos_de_docs.nome_modelo_doc == nome_do_arq_modelo,
-                arq_modelo_doc   = open('{}'.format( (Path(pasta, 'static/temp', session.Arq_mod).absolute()) ), 'w' ),
-                nome_modelo_doc  = nome_do_arq_modelo,
-                servico_refere   = form_arquivo_processo.vars.Tipo_do_Processo)
-                session.arquivo_id = arquivo_id
+        session.Arq_mod = form_arquivo_processo.vars.Arq_mod
 
-
+        form_arquivo_processo.vars.Protocolo = encontrado.id
+        if form_arquivo_processo.vars.Salvar_modelo == True and form_arquivo_processo.vars.Arq_mod!= None:
+            nome_do_arq_modelo = request.vars.Arq_mod.filename
+            arquivo_id = db.Modelos_de_docs.update_or_insert(
+            db.Modelos_de_docs.nome_modelo_doc == nome_do_arq_modelo,
+            arq_modelo_doc   = open('{}'.format( (Path(pasta, 'static/temp', session.Arq_mod).absolute()) ), 'w' ),
+            nome_modelo_doc  = nome_do_arq_modelo,
+            servico_refere   = form_arquivo_processo.vars.Tipo_do_Processo)
+            session.arquivo_id = arquivo_id
 
 
         if  form_arquivo_processo.vars.ref_arq_modelo_doc != None:

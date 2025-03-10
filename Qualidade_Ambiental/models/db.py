@@ -3,6 +3,7 @@
 import datetime
 import os
 from pathlib import Path
+from my_validador import *
 
 if 0==1: # Este namespace serve apenas para a IDE enchergar e trabalhar com os itens abaixo
     from gluon import *

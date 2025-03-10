@@ -121,8 +121,9 @@ def editar_laudo():
 
 def Registrar_Laudo():
     protoc = request.args(0)
+    
     db.Laudos.validate_and_insert(Protocolo = protoc)
-    redirect(URL('default','Processos', extension='', args=[protoc]), client_side=True) # type: ignore
+    redirect(URL('default','Processos', extension='', args=[protoc], vars={'f':'ver'}), client_side=True) # type: ignore
     
 
 def Laudos(): #Menu
@@ -134,7 +135,7 @@ def Laudos(): #Menu
     if f=='editar':
         form = SQLFORM(db.Laudos, laudo, showid=True, formstyle='table3cols')
     elif f=='ver':
-        form = SQLFORM(db.Laudos, laudo, readonly=True, formstyle='table3cols')
+        form = SQLFORM(db.Laudos, laudo, readonly=True, formstyle='table3cols', represent_none='')
     else:
         form = SQLFORM(db.Laudos)
         
