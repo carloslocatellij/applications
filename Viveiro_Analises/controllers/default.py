@@ -74,7 +74,7 @@ def Processos(): #Menu
     processo = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else None
 
-    tem_laudo =  db(db.Laudos.Protocolo == processo).select()
+    tem_laudo = db(db.Laudos.Protocolo == processo).count() > 0
 
     if f=='editar':
         formprocess = SQLFORM(db.Requerimentos, processo ) # type: ignore
@@ -112,37 +112,61 @@ def Processos(): #Menu
     return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca, tem_laudo=tem_laudo))
 
 
+def editar_laudo():
+    protoc = request.args(0)
+    session.edit_laudo = True if session.edit_laudo == False else False
+    response.js =  "jQuery('#Laudo').get(0).reload()"
+    redirect(URL('default','Processos', extension='', args=[protoc], vars=dict(f='ver')), client_side=True) # type: ignore
+
+
 def Registrar_Laudo():
     protoc = request.args(0)
-
     db.Laudos.validate_and_insert(Protocolo = protoc)
-
-    session.edit_laudo = True
-
-    redirect(URL('default','Processos.html', args=[protoc], vars={'reg': True} )) # type: ignore
+    redirect(URL('default','Processos', extension='', args=[protoc]), client_side=True) # type: ignore
     
 
 def Laudos(): #Menu
     
     laudo = request.args(0) or None
-    f = request.vars['f'] if request.vars['f']  else None
-    
+    f = request.vars['f'] if request.vars['f']  else 'ver'
+    target='Load'
+
     if f=='editar':
         form = SQLFORM(db.Laudos, laudo, showid=True, formstyle='table3cols')
     elif f=='ver':
         form = SQLFORM(db.Laudos, laudo, readonly=True, formstyle='table3cols')
     else:
-        form = SQLFORM(db.Laudos, laudo)
+        form = SQLFORM(db.Laudos)
         
+
     if form.process().accepted:
-        response.flash = f'Dados do Laudo atualizados' if laudo else 'Laudo Registrado'
-        redirect(URL('default', 'Laudos', args=[form.vars.Protocolo], vars={'f':'ver'})) # type: ignore
+        session.flash = f'Dados do Laudo atualizados' if laudo else 'Laudo Registrado'
+        editar_laudo()
+        redirect(URL('default','Processos', extension='', args=[laudo]), client_side=True) # type: ignore
+        
+         
     elif form.errors:
         response.flash = 'Corrija os Erros indicados'
     else:
         pass
 
     return response.render(dict(form=form, laudo=laudo))
+
+
+def Despachar_Processos(): #Menu
+    from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2 # type: ignore
+    from despachos import Despacho_Poda_Particular  # type: ignore
+
+    processo = int(request.vars.processo)
+    
+    query = db(db.Requerimentos.Protocolo == processo).select().render(0).as_dict()
+    #query_obra = db.Obras(db.Obras.id == query.get('Id'))
+    texto_despacho = Despacho_Poda_Particular(query)
+
+    markdowner = Markdown2(html4tags=True, tab_width=4, )
+    texto_md = markdowner.convert(texto_despacho) or None
+
+    return dict(conteudo = XML(texto_md)) # type: ignore
 
 
 def Lista_de_Registros():
@@ -159,20 +183,3 @@ def Lista_de_Registros():
 
     return dict(records=SQLFORM.grid(records,  links=links,user_signature=False, editable=False, searchable=False, deletable=False, create=False,csv=False,
     represent_none='', maxtextlength = 120, _class="table"), table=table)
-
-
-def Despachar_Processos(): #Menu
-    from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2 # type: ignore
-    from despachos import Despacho_Poda_Particular  # type: ignore
-
-    processo = int(request.vars.processo)
-    
-    query = db(db.Requerimentos.Protocolo == processo).select().render(0).as_dict()
-    #query_obra = db.Obras(db.Obras.id == query.get('Id'))
-    texto_despacho = Despacho_Poda_Particular(query)
-
-    markdowner = Markdown2(html4tags=True, tab_width=4, )
-    texto_md = markdowner.convert(texto_despacho) or None
-
-
-    return dict(conteudo = XML(texto_md)) # type: ignore

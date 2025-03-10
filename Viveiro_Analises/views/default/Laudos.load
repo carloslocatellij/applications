@@ -5,6 +5,8 @@
 <h3 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h3>
 </div>
 
-{{=form}}
+<div class="container">
+{{=A('Editar', callback=URL(c='default',f='editar_laudo', extension='', args=[request.args(0)], vars={ 'f':'editar'}), _class='btn btn-primary', cid='Laudo') }}
+</div>
 
-{{#response.toolbar()}}
+{{=form}}
