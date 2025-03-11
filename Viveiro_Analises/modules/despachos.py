@@ -10,7 +10,7 @@ def Despacho_Poda_Particular(query):
     num_extens_poda = num2words.num2words(soma_poda, lang='pt-br')
     num_extens_supress = num2words.num2words(soma_supress, lang='pt-br')
     
-    if query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional']:
+    if query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência']:
         texto = f'''AUTORIZADA A PODA DE NO MÁXIMO 25% DO VOLUME DA COPA DA(S) ÁRVORE(S) DE FORMA DISTRIBUÍDA E EQUILIBRADA, SENDO: PODA DE LIMPEZA E ADEQUAÇÃO DE {soma_poda} ({num_extens_poda}) ÁRVORE(S) DA(S) ESPÉCIE(S): {query.get('Podas')},  LOCALIZADA(S) NA {query.get('Endereco')}. A PODA REALIZADA EM VOLUME MAIOR QUE 25% (VINTE E CINCO POR CENTO) DA COPA ORIGINAL DA ÁRVORE É CONSIDERADA DRÁSTICA E PODE CAUSAR SÉRIOS DANOS À SAÚDE DA ÁRVORE.
 
 LEI 13.031/2018
@@ -55,6 +55,9 @@ DECRETO 18.301/2019
 ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PERMITIDA PODA NA QUAL A COPA DA ÁRVORE FIQUE COM FORMA GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
     
     '''
+
+    else:
+        texto = 'Não foi possível a geração do texto.'
     
     texto_supress = f'''
     Ilmo.(a) Sr.(a) JOAO PESCAROLO DA SILVA

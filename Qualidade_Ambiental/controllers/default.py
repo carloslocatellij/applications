@@ -746,19 +746,21 @@ def Pessoas(): #Menu
 
 @auth.requires_login()
 def Processos(): #Menu
+    tipo_id = None
+    pessoa_id = session.pessoa_id or request.vars['pessoa_id'] or  None
     processo = request.args(0)
     if processo:
+        tipo_id = db.Processos(db.Processos.id == request.args(0)).IdTipo
+        pessoa_id = db.Processos(db.Processos.id == request.args(0)).IdPessoa
         try:
             processo = int(processo)
         except (ValueError, TypeError):
             processo = None
 
-    pessoa_id = session.pessoa_id or request.vars['pessoa_id'] or  None
     fields = ['Protocolo','IdPessoa','DataReg', 'IdDpto', 'IdTipo', 'Assunto']
 
     db.Processos.IdDpto.default = 1024412
 
-    tipo_id = ''
     f = request.vars.get('f') or None
 
     if f=='editar' and processo:
@@ -773,34 +775,25 @@ def Processos(): #Menu
         readonly=True, showid=True,
          linkto=URL(c='acessorios', f='Lista_de_Registros', args=['db', request.controller],  ),
          labels = labels  , _formname='formprocesso_ver')
-    elif not processo:
-        formprocess = SQLFORM(db.Processos, fields=fields, _formname='formprocesso', submit_button='Registrar Processo')
+        
     else:
-        # Tratar caso o registro não seja encontrado
-        redirect(URL('error'))
-
-    # if processo:
-    #     tipo_id = db.Processos(db.Processos.id == request.args(0)).IdTipo
-    #     pessoa_id = db.Processos(db.Processos.id == request.args(0)).IdPessoa
+        formprocess = SQLFORM(db.Processos, fields=fields, _formname='formprocesso', submit_button='Registrar Processo')
 
 
     if formprocess.validate(dbio=False, keepvalues=True):
-        tipo_id = formprocess.vars.IdDpto
-
         if f == 'editar' and processo:
-            # Força atualização em vez de inserção
-            db(db.Processos.id == processo).update(**dict(
+            processo_id= db(db.Processos.id == processo).update(**dict(
                 IdPessoa=formprocess.vars.IdPessoa,
                 Protocolo=formprocess.vars.Protocolo,
                 DataReg=formprocess.vars.DataReg,
                 IdDpto=formprocess.vars.IdDpto,
                 IdTipo=formprocess.vars.IdTipo,
                 Assunto=formprocess.vars.Assunto ))
+            redirect(URL('default', 'Processos', args=[processo_id], vars={'f':'ver'}))
         else:
-            # Inserção normal
-            db.Processos.insert(**formprocess.vars)
-            response.flash = f'Dados do protocolo atualizados' if processo else f'Protocolo Registrado'
-            redirect(URL('default', 'Processos', args=[formprocess.vars.id], vars={'f':'ver'}))
+            processo_id= db.Processos.insert(**formprocess.vars)
+            response.flash= f'Dados do protocolo atualizados' if processo else f'Protocolo Registrado'
+            redirect(URL('default', 'Processos', args=[processo_id], vars={'f':'ver'}))
 
     elif formprocess.errors:
         print("URL:", request.url)
