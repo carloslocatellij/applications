@@ -1,6 +1,6 @@
 
 from datetime import datetime
-from my_validador import *
+from my_validador import * # type: ignore 
 
 if 0 == 1:
     from gluon import * # type: ignore
@@ -96,7 +96,6 @@ Requerimentos = db.define_table('Requerimentos',
     format='%(Protocolo)s',
     migrate=False,
     fake_migrate=False
-    
     )
 
 
@@ -108,8 +107,7 @@ Laudos = db.define_table('Laudos',
             'Em Análise', 'Aguardando', '']))),
       Field('data_do_laudo', 'date',
             rname='`data do laudo`',
-            requires=IS_EMPTY_OR(IS_DATE(format=T('%d/%m/%Y'),
-            error_message='Deve ter o formato xx/xx/20xx') )),
+            requires=IS_EMPTY_OR(IS_DATE(format='%d/%m/%Y') )),
       Field('proprietario', 'string', ),
       Field('morador', 'string'),
       Field('especie_ret1', 'string', rname='`especie ret1`'),
@@ -121,7 +119,7 @@ Laudos = db.define_table('Laudos',
       Field('especie_ret4', 'string', rname='`especie ret4`'),
       Field('qtd_ret4', rname='`qtd ret4`' ),
       Field('qtd_repor', rname='`qtd repor`' ),
-      Field('porte_repor', rname='`porte repor`'),
+      Field('porte_repor', rname='`porte repor`', default='' , requires=IS_IN_SET(['PEQUENO', 'PEQUENO OU MÉDIO', 'MÉDIO', 'MÉDIO OU GRANDE', 'GRANDE', ''])),
       Field('especie_poda1', 'string', rname= '`especie poda1`'),
       Field('qtd_poda1', rname='`qtd poda1`' ),
       Field('especie_poda2', 'string', rname= '`especie poda2`'),
@@ -131,18 +129,19 @@ Laudos = db.define_table('Laudos',
       Field('especie_poda4', 'string', rname= '`especie poda4`'),
       Field('qtd_poda4', rname='`qtd poda4`' ),  
       Field('tipo'),
-      Field('p1', 'integer', label='Conflito com fiação elétrica', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget),
-      Field('p2', 'integer', label='Prejuizo a rede de água/esgoto', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget),
-      Field('p3', 'integer', label='Danos a estrutura da construção', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget),
-      Field('p4', 'integer', label='Restrição a passagem de pedestres', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget),
-      Field('p5', 'integer', label='Porte ou espécie inadequada', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget),
-      Field('p6', 'integer', label='Árvore senescente, debilitada por poda/pragas/parasitas', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget),
-      Field('p7', 'integer', label='Árvore morta/seca', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget),
-      Field('p8', 'integer', label='Passagem de Veículos', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget),
-      Field('p9' , 'integer', label='Obras, Reforma, Construção, Demolição', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget),
-      Field('p10', 'integer', label='Projetos e/ou Atividades', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget),
-      Field('p11', 'integer', label='Risco a população, patrimônio', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget),
+      Field('p1', 'integer', label='Conflito com fiação elétrica', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]' ),
+      Field('p2', 'integer', label='Prejuizo a rede de água/esgoto', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
+      Field('p3', 'integer', label='Danos a estrutura da construção', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
+      Field('p4', 'integer', label='Restrição a passagem de pedestres', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
+      Field('p5', 'integer', label='Porte ou espécie inadequada', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
+      Field('p6', 'integer', label='Árvore senescente, debilitada por poda/pragas/parasitas', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
+      Field('p7', 'integer', label='Árvore morta/seca', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
+      Field('p8', 'integer', label='Passagem de Veículos', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
+      Field('p9' , 'integer', label='Obras, Reforma, Construção, Demolição', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
+      Field('p10', 'integer', label='Projetos e/ou Atividades', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
+      Field('p11', 'integer', label='Risco a população, patrimônio', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
       Field('Obs', rname='`Obs.`'),
+      Field('tecnico', 'string', requires=IS_EMPTY_OR(IS_IN_SET(['Guilherme Cavenaghi', 'Renan Fabrizzio Lima Viche', 'Otton Garcia Arruda', '']) )),
       primarykey=['Protocolo'],
       rname = '`{}`'.format(tabela_laudos)
 )
@@ -157,12 +156,22 @@ db.Requerimentos.Supressoes = Field.Virtual('Supressoes',
         lambda row: ''.join([f'({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} ' if row.Requerimentos.especie_ret1 else ''
                                 ,f'({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}' if row.Requerimentos.especie_ret2 else ''
                                 ,f'({row.Requerimentos.qtd_ret3}) {row.Requerimentos.especie_ret3} ' if row.Requerimentos.especie_ret3 else ''
-                                ,f'({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}' if row.Requerimentos.especie_ret4 else ''])
-        )
+                                ,f'({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}' if row.Requerimentos.especie_ret4 else '']))
 
 db.Requerimentos.Podas = Field.Virtual('Podas',
         lambda row: ''.join([f'({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1} ' if row.Requerimentos.especie_poda1 else ''
                                 ,f'({row.Requerimentos.qtd_poda2}) {row.Requerimentos.especie_poda2}' if row.Requerimentos.especie_poda2 else ''
                                 ,f'({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3} ' if row.Requerimentos.especie_poda3 else ''
-                                ,f'({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}' if row.Requerimentos.especie_poda4 else ''])
-        )
+                                ,f'({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}' if row.Requerimentos.especie_poda4 else '']))
+
+db.Laudos.Supressoes = Field.Virtual('Supressoes',
+        lambda row: ''.join([f'({row.Laudos.qtd_ret1}) {row.Laudos.especie_ret1} ' if row.Laudos.especie_ret1 else ''
+                                ,f'({row.Laudos.qtd_ret2}) {row.Laudos.especie_ret2}' if row.Laudos.especie_ret2 else ''
+                                ,f'({row.Laudos.qtd_ret3}) {row.Laudos.especie_ret3} ' if row.Laudos.especie_ret3 else ''
+                                ,f'({row.Laudos.qtd_ret4}) {row.Laudos.especie_ret4}' if row.Laudos.especie_ret4 else '']))
+
+db.Laudos.Podas = Field.Virtual('Podas',
+        lambda row: ''.join([f'({row.Laudos.qtd_poda1}) {row.Laudos.especie_poda1} ' if row.Laudos.especie_poda1 else ''
+                                ,f'({row.Laudos.qtd_poda2}) {row.Laudos.especie_poda2}' if row.Laudos.especie_poda2 else ''
+                                ,f'({row.Laudos.qtd_poda3}) {row.Laudos.especie_poda3} ' if row.Laudos.especie_poda3 else ''
+                                ,f'({row.Laudos.qtd_poda4}) {row.Laudos.especie_poda4}' if row.Laudos.especie_poda4 else '']))

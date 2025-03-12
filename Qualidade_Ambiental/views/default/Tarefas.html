@@ -140,18 +140,18 @@ border-color: #bfb;
                                 
                             </td>
                         </td>
-                        <tr>    
-                            
-                            <table class="jumbotron" style="border: 1px solid">
-                                <br/>
-                                <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}} 
-                                    {{for k, v in formtarefa.custom.linkto.items():}}        
-                                    {{=TD(DIV(v, _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
-                                    {{pass}}
-                                </td>
-                            </table>
-                        </tr>
-                    </table>
+                                <tr>    
+                                    
+                                    <table class="jumbotron" style="border: 1px solid">
+                                        <br/>
+                                        <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}} 
+                                            {{for k, v in formtarefa.custom.linkto.items():}}        
+                                            {{=TD(DIV(v, _class="card", _style="border: 1px solid; padding-inline: 20px; color: darkgreen"))}}
+                                            {{pass}}
+                                        </td>
+                                    </table>
+                                </tr>
+                        </table>
                         <div style="position: absolute;" id="suggestions" class="suggestions"></div>
         </table>
     </td>  
