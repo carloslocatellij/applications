@@ -44,7 +44,7 @@ Bairros = db.define_table ('Bairros',
 
 
 Logradouros = db.define_table ('Logradouros',
-	Field ('Logradouro', 'string', notnull=True, requires=[IS_NOT_EMPTY() ,IS_UPPER(), Remove_Acentos()]),
+	Field ('Logradouro', 'string', notnull=True, requires=[IS_NOT_EMPTY() ,IS_UPPER(), ]),#Remove_Acentos()]),
 	Field ('Cep', 'integer',),
 	Field ('Id', 'id'),
 	Field ('Denominacao',  requires=IS_IN_SET(['-','ALAMEDA','AVENIDA','ESTR. MUN.','ESTRADA',
@@ -144,7 +144,7 @@ Pessoas = db.define_table ('Pessoas',
 	Field ('Id', 'id'),
 	Field ('Idm', 'integer' ),
 	Field ('Nome', 'string', length='115',
-     requires = [IS_NOT_EMPTY() ,IS_UPPER(), Remove_Acentos()], notnull=True),
+     requires = [IS_NOT_EMPTY() ,IS_UPPER(), ], notnull=True), #Remove_Acentos()
     Field ('CPF', 'string', unique=True,
      requires=[IS_EMPTY_OR(IS_CPF_OR_CNPJ()), IS_EMPTY_OR(IS_NOT_IN_DB(db, 'Pessoas.CPF',
      error_message='Já existe uma Pessoa com este Número de CPF'))],
