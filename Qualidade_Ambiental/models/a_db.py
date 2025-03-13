@@ -44,7 +44,18 @@ configuration = AppConfig(reload=False)
 
 
 
-db = DAL('{}://{}:{}@{}/{}'.format(
+# - Banco Teste 
+if not configuration.get('app.production'):
+    db = DAL(configuration.take("db")['uri'], #type: ignore
+                 pool_size=50,
+             migrate_enabled=True, migrate=False, fake_migrate_all=True, lazy_tables=True,
+                 #check_reserved=[configuration.take("db")['engine']],
+                 #adapter_args={'safe': True},
+            )
+
+# Banco Produção
+else:
+    db = DAL('{}://{}:{}@{}/{}'.format(
                 configuration.take("db")['engine'],
                 configuration.take("db")['username'],
                 configuration.take("db")['password'],
@@ -54,6 +65,7 @@ db = DAL('{}://{}:{}@{}/{}'.format(
             migrate_enabled=True, migrate=False, fake_migrate_all=True, lazy_tables=True,
             check_reserved=['mysql'], adapter_args={'safe': True},
             )
+    
 
 #db._adapter.types = copy.copy(db._adapter.types)
 db._adapter.types['boolean']='TINYINT(1)'

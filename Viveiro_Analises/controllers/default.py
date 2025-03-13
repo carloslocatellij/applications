@@ -133,9 +133,9 @@ def Laudos(): #Menu
     target='Load'
 
     if f=='editar':
-        form = SQLFORM(db.Laudos, laudo, showid=True, formstyle='table3cols')
+        form = SQLFORM(db.Laudos, laudo, showid=True,)
     elif f=='ver':
-        form = SQLFORM(db.Laudos, laudo, readonly=True, formstyle='table3cols', represent_none='')
+        form = SQLFORM(db.Laudos, laudo, readonly=True, represent_none='')
     else:
         form = SQLFORM(db.Laudos)
         
