@@ -181,8 +181,9 @@ def Despachar_Processos(): #Menu
     markdowner = Markdown2(html4tags=True,  )
     
     texto_md = markdowner.convert(texto_despacho) or None
+    copybtn = TAG.button('Copy',_class='button', onclick=f'$($(navigator.clipboard.writeText("{texto_md}")))' )   
 
-    return dict(conteudo = XML(texto_md)) # type: ignore
+    return dict(conteudo = XML(texto_md), copybtn=copybtn) # type: ignore
 
 
 def Lista_de_Registros():
