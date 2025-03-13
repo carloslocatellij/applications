@@ -12,13 +12,18 @@
 
 {{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
 
-<div class="container">
+<div class="container"  class="card" style="border: 1px solid; padding: 5px; word-wrap: break-word; color: darkslategray">
     <!-- {{=A('<<Anterior', _href=URL(c='default',f='Processos', args=[int(processo) -1], vars={'f':'ver'}), _class='btn btn-primary',)if
     processo else ''}}
     {{=A('Proximo>>', _href=URL(c='default',f='Processos', args=[int(processo) +1], vars={'f':'ver'}), _class='btn btn-primary',)if
     processo else ''}} -->
 {{=A('Editar', _href=URL(c='default',f='Processos', args=[processo], vars={ 'f':'editar'}), _class='btn btn-primary', ) if processo else ''}}
 {{=A('Novo', _href=URL(c='default',f='Processos',  vars={}), _class='btn btn-primary',)if processo else ''}}
+{{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'),
+**atributo),SPAN(_class="caret") }}
+{{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled") }}
+{{=A('Despacho', _href=URL(c='default',f='Despachar_Processos', vars={'processo': processo}), _class='btn btn-primary',)if processo else ''}}
+
 </div>
 
 <div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
@@ -125,15 +130,5 @@
                     _id='Laudos', _class="jumbotron", _style="border: 1px solid; padding:10px;word-wrap:break-word;") if tem_laudo else None}}
                 </tr>
         </div>
-
-        {{=A('Despacho', _href=URL(c='default',f='Despachar_Processos', vars={'processo': processo}), _class='btn btn-primary',)if processo else ''}}
-
-
-
-    <br>
-    {{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo),SPAN(_class="caret") }}
-    {{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled") }}
-    
-    <br>
 
     
