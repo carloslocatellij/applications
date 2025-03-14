@@ -62,8 +62,8 @@ def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
     
     links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=session.controller,
                               f=regform, args=row[tabela]['Protocolo'] if tab2 != None else row['Protocolo'], vars={'f': 'ver'})))]
-    grade = SQLFORM.grid( busca, represent_none='', links=links, editable=False, searchable=False, deletable=False, create=False, details=False,
-                          csv=True,  maxtextlength = 120, _class="table", user_signature=False, fields=list_fields, links_placement = 'left')
+    grade = SQLFORM.grid( busca, represent_none='', links=links, editable=False, searchable=False, deletable=False, create=False, details=False, paginate=30,
+                          csv=True,  maxtextlength = 120, _class="table", user_signature=False, fields=list_fields, links_placement = 'left', orderby=~db.Requerimentos.data_do_laudo)
 
     
    

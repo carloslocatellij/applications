@@ -72,9 +72,9 @@
                                         {{=form.custom.widget['Obs']}}</div></td>
                             </tr>
 
-                        <table width="15%" align='left>
-                            <div> style="padding: 5px; justify-content: top; vertical-align: top;">{{=B(H3('Critérios considerados na Análise:'))}} <div>
-                                <div align='center' class="card" style="border: 1px solid; padding: 5px; word-wrap: break-word; color: darkslategray">
+                        <table width="45%" align='left'>
+                            <div style="padding: 5px; justify-content: top; vertical-align: top;">{{=B(H3('Critérios considerados na Análise:'))}}</div>
+                                <div align='left' class="card" style="border: 1px solid; padding: 5px; word-wrap: break-word; color: darkslategray">
                                     <div>{{=form.custom.widget['p1']}} Conflito com fiação elétrica</div>
                                     <div>{{=form.custom.widget['p2']}} Prejuizo a rede de água/esgoto</div>
                                     <div>{{=form.custom.widget['p3']}} Danos a estrutura da construção</div>
@@ -87,6 +87,11 @@
                                     <div>{{=form.custom.widget['p10']}} Projetos e/ou Atividades</div>
                                     <div>{{=form.custom.widget['p11']}} Risco a população, patrimônio</div>
                                 </div>
+                                <style>
+                                    .form-check-input {
+                                        display: inline-block !important;
+                                    }
+                                </style>
                         </table>
                         <br>
                             <td width="25%" align='left' style="padding-inline: 10px">{{=B('Técnico:  ')}}<div align='left' class="card">{{=form.custom.widget['tecnico']}}</td></div>            

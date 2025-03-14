@@ -64,7 +64,15 @@ else:
             migrate_enabled=True, migrate=False, fake_migrate_all=True, lazy_tables=True,
             check_reserved=['mysql'], adapter_args={'safe': True},
             )
-
+    authdb = DAL('{}://{}:{}@{}/{}'.format(
+                configuration.take("db")['engine'],
+                configuration.take("db")['username'],
+                configuration.take("db")['password'],
+                configuration.take("db")['uri'], 'Tconect' ) ,
+            pool_size=50,
+            migrate_enabled=True, migrate=False, fake_migrate_all=True, lazy_tables=True,
+            check_reserved=['mysql'], adapter_args={'safe': True},
+            )
 
 #db._adapter.types = copy.copy(db._adapter.types)
 db._adapter.types['boolean']='TINYINT(1)'
@@ -109,7 +117,7 @@ response.optimize_js = 'concat,minify,inline'
 
 # host names must be a list of allowed host names (glob syntax allowed)
 auth = Auth(
-    db, host_names=configuration.get('host.names'),
+    authdb, host_names=configuration.get('host.names'),
      )
 
 # -------------------------------------------------------------------------

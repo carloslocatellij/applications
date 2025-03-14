@@ -95,8 +95,7 @@ Requerimentos = db.define_table('Requerimentos',
     primarykey = ['Protocolo'],
     format='%(Protocolo)s',
     migrate=False,
-    fake_migrate=False
-    )
+    fake_migrate=False )
 
 
 Laudos = db.define_table('Laudos',
@@ -129,7 +128,7 @@ Laudos = db.define_table('Laudos',
       Field('especie_poda4', 'string', rname= '`especie poda4`'),
       Field('qtd_poda4', rname='`qtd poda4`' ),  
       Field('tipo'),
-      Field('p1', 'integer', label='Conflito com fiação elétrica', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]' ),
+      Field('p1', 'integer', label='Conflito com fiação elétrica', requires= IS_CHKBOX01(on=True, off=False) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]' ),
       Field('p2', 'integer', label='Prejuizo a rede de água/esgoto', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
       Field('p3', 'integer', label='Danos a estrutura da construção', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),
       Field('p4', 'integer', label='Restrição a passagem de pedestres', requires= IS_CHKBOX01(on=1, off=0) ,widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: '  ' if v not in [ 'on', '1', 1 ] else '[X]'),

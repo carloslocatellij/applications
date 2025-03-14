@@ -6,14 +6,12 @@ def Despachar(query, relation_query):
     
     num_extens_poda = num2words.num2words(soma_poda, lang='pt-br')
     num_extens_poda = num_extens_poda.upper()
-    
-    tecnico = relation_query.get('tecnico').upper() if relation_query.get('tecnico') else 'XXXXXXXXXXXXXX'
-    
+        
     #   APENAS PODA - SEM LAUDO
     if not relation_query:
         
         # IMÓVEL PARTICULAR
-        if query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência']:
+        if query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'comercio']:
             texto = f'''AUTORIZADA A PODA DE NO MÁXIMO 25% DO VOLUME DA COPA DA(S) ÁRVORE(S) DE FORMA DISTRIBUÍDA E EQUILIBRADA, SENDO: PODA DE LIMPEZA E ADEQUAÇÃO DE {soma_poda} ({num_extens_poda}) ÁRVORE(S) DA(S) ESPÉCIE(S): {query.get('Podas')},  LOCALIZADA(S) NA {query.get('Endereco')}. A PODA REALIZADA EM VOLUME MAIOR QUE 25% (VINTE E CINCO POR CENTO) DA COPA ORIGINAL DA ÁRVORE É CONSIDERADA DRÁSTICA E PODE CAUSAR SÉRIOS DANOS À SAÚDE DA ÁRVORE.
 
 LEI 13.031/2018
@@ -69,6 +67,7 @@ GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESP�
             
     #   SUPRESSÕES  -  TEM LAUDO
     else:
+        tecnico = relation_query.get('tecnico').upper() if relation_query.get('tecnico') else 'XXXXXXXXXXXXXX'
         qtd_repor = relation_query.get('qtd_repor') or 0
         soma_supress = sum([x for x in [relation_query.get('qtd_ret1'), relation_query.get('qtd_ret2'), relation_query.get('qtd_ret3'), relation_query.get('qtd_ret4')] if x])
         num_extens_supress = '{}{}'.format(num2words.num2words(soma_supress, lang='pt-br').upper(), 'A' if soma_supress in [1,2] else '')
@@ -138,6 +137,34 @@ ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PE
 
 PROTOCOLAR A CÓPIA DESTE DOCUMENTO NO POUPATEMPO OU PREFEITURA REGIONAL NORTE. '''
 
+
+            # DENÚNCIA SMAURB
+            '''
+            EM VISTORIA REALIZADA NO DIA 13/03/2023 PELO TÉCNICO AGRÍCOLA GUILHERME CAVENAGHI,  VERIFICOU-SE A NECESSIDADE DE PODA DE LIMPEZA E ADEQUAÇÃO DE 06 (SEIS) ÁRVORES DAS ESPÉCIES: (04) IPÊ-ROSA, (01) AMENDOIM-BRAVO E (01) LEUCENA. 
+            SENDO ASSIM, SOLICITAMOS, POR GENTILEZA, QUE O PROPRIETÁRIO DO IMÓVEL SEJA NOTIFICADO PARA QUE O MESMO TOME PROVIDÊNCIAS PARA A PODA (JÁ AUTORIZADA). SEGUE ANEXO PRINT DO CADASTRO IMOBILIÁRIO.
+            A PODA DEVE SER REALIZADA POR PODADOR HABILITADO, COM O CORTE DE NO MÁXIMO 25% DO VOLUME DA COPA DA(S) ÁRVORE(S) DE FORMA DISTRIBUÍDA E EQUILIBRADA.
+            '''
+            # indeferido
+            '''
+            Em vistoria realizada no dia 04/02/2025 pelo Técnico Guilherme Cavenaghi, na Rua Joaquim Antônio Machado, N 1492, São Deocleciano, constatou-se o que segue:
+As árvore(s) estão(s) bem desenvolvida e com galhos com boa conformação, com uma distância segura das fiações elétricas e outras infraestruturas.
+Como não foi constatada a presença de galhos secos, a árvore está equilibrada, sem galhos frágeis e conflito com as instalações não há a necessidade de manejo.
+Considerando que, a arborização desempenha um papel crucial na manutenção da temperatura em ambientes urbanos. Árvores, especialmente aquelas com copas frondosas, contribuem significativamente para a estabilização térmica das áreas urbanas por meio de sombreamento e evapotranspiração.
+Além de regular a temperatura, as árvores melhoram a qualidade do ar ao absorver poluentes e liberar oxigênio. Um ambiente mais fresco e limpo contribui para o bem-estar dos residentes e reduz o consumo de energia para resfriamento.
+Não havendo necessidade para a supressão ou poda, fica indeferido o pedido.
+
+
+LEI Nº 13.031 DE 26 DE SETEMBRO DE 2018
+Seção II
+Das Infrações
+Art. 76. Constitui infração toda ação ou omissão contrária às disposições da presente Lei, respondendo solidariamente e sem prejuízo da responsabilidade penal e civil:
+a) o proprietário do imóvel e/ou mandante;
+b) o autor da ação;
+c) quem, de qualquer modo, concorrer para a prática da infração. (...)
+V. efetuar poda que comprometa o potencial de altura máxima da espécie;
+VI. efetuar poda que comprometa o potencial de área máxima de sombreamento da espécie;
+(...)
+            '''
 
 
         else:

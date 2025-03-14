@@ -68,7 +68,7 @@ def download():
     return response.download(request, db)
 
 
-
+@auth.requires_login()
 def Processos(): #Menu
     table='Requerimentos'
     tablename = f'{db[table]._tablename[:-1]}'
@@ -121,6 +121,7 @@ def editar_laudo():
     redirect(URL('default','Processos', extension='', args=[protoc], vars={'f':'ver'}), client_side=True) # type: ignore
 
 
+@auth.requires_login()
 def Registrar_Laudo():
     print('tentado registrar')
     protoc = request.args(0)
@@ -135,8 +136,9 @@ def Registrar_Laudo():
     
     redirect(URL('default','Processos', extension='', args=[protoc], vars={'f':'ver'}), client_side=True) # type: ignore
     
-
-def Laudos(): #Menu
+    
+@auth.requires_login()
+def Laudos():
     table= 'Laudos'
     laudo = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else 'ver'
@@ -164,28 +166,48 @@ def Laudos(): #Menu
     return response.render(dict(form=form, laudo=laudo))
 
 
+@auth.requires_login()
 def Despachar_Processos(): #Menu
     from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2 # type: ignore
     from despachos import Despachar  # type: ignore
 
-    processo = int(request.vars.processo)
-    prime_query = db(db.Requerimentos.Protocolo == processo).select().render(0).as_dict()
-    relation_query = db(db.Laudos.Protocolo == processo)
+    processo= request.vars.processo or ''  
+    prime_query= ''
+    conteudo= ''
+    copybtn= ''
+    form=''
     
-    if relation_query.count() > 0:
-        relation_query = relation_query.select().render(0).as_dict()
+    if processo:
+        prime_query = db(db.Requerimentos.Protocolo == processo).select().render(0).as_dict()
+        
+        relation_query = db(db.Laudos.Protocolo == processo) 
+         
+        if relation_query.count() > 0:
+            relation_query = relation_query.select().render(0).as_dict()
+        else:
+            relation_query = None
+            
+        texto_despacho = Despachar(prime_query, relation_query)
+
+        markdowner = Markdown2(html4tags=True,  )
+        
+        texto_md = markdowner.convert(texto_despacho) or None
+        texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"')
+        copybtn = TAG.button('Copy', _class='button', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
+        conteudo = XML(texto_md) # type: ignore
     else:
-        relation_query = None
-    texto_despacho = Despachar(prime_query, relation_query)
-
-    markdowner = Markdown2(html4tags=True,  )
-    
-    texto_md = markdowner.convert(texto_despacho) or None
-    copybtn = TAG.button('Copy',_class='button', onclick=f'$($(navigator.clipboard.writeText("{texto_md}")))' )   
-
-    return dict(conteudo = XML(texto_md), copybtn=copybtn) # type: ignore
+        form = SQLFORM.factory(Field('Protocolo'))
+        
+    if not processo:  
+        if form.process().accepted:
+            session.flash = f'Procurando'
+            redirect(URL('default', 'Despachar_Processos', vars={'processo' : form.vars.Protocolo}) )# type: ignore
 
 
+    return dict(conteudo = conteudo, copybtn=copybtn, form= form) # type: ignore
+
+
+@auth.requires_login()
 def Lista_de_Registros():
     import re
     
