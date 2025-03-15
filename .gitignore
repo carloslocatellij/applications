@@ -247,3 +247,4 @@ build/*
 venv
 .pythonhistory
 admin/
+*/databases/

@@ -46,8 +46,11 @@ configuration = AppConfig(reload=True)
 # - Banco Teste 
 if not configuration.get('app.production'):
     db = DAL(configuration.take("db")['uri'], #type: ignore
-                 pool_size=50,
-             migrate_enabled=True, migrate=False, fake_migrate_all=True, lazy_tables=True,
+                pool_size=50,
+                migrate_enabled=True,
+                migrate=True, 
+                fake_migrate_all=True, 
+                lazy_tables=True,
                  #check_reserved=[configuration.take("db")['engine']],
                  #adapter_args={'safe': True},
             )
