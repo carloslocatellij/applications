@@ -1,3 +1,5 @@
+{{extend 'scripts.html'}}
+
 <style>
 /* Caixa para o marcador */
 input[type="checkbox"] {
@@ -63,8 +65,8 @@ input[type="checkbox"]:focus + label {
 </div> 
 
 
-<div class="container">
-{{=A('Editar', callback=URL(c='default',f='editar_laudo', extension='', args=[request.args(0)], vars={ 'f':'editar'}), _class='btn btn-primary', cid='Laudo') }}
+<div class="container", align='left'>
+{{=A('Editar', callback=URL(c='default', f='editar_laudo', extension='', args=[request.args(0)], vars={ 'f':'editar'}), _class='btn btn-primary',  cid='Laudo')  if not session.edit_laudo else '' }}
 </div>
 
     {{=form.custom.begin}}
@@ -158,10 +160,7 @@ input[type="checkbox"]:focus + label {
                         <br>
                             <td width="25%" align='left' style="padding-inline: 10px">{{=B('Técnico:  ')}}<div align='left' class="card">{{=form.custom.widget['tecnico']}}</td></div>            
 
-
                         </table>
-
-
                             <table class="jumbotron" style="border: 1px solid">
                                 <br/>
                                 <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}} 

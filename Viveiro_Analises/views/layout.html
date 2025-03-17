@@ -125,7 +125,7 @@
                 </nav>
           </td>
           <td width='10%' align="center">{{if len(request.args) > 0:}}{{=P(request.args[0]) if request.function == 'Processos'  else ''}}<div>{{=A('Criar Tarefa', _href=URL(c='default',f='Criar_Tarefa', args=request.args[0], ), _class='btn btn-success', _style="align: center") if request.function == 'Processos' and request.args[0]  else ''}}</div>{{pass}} </td>
-          <td width='80%' align="right"><h1 class="display-5">{{=request.application.replace('_', ' ')}} </h1></td>
+          <td width='80%' align="right"><h1 class="display-5">{{='Viveiro Análises'}} </h1></td>
 
         </table>
       </div>
@@ -156,6 +156,7 @@
     {{end}}
 
     <!-- The javascript =============================== -->
+  {{block page_js}}
     <script src="{{=URL('static','js/calendar.js')}}"></script>
     <script src="{{=URL('static','js/jquery.maskedinput.js')}}"></script>
     <script src="{{=URL('static','js/jquery.mask.min.js')}}"></script>
@@ -184,7 +185,7 @@
 
     <script src="{{=URL('static','js/bootstrap.bundle.min.js')}}"></script>
     <script src="{{=URL('static','js/web2py-bootstrap4.js')}}"></script>
-    {{block page_js}}
+
 
     {{end page_js}}
 

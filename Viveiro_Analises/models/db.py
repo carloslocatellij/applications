@@ -4,37 +4,9 @@ from my_validador import *  # type: ignore
 if 0 == 1:
     from gluon import *  # type: ignore
     from gluon import (
-        db,
-        configuration,
-        IS_IN_SET,
-        IS_UPPER,
-        IS_EMPTY_OR,
-        IS_IN_DB,
-        IS_NOT_IN_DB,
-        CLEANUP,  # type: ignore
-        Field,
-        auth,
-        IS_MATCH,
-        IS_FLOAT_IN_RANGE,
-        a_db,
-        db,
-        IS_CHKBOX01,
-        DAL,
-        IS_INT_IN_RANGE,
-        IS_CPF_OR_CNPJ,
-        MASK_CPF,
-        MASK_CNPJ,
-        Remove_Acentos,
-        IS_DECIMAL_IN_RANGE,
-        SQLFORM,
-        IS_DATE,
-        CLEANUP,
-        IS_NOT_EMPTY,
-        IS_LOWER,
-        Field,
-        auth,
-        IS_ALPHANUMERIC,
-    )  # type: ignore
+        db, configuration, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
+        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db, IS_CHKBOX01, DAL, IS_INT_IN_RANGE, IS_CPF_OR_CNPJ,  MASK_CPF,
+        MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE, SQLFORM, IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC, )  # type: ignore
 
     request = current.request  # type: ignore
     response = current.response  # type: ignore
@@ -53,12 +25,15 @@ else:
     tab_ruas = """Ruas"""
 
 
+regiao_cor ={1:'CENTRAL', 2:'BOSQUE', 3:'TALHADO', 4:'REPRESA', 5:'VILA TONINHO', 6:'SCHIMITT',
+7:'HB', 8:'CIDADE DAS CRIANÇAS', 9:'PINHEIRINHO' , 10:'CÉU'}
+
 Bairros = db.define_table(
     "Bairros",
     Field("Bairro", "string"),
     Field("Perimetro", "string"),
     Field("Area", "string"),
-    Field("Regiao", "string"),
+    Field("Regiao", 'integer',requires= IS_IN_SET(regiao_cor, zero=None)),
     primarykey=["Bairro"],
     format="Bairro",
     migrate=True,
@@ -79,8 +54,8 @@ Ruas = db.define_table(
 
 Requerimentos = db.define_table(
     "Requerimentos",
-    Field("Protocolo", requires=IS_INT_IN_RANGE("0", "2025999999999")),
-    Field("Requerente"),
+    Field("Protocolo", requires=IS_INT_IN_RANGE("0", "2025000999999")),
+    Field("Requerente", requires=[IS_UPPER(), Remove_Acentos()]),
     Field(
         "data_entrada",
         "date",
@@ -91,7 +66,7 @@ Requerimentos = db.define_table(
     ),
     Field(
         "Endereco1",
-        "string",
+        "string", requires=[IS_UPPER(), Remove_Acentos()]
     ),
     # requires=IS_IN_DB(db, 'Ruas.Endereco1')),
     Field("Numero1"),
@@ -139,6 +114,7 @@ Requerimentos = db.define_table(
                 "Indeferido",
                 "Em Análise",
                 "Aguardando",
+                "Com Pendência",
                 "",
             ]
         ),
@@ -155,8 +131,10 @@ Requerimentos = db.define_table(
         "tipo_imovel",
         rname="`tipo imovel`",
         label="Tipo de Imóvel",
-        requires=IS_IN_SET(["público", "privado", "institucional"]),
+        requires=IS_IN_SET(["público", "privado", "institucional", "terreno"]),
     ),
+    Field("protocolo_anterior", 'reference Requerimentos',
+          requires=IS_EMPTY_OR(IS_IN_DB(db, "Requerimentos.Protocolo" ))),
     rname="`{}`".format(tabela_solicitacoes),
     primarykey=["Protocolo"],
     format="%(Protocolo)s",
@@ -179,6 +157,7 @@ Laudos = db.define_table(
                     "Indeferido",
                     "Em Análise",
                     "Aguardando",
+                    "Com Pendência",
                     "",
                 ]
             )
@@ -220,7 +199,7 @@ Laudos = db.define_table(
     Field("tipo"),
     Field(
         "p1",
-        "boolean",
+        "integer",
         label="Conflito com fiação elétrica",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -228,7 +207,7 @@ Laudos = db.define_table(
     ),
     Field(
         "p2",
-        "boolean",
+        "integer",
         label="Prejuízo a rede de água/esgoto",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -236,7 +215,7 @@ Laudos = db.define_table(
     ),
     Field(
         "p3",
-        "boolean",
+        "integer",
         label="Danos à estrutura da construção",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -244,7 +223,7 @@ Laudos = db.define_table(
     ),
     Field(
         "p4",
-        "boolean",
+        "integer",
         label="Restrição à passagem de pedestres",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -252,7 +231,7 @@ Laudos = db.define_table(
     ),
     Field(
         "p5",
-        "boolean",
+        "integer",
         label="Porte ou espécie inadequada",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -260,7 +239,7 @@ Laudos = db.define_table(
     ),
     Field(
         "p6",
-        "boolean",
+        "integer",
         label="Árvore senescente, debilitada por poda/pragas/parasitas",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -268,7 +247,7 @@ Laudos = db.define_table(
     ),
     Field(
         "p7",
-        "boolean",
+        "integer",
         label="Árvore morta/seca",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -276,7 +255,7 @@ Laudos = db.define_table(
     ),
     Field(
         "p8",
-        "boolean",
+        "integer",
         label="Passagem de veículos",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -284,7 +263,7 @@ Laudos = db.define_table(
     ),
     Field(
         "p9",
-        "boolean",
+        "integer",
         label="Obras, reforma, construção, demolição",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -292,7 +271,7 @@ Laudos = db.define_table(
     ),
     Field(
         "p10",
-        "boolean",
+        "integer",
         label="Projetos e/ou atividades",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -300,7 +279,7 @@ Laudos = db.define_table(
     ),
     Field(
         "p11",
-        "boolean",
+        "integer",
         label="Risco à população, patrimônio",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -334,9 +313,9 @@ db.Requerimentos.Endereco = Field.Virtual(
     lambda row: str(
         ", ".join(
             [
-                f"Av./Rua {row.Requerimentos.Endereco1}" or "",
+                f"RUA/AV. {row.Requerimentos.Endereco1}" or "",
                 f"Nº {row.Requerimentos.Numero1}" or "",
-                f"Bairro: {row.Requerimentos.Bairro}" or "",
+                f"BAIRRO: {row.Requerimentos.Bairro}" or "",
             ]
         )
     ),
@@ -344,18 +323,18 @@ db.Requerimentos.Endereco = Field.Virtual(
 
 db.Requerimentos.Supressoes = Field.Virtual(
     "Supressoes",
-    lambda row: ", ".join(
+    lambda row: " ".join(
         [
             f"({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} "
             if row.Requerimentos.especie_ret1
             else "",
-            f"({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}"
+            f",({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}"
             if row.Requerimentos.especie_ret2
             else "",
-            f"({row.Requerimentos.qtd_ret3}) {row.Requerimentos.especie_ret3} "
+            f",({row.Requerimentos.qtd_ret3}) {row.Requerimentos.especie_ret3} "
             if row.Requerimentos.especie_ret3
             else "",
-            f"({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}"
+            f",({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}"
             if row.Requerimentos.especie_ret4
             else "",
         ]
@@ -364,18 +343,18 @@ db.Requerimentos.Supressoes = Field.Virtual(
 
 db.Requerimentos.Podas = Field.Virtual(
     "Podas",
-    lambda row: ", ".join(
+    lambda row: " ".join(
         [
             f"({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1} "
             if row.Requerimentos.especie_poda1
             else "",
-            f"({row.Requerimentos.qtd_poda2}) {row.Requerimentos.especie_poda2}"
+            f",({row.Requerimentos.qtd_poda2}) {row.Requerimentos.especie_poda2}"
             if row.Requerimentos.especie_poda2
             else "",
-            f"({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3} "
+            f",({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3} "
             if row.Requerimentos.especie_poda3
             else "",
-            f"({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}"
+            f",({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}"
             if row.Requerimentos.especie_poda4
             else "",
         ]
@@ -384,18 +363,18 @@ db.Requerimentos.Podas = Field.Virtual(
 
 db.Laudos.Supressoes = Field.Virtual(
     "Supressoes",
-    lambda row: ", ".join(
+    lambda row: " ".join(
         [
             f"({row.Laudos.qtd_ret1}) {row.Laudos.especie_ret1} "
             if row.Laudos.especie_ret1
             else "",
-            f"({row.Laudos.qtd_ret2}) {row.Laudos.especie_ret2}"
+            f",({row.Laudos.qtd_ret2}) {row.Laudos.especie_ret2}"
             if row.Laudos.especie_ret2
             else "",
-            f"({row.Laudos.qtd_ret3}) {row.Laudos.especie_ret3} "
+            f",({row.Laudos.qtd_ret3}) {row.Laudos.especie_ret3} "
             if row.Laudos.especie_ret3
             else "",
-            f"({row.Laudos.qtd_ret4}) {row.Laudos.especie_ret4}"
+            f",({row.Laudos.qtd_ret4}) {row.Laudos.especie_ret4}"
             if row.Laudos.especie_ret4
             else "",
         ]
@@ -404,25 +383,25 @@ db.Laudos.Supressoes = Field.Virtual(
 
 db.Laudos.Podas = Field.Virtual(
     "Podas",
-    lambda row: ", ".join(
+    lambda row: " ".join(
         [
             f"({row.Laudos.qtd_poda1}) {row.Laudos.especie_poda1} "
             if row.Laudos.especie_poda1
             else "",
-            f"({row.Laudos.qtd_poda2}) {row.Laudos.especie_poda2}"
+            f",({row.Laudos.qtd_poda2}) {row.Laudos.especie_poda2}"
             if row.Laudos.especie_poda2
             else "",
-            f"({row.Laudos.qtd_poda3}) {row.Laudos.especie_poda3} "
+            f",({row.Laudos.qtd_poda3}) {row.Laudos.especie_poda3} "
             if row.Laudos.especie_poda3
             else "",
-            f"({row.Laudos.qtd_poda4}) {row.Laudos.especie_poda4}"
+            f",({row.Laudos.qtd_poda4}) {row.Laudos.especie_poda4}"
             if row.Laudos.especie_poda4
             else "",
         ]
     ),
 )
 
-
+# DADOS DE TESTE INSERIDOS AUTOMÁTICAMENTE EM AMBIENTE DE TESTE.
 if not configuration.get("app.production"):
     from faker import Faker  # type: ignore
 

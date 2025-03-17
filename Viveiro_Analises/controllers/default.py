@@ -125,12 +125,11 @@ def editar_laudo():
 def Registrar_Laudo():
     print('tentado registrar')
     protoc = request.args(0)
-    print(protoc)
     processo = db(db.Requerimentos.Protocolo == protoc).select().first()
     print(processo.Protocolo)
     try:
-        x = db.Laudos.validate_and_insert(Protocolo = protoc, proprietario=processo.Requerente, data_do_laudo = processo.data_do_laudo, Despacho=processo.Despacho)
-        print(x)
+        db.Laudos.validate_and_insert(Protocolo = protoc, proprietario=processo.Requerente, data_do_laudo = processo.data_do_laudo, Despacho=processo.Despacho)
+        session.edit_laudo = True
     except Exception as e:
         session.flash = f'Erro {e}'
     
@@ -192,8 +191,11 @@ def Despachar_Processos(): #Menu
         markdowner = Markdown2(html4tags=True,  )
         
         texto_md = markdowner.convert(texto_despacho) or None
-        texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"')
-        copybtn = TAG.button('Copy', _class='button', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
+        texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"').replace('<p>', '').replace('</p>', '')
+        copybtn = TAG.button('<Copiar>', _class='btn btn-info', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
+        returnbtn = A('Voltar', _href=URL('default', 'Processos', args=[processo], vars={'f':'ver'}), _class='btn btn-primary')# type: ignore
+        newbtn = A('Novo', _href=URL('default', 'Processos'), _class='btn btn-primary')# type: ignore
+   
         conteudo = XML(texto_md) # type: ignore
     else:
         form = SQLFORM.factory(Field('Protocolo'))
@@ -204,7 +206,7 @@ def Despachar_Processos(): #Menu
             redirect(URL('default', 'Despachar_Processos', vars={'processo' : form.vars.Protocolo}) )# type: ignore
 
 
-    return dict(conteudo = conteudo, copybtn=copybtn, form= form) # type: ignore
+    return dict(returnbtn=returnbtn, newbtn=newbtn, copybtn=copybtn, conteudo = conteudo, form= form) # type: ignore
 
 
 @auth.requires_login()

@@ -13,16 +13,16 @@
 
 {{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
 
-{{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'),
-**atributo),SPAN(_class="caret") }}
+{{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'), **atributo),SPAN(_class="caret") }}
 {{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled") }}
+
 
 <div class="container"  class="card" style="border: 1px solid; padding: 5px; word-wrap: break-word; color: darkslategray">
     <!-- {{=A('<<Anterior', _href=URL(c='default',f='Processos', args=[int(processo) -1], vars={'f':'ver'}), _class='btn btn-primary',)if
     processo else ''}}
     {{=A('Proximo>>', _href=URL(c='default',f='Processos', args=[int(processo) +1], vars={'f':'ver'}), _class='btn btn-primary',)if
     processo else ''}} -->
-{{=A('Editar', _href=URL(c='default',f='Processos', args=[processo], vars={ 'f':'editar'}), _class='btn btn-primary', ) if processo else ''}}
+{{=A(SPAN('Editar', _class="glyphicon glyphicon-envelope"), _href=URL(c='default',f='Processos', args=[processo], vars={ 'f':'editar'}), _class='btn btn-primary') if processo else '' }}
 {{=A('Novo', _href=URL(c='default',f='Processos',  vars={}), _class='btn btn-primary',) if processo else ''}}
 {{=A('Despacho', _href=URL(c='default',f='Despachar_Processos', vars={'processo': processo}), _class='btn btn-primary',)if processo else ''}}
 
@@ -44,7 +44,10 @@
                             <td width="45%" align='left' style="padding-inline: 10px;">{{=B('Endereço: ')}}<div align='left' class="card">{{=formprocess.custom.widget['Endereco1']}}</td>
                             <td width="5%" align='left'style="padding-inline: 10px;">{{=B('Numero:    ')}} <div align='left' class="card">{{=formprocess.custom.widget['Numero1']}}</td>
                             <td width="35%" align='left'style="padding-inline: 10px;">{{=B('Bairro:    ')}} <div align='left' class="card">{{=formprocess.custom.widget['Bairro']}}</td>
+                            <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Protocolo Ref.: ')}} <div align='left' class="card">
+                                        {{=formprocess.custom.widget['protocolo_anterior']}}</td>
                         </tr>
+
                         <tr>
                             <table>
                                 <td width="8%" align='left' style="padding-inline: 5px;">{{=B('1º Poda qtd.: ')}}<div align='left' class="card">
@@ -119,12 +122,12 @@
     {{=formprocess.custom.end}}
 
         <br>
-        {{=A('Registrar Laudo', _href=URL(c='default',f='Registrar_Laudo',  args=[request.args(0)], vars={'f':'ver'}), _class='btn btn-primary',) if not tem_laudo  and request.args(0) else None}}
+        {{=A('Registrar Laudo', _href=URL(c='default',f='Registrar_Laudo',  args=[request.args(0)], vars={'f':'editar'}), _class='btn btn-success active',) if not tem_laudo  and request.args(0) else ''}}
 
         <div id="Laudo">
                 <tr>
                     {{=DIV(LOAD('default', 'Laudos.load',  args=[request.args(0)], vars={'f': 'editar' if session.edit_laudo else 'ver', 'reload_div':'Laudo'}, content='Carregando...', ajax=True, target='Laudo'),
-                    _id='Laudos', _class="jumbotron", _style="border: 1px solid; padding:10px;word-wrap:break-word;") if tem_laudo else None}}
+                    _id='Laudos', _class="jumbotron", _style="border: 1px solid; padding:10px;word-wrap:break-word;") if tem_laudo else ''}}
                 </tr>
         </div>
 
