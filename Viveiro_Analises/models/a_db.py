@@ -35,28 +35,16 @@ if 0==1:
 # -------------------------------------------------------------------------
 # once in production, remove reload=True to gain full speed
 # -------------------------------------------------------------------------
-configuration = AppConfig(reload=True)
 
 
 # session.connect(request, response, cookie_key=configuration.take("db")['password'],)
 # session.secure()
 # session.samesite('Strict')
 
+configuration = AppConfig(reload=True)
 
-# - Banco Teste 
-if not configuration.get('app.production'):
-    db = DAL(configuration.take("db")['uri'], #type: ignore
-                pool_size=50,
-                migrate_enabled=True,
-                migrate=True, 
-                fake_migrate_all=True, 
-                lazy_tables=True,
-                 #check_reserved=[configuration.take("db")['engine']],
-                 #adapter_args={'safe': True},
-            )
-
-# Banco Produção
-else:
+# - Banco Produção 
+if configuration.get('app.production'):
     db = DAL('{}://{}:{}@{}/{}'.format(
                 configuration.take("db")['engine'],
                 configuration.take("db")['username'],
@@ -64,10 +52,31 @@ else:
                 configuration.take("db")['uri'],
                 configuration.take("db")['database'] ) ,
             pool_size=50,
+            migrate_enabled=True, migrate=False, fake_migrate_all=False, lazy_tables=True,
+            check_reserved=['mysql'], adapter_args={'safe': True},
+            )
+    authdb = DAL('{}://{}:{}@{}/{}'.format(
+                configuration.take("db")['engine'],
+                configuration.take("db")['username'],
+                configuration.take("db")['password'],
+                configuration.take("db")['uri'], 'Tconect' ) ,
+            pool_size=50,
             migrate_enabled=True, migrate=False, fake_migrate_all=True, lazy_tables=True,
             check_reserved=['mysql'], adapter_args={'safe': True},
             )
 
+
+# Banco Teste
+else:
+    db = DAL(configuration.take("db")['uri'], #type: ignore
+                pool_size=50,
+                migrate_enabled=True,
+                migrate=True, 
+                fake_migrate_all=True, 
+                lazy_tables=True,
+                check_reserved=[configuration.take("db")['engine']],
+                adapter_args={'safe': True},
+            )
 
 #db._adapter.types = copy.copy(db._adapter.types)
 db._adapter.types['boolean']='TINYINT(1)'
@@ -111,9 +120,14 @@ response.optimize_js = 'concat,minify,inline'
 # -------------------------------------------------------------------------
 
 # host names must be a list of allowed host names (glob syntax allowed)
-auth = Auth(
-    db, host_names=configuration.get('host.names'),
-     )
+if not configuration.get('app.production'):
+    auth = Auth(
+        db, host_names=configuration.get('host.names'), 
+        )
+else:
+    auth = Auth(
+        authdb, host_names=configuration.get('host.names'),
+        )
 
 # -------------------------------------------------------------------------
 # create all tables needed by auth, maybe add a list of extra fields
@@ -123,14 +137,14 @@ auth = Auth(
 
 
 # from validador import IS_CPF
-auth.settings.extra_fields['auth_user'] = [
-    Field('IdDepto', 'integer'), # type: ignore
-    #Field('CPF', 'text', requires=IS_CPF()),
-]
+# auth.settings.extra_fields['auth_user'] = [
+#     Field('IdDepto', 'integer'), # type: ignore
+#     #Field('CPF', 'text', requires=IS_CPF()),
+# ]
 
-auth.define_tables(username=True, signature=True, fake_migrate=True, )
+auth.define_tables(username=True,  migrate=True, fake_migrate=False, )
 
-auth.settings.update_fields = [ 'first_name', 'last_name', 'username', 'email', 'IdDepto']
+#auth.settings.update_fields = [ 'first_name', 'last_name', 'username', 'email', 'IdDepto']
 
 # -------------------------------------------------------------------------
 # configure email

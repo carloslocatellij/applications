@@ -1,8 +1,67 @@
-<link rel="stylesheet" href="{{=URL('static','css/mycss.css')}}"/>
+<style>
+/* Caixa para o marcador */
+input[type="checkbox"] {
+  appearance: none;
+  position: relative;
+  /* Tamanho */
+  width: 1.45rem;
+  height: 1.45rem;
+  /* Cor do fundo e borda */
+  background-color: #fff;
+  border: 0.45rem solid #ccc;
+  border-radius: 0.25rem;
+}
+
+/* Características do marcador */
+input[type="checkbox"]::before {
+  content: "";
+  /* Posicionar no meio */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* Tamanho do marcador */
+  width: 0.75rem;
+  height: 0.75rem;
+  /* Formato do marcador */
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  /* Posicionar no meio */
+  transform: translate(-50%, -50%) scale(0);
+  transform-origin: center;
+  transition: 0.45s transform ease-in-out;
+  /* Cor do marcador */
+  box-shadow: inset 1rem 1rem #fff;
+}
+
+/* Cor da caixa para o marcador */
+input[type="checkbox"]:checked {
+  background-color:rgb(19, 224, 53);
+  border-color: rgb(19, 224, 53);;
+}
+
+/* Características do marcador quando selecionado */
+input[type="checkbox"]:checked::before {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Características do marcador quando selecionado */
+input[type="checkbox"]:disabled {
+  opacity: 0.25;
+}
+
+input[type="checkbox"]:focus {
+  border-color:rgb(38, 155, 201);
+}
+
+input[type="checkbox"]:focus + label {
+  color: rgb(38, 155, 201);
+}
+
+</style>
 
 <div class="container">
 <h3 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h3>
-</div>
+</div> 
+
 
 <div class="container">
 {{=A('Editar', callback=URL(c='default',f='editar_laudo', extension='', args=[request.args(0)], vars={ 'f':'editar'}), _class='btn btn-primary', cid='Laudo') }}
@@ -10,7 +69,7 @@
 
     {{=form.custom.begin}}
         <table width="100%" >
-                    <tr>
+                    <tr>  
                         <tr>
                             <td width="10%" align='left' style="padding-inline: 10px">{{=B('Protocolo:')}} <div align='center' class="card">{{=form.custom.widget['Protocolo']}}</div></td>
                             <td width="25%" align='left' style="padding-inline: 10px">{{=B('Proprietario: ')}}:<div align='left' class="card">{{=form.custom.widget['proprietario']}}</div> </td> 
@@ -20,63 +79,66 @@
                         </tr> 
                     </tr>
                         <tr>
-                            <table>
-                          <td width="15%" align='left' style="padding-inline: 10px;">{{=B('1ª Poda espécie: ')}}<div align='left' class="card">
-                                    {{=form.custom.widget['especie_poda1']}}</td>
-                          <td width="10%" align='left' style="padding-inline: 10px;">{{=B('1ª Poda qtd.: ')}}<div align='left' class="card">
+                        <table>
+                          <td width="10%" align='left' style="padding-inline: 5px;">{{=B('1ª Poda qtd.: ')}}<div align='left' class="card">
                                     {{=form.custom.widget['qtd_poda1']}}</td>
+                          <td width="15%" align='left' style="padding-inline: 5px;">{{=B('1ª Poda espécie: ')}}<div align='left' class="card">
+                                    {{=form.custom.widget['especie_poda1']}}</td>
                                 {{db.Requerimentos.especie_poda2.show_if = (db.Requerimentos.especie_poda1!=None)}}
-                            <td width="15%" align='left' style="padding-inline: 10px;">{{=B('2ª Poda espécie: ')}}<div align='left' class="card">
-                                    {{=form.custom.widget['especie_poda2']}}</td>
-                            <td width="10%" align='left' style="padding-inline: 10px;">{{=B('2ª Poda qtd.: ')}}<div align='left' class="card">
+                            <td width="10%" align='left' style="padding-inline: 5px;">{{=B('2ª Poda qtd.: ')}}<div align='left' class="card">
                                     {{=form.custom.widget['qtd_poda2']}}</td>
-                            <td width="15%" align='left' style="padding-inline: 10px;">{{=B('3ª Poda espécie: ')}}<div align='left' class="card">
-                                    {{=form.custom.widget['especie_poda3']}}</td>
-                            <td width="10%" align='left' style="padding-inline: 10px;">{{=B('3ª Poda qtd.: ')}}<div align='left' class="card">
+                            <td width="15%" align='left' style="padding-inline: 5px;">{{=B('2ª Poda espécie: ')}}<div align='left' class="card">
+                                    {{=form.custom.widget['especie_poda2']}}</td>
+                            <td width="10%" align='left' style="padding-inline: 5px;">{{=B('3ª Poda qtd.: ')}}<div align='left' class="card">
                                     {{=form.custom.widget['qtd_poda3']}}</td>
-                            <td width="15%" align='left' style="padding-inline: 10px;">{{=B('4ª Poda espécie: ')}}<div align='left' class="card">
-                                    {{=form.custom.widget['especie_poda4']}}</td>
-                            <td width="10%" align='left' style="padding-inline: 10px;">{{=B('4ª Poda qtd.: ')}}<div align='left' class="card">
+                            <td width="15%" align='left' style="padding-inline: 5px;">{{=B('3ª Poda espécie: ')}}<div align='left' class="card">
+                                    {{=form.custom.widget['especie_poda3']}}</td>
+                            <td width="10%" align='left' style="padding-inline: 5px;">{{=B('4ª Poda qtd.: ')}}<div align='left' class="card">
                                     {{=form.custom.widget['qtd_poda4']}}</td>
+                            <td width="15%" align='left' style="padding-inline: 5px;">{{=B('4ª Poda espécie: ')}}<div align='left' class="card">
+                                    {{=form.custom.widget['especie_poda4']}}</td>
                             </table>
                         </tr>
                         <tr>
                             <table>
-                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('1ª Supressão espécie: ')}}<div align='left' class="card">
-                                        {{=form.custom.widget['especie_ret1']}}</td>
-                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('1ª Supr. qtr.: ')}}<div align='left' class="card">
+                                <td width="10%" align='left' style="padding-inline: 5px;">{{=B('1ª Supr. qtr.: ')}}<div align='left' class="card">
                                         {{=form.custom.widget['qtd_ret1']}}</td>
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('1ª Supressão espécie: ')}}<div align='left' class="card">
+                                        {{=form.custom.widget['especie_ret1']}}</td>
                             
-                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('2ª Supressão espécie: ')}}<div align='left' class="card">
-                                        {{=form.custom.widget['especie_ret2']}}</td>
-                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('2ª Supr. qtr.: ')}}<div align='left' class="card">
+                                <td width="10%" align='left' style="padding-inline: 5px;">{{=B('2ª Supr. qtr.: ')}}<div align='left' class="card">
                                         {{=form.custom.widget['qtd_ret2']}}</td>
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('2ª Supressão espécie: ')}}<div align='left' class="card">
+                                        {{=form.custom.widget['especie_ret2']}}</td>
                             
-                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('3ª Supressão espécie: ')}}<div align='left' class="card">
-                                        {{=form.custom.widget['especie_ret3']}}</td>
-                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('3ª Supr. qtr.: ')}}<div align='left' class="card">
+                                <td width="10%" align='left' style="padding-inline: 5px;">{{=B('3ª Supr. qtr.: ')}}<div align='left' class="card">
                                         {{=form.custom.widget['qtd_ret3']}}</td>
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('3ª Supressão espécie: ')}}<div align='left' class="card">
+                                        {{=form.custom.widget['especie_ret3']}}</td>
                             
-                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('4ª Supressão espécie: ')}}<div align='left' class="card">
-                                        {{=form.custom.widget['especie_ret4']}}</td>
-                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('4ª Supr. qtr.: ')}}<div align='left' class="card">
+                                <td width="10%" align='left' style="padding-inline: 5px;">{{=B('4ª Supr. qtr.: ')}}<div align='left' class="card">
                                         {{=form.custom.widget['qtd_ret4']}}</td>
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('4ª Supressão espécie: ')}}<div align='left' class="card">
+                                        {{=form.custom.widget['especie_ret4']}}</td>
                             </table>
                         </tr>
-                            <tr>    
-                                <td width="20%" align='left'>{{=B('Qtd. a Repor:')}} <div align='center' class="card">
-                                        {{=form.custom.widget['qtd_repor']}}</div></td>
-                                <td width="20%" align='left'>{{=B('Porte a Repor:')}} <div align='center' class="card">
-                                        {{=form.custom.widget['porte_repor']}}</div></td>
-                                <td width="20%" align='left'>{{=B('Tipo de Imóvel:')}} <div align='center' class="card">
-                                        {{=form.custom.widget['tipo']}}</div></td>
-                                <td width="20%" align='left'>{{=B('Obs.:')}} <div align='center' class="card">
-                                        {{=form.custom.widget['Obs']}}</div></td>
-                            </tr>
-                        <table width="55%">
+                                <tr>
+                                        <table>
+                                                <td width="8%" align='left'>{{=B('Qtd. a Repor:')}}{{=form.custom.widget['qtd_repor']}}</td>
+
+                                                <td width="20%" align='left'>{{=B('Porte a Repor:')}} <div align='center' class="card">
+                                                        {{=form.custom.widget['porte_repor']}}</div></td>
+
+                                                <td width="20%" align='left'>{{=B('Tipo de Imóvel:')}} <div align='center' class="card">
+                                                        {{=form.custom.widget['tipo']}}</div></td>
+                                        </table>
+                                                <td width="20%" align='left'>{{=B('Obs.:')}} <div align='center' class="card">
+                                                        {{=form.custom.widget['Obs']}}</div></td>
+                                </tr>
+                        <table >
                             {{=B(H5('Critérios considerados na Análise:'))}}
-                            <td  align='left style="padding: 5px; justify-content: top; vertical-align: top;">
-                                <div align='center' class="card" style="border: 1px solid; padding: 5px; color: darkslategray">
+                            <div  class="card" width="45%" align='left' style="padding: 5px; vertical-align: top;">
+                                <div align='left'>
                                     <div>{{=form.custom.widget['p1']}} Conflito com fiação elétrica</div> 
                                     <div>{{=form.custom.widget['p2']}} Prejuizo a rede de água/esgoto</div>
                                     <div>{{=form.custom.widget['p3']}} Danos a estrutura da construção</div>
@@ -88,9 +150,11 @@
                                     <div>{{=form.custom.widget['p9']}} Obras, Reforma, Construção, Demolição</div>
                                     <div>{{=form.custom.widget['p10']}} Projetos e/ou Atividades</div>
                                     <div>{{=form.custom.widget['p11']}} Risco a população, patrimônio</div>
-                            <div>
-                            </td>
+                                </div>
+                            </div>
+
                         </table>
+
                         <br>
                             <td width="25%" align='left' style="padding-inline: 10px">{{=B('Técnico:  ')}}<div align='left' class="card">{{=form.custom.widget['tecnico']}}</td></div>            
 

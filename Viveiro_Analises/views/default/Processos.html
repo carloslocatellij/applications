@@ -47,48 +47,43 @@
                         </tr>
                         <tr>
                             <table>
-                          <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['especie_poda1']}}</td>
-                          <td width="10%" align='left' style="padding-inline: 10px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['qtd_poda1']}}</td>
-                                {{db.Requerimentos.especie_poda2.show_if = (db.Requerimentos.especie_poda1!=None)}}
-                            <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['especie_poda2']}}</td>
-                            <td width="10%" align='left' style="padding-inline: 10px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['qtd_poda2']}}</td>
-
-                            <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['especie_poda3']}}</td>
-                            <td width="10%" align='left' style="padding-inline: 10px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['qtd_poda3']}}</td>
-
-                            <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Poda esp.: ')}}<div align='left' class="card">
+                                <td width="8%" align='left' style="padding-inline: 5px;">{{=B('1º Poda qtd.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['qtd_poda1']}}</td>
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('1º Poda espécie: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['especie_poda1']}}</td>
+                                        {{db.Requerimentos.especie_poda2.show_if = (db.Requerimentos.especie_poda1!=None)}}
+                                <td width="8%" align='left' style="padding-inline: 5px;">{{=B('2º Poda qtd.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['qtd_poda2']}}</td>
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('2º Poda espécie: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['especie_poda2']}}</td>
+                                <td width="8%" align='left' style="padding-inline: 5px;">{{=B('3º Poda qtd.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['qtd_poda3']}}</td>
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('3º Poda espécie: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['especie_poda3']}}</td>
+                                <td width="8%" align='left' style="padding-inline: 5px;">{{=B('4º Poda qtd.: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['qtd_poda4']}}</td>
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('4º Poda espécie: ')}}<div align='left' class="card">
                                     {{=formprocess.custom.widget['especie_poda4']}}</td>
-                            <td width="10%" align='left' style="padding-inline: 10px;">{{=B('Poda qtd.: ')}}<div align='left' class="card">
-                                    {{=formprocess.custom.widget['qtd_poda4']}}</td>
                             </table>
                         </tr>
                         <tr>
                             <table>
-                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Retirada esp.: ')}}<div align='left' class="card">
-                                        {{=formprocess.custom.widget['especie_ret1']}}</td>
-                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('ret qtd.: ')}}<div align='left' class="card">
+                                <td width="8%" align='left' style="padding-inline: 5px;">{{=B('1º Supr. qtd.: ')}}<div align='left' class="card">
                                         {{=formprocess.custom.widget['qtd_ret1']}}</td>
-                            
-                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Retirada esp.: ')}}<div align='left' class="card">
-                                        {{=formprocess.custom.widget['especie_ret2']}}</td>
-                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('ret qtd.: ')}}<div align='left' class="card">
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('1º Supressão espécie: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['especie_ret1']}}</td>
+                                <td width="8%" align='left' style="padding-inline: 5px;">{{=B('2º Supr. qtd.: ')}}<div align='left' class="card">
                                         {{=formprocess.custom.widget['qtd_ret2']}}</td>
-                            
-                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Retirada esp.: ')}}<div align='left' class="card">
-                                        {{=formprocess.custom.widget['especie_ret3']}}</td>
-                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('ret qtd.: ')}}<div align='left' class="card">
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('2º Supressão espécie: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['especie_ret2']}}</td>
+                                <td width="8%" align='left' style="padding-inline: 5px;">{{=B('3º Supr. qtd.: ')}}<div align='left' class="card">
                                         {{=formprocess.custom.widget['qtd_ret3']}}</td>
-                            
-                                <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Retirada esp.: ')}}<div align='left' class="card">
-                                        {{=formprocess.custom.widget['especie_ret4']}}</td>
-                                <td width="10%" align='left' style="padding-inline: 10px;">{{=B('ret qtd.: ')}}<div align='left' class="card">
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('3º Supressão espécie: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['especie_ret3']}}</td>
+                                <td width="8%" align='left' style="padding-inline: 5px;">{{=B('4º Supr. qtd.: ')}}<div align='left' class="card">
                                         {{=formprocess.custom.widget['qtd_ret4']}}</td>
+                                <td width="15%" align='left' style="padding-inline: 5px;">{{=B('4º Supressão espécie: ')}}<div align='left' class="card">
+                                        {{=formprocess.custom.widget['especie_ret4']}}</td>
                             </table>
                         </tr>
                             <tr>    
