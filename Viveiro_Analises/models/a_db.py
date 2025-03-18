@@ -55,6 +55,7 @@ if configuration.get('app.production'):
             migrate_enabled=True, migrate=False, fake_migrate_all=False, lazy_tables=True,
             check_reserved=['mysql'], adapter_args={'safe': True},
             )
+    
     authdb = DAL('{}://{}:{}@{}/{}'.format(
                 configuration.take("db")['engine'],
                 configuration.take("db")['username'],
@@ -124,10 +125,13 @@ if not configuration.get('app.production'):
     auth = Auth(
         db, host_names=configuration.get('host.names'), 
         )
+    signature = auth.sgnature
+    
 else:
     auth = Auth(
-        authdb, host_names=configuration.get('host.names'),
+        authdb, host_names=configuration.get('host.names'), 
         )
+
 
 # -------------------------------------------------------------------------
 # create all tables needed by auth, maybe add a list of extra fields
@@ -142,7 +146,7 @@ else:
 #     #Field('CPF', 'text', requires=IS_CPF()),
 # ]
 
-auth.define_tables(username=True,  migrate=True, fake_migrate=False, )
+auth.define_tables(username=True,  migrate=True, fake_migrate=False )
 
 #auth.settings.update_fields = [ 'first_name', 'last_name', 'username', 'email', 'IdDepto']
 
