@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html manifest="manifest.appcache">
-<!--[if (gt IE 9)|!(IE)]><!-->
-<html class="no-js" lang="{{='pt-br'}}"> <!--<![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js" lang="{{='pt-br'}}"> <!--<![endif]-->
 
 <head>
     <meta charset="utf-8" lang="pt-br">
@@ -37,14 +36,11 @@
     {{block head}}
     {{end}}
 </head>
-
-<body>
-    <div class="w2p_flash alert alert-dismissable">{{=response.flash or ''}}</div>
-    
-    {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
-    {{block page_js}}
-    
+<body>   
     {{include}}
+</body>
+
+{{block page_js}}
 <script type="text/javascript">
     $(document).ready(function () {
         $('.date').mask('00/00/0000', { placeholder: "__/__/____" },);
@@ -66,5 +62,5 @@
         }
     });
 </script>
-{{end}}
-</head>
+{{end page_js}}
+

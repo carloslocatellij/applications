@@ -12,9 +12,7 @@ def Despachar(query, relation_query):
 
     soma_poda = sum([x for x in [query.get('qtd_poda1'), query.get('qtd_poda2'), query.get('qtd_poda3'), query.get('qtd_poda4')] if x])
     
-    num_extens_poda = '{}{}'.format(num2words.num2words(soma_poda, lang='pt-br').upper(), 'A' if soma_poda == 1 else '') if soma_poda != 2 else 'DUAS'
-    num_extens_poda = num_extens_poda.upper()
-        
+    num_extens_poda = num2words.num2words(soma_poda, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZAS', 'DEZES')
         
     #   APENAS PODA - SEM LAUDO
     if not relation_query:
@@ -78,6 +76,7 @@ GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESP�
             texto = f'''
                 Existem pendências
             '''
+            
         elif (not query.get('Despacho') and query.get('protocolo_anterior')):
             texto = f'''
 INFORMAMOS QUE JÁ FOI REALIZADA VISTORIA TÉCNICA E AUTORIZAÇÃO PELO PROTOCOLO {query.get('protocolo_anterior')} EM XX/xxx/202x.
@@ -92,8 +91,8 @@ INFORMAMOS QUE JÁ FOI REALIZADA VISTORIA TÉCNICA E AUTORIZAÇÃO PELO PROTOCOL
         tecnico = relation_query.get('tecnico').upper() if relation_query.get('tecnico') else 'XXXXXXXXXXXXXX'
         qtd_repor = relation_query.get('qtd_repor') or 0
         soma_supress = sum([x for x in [relation_query.get('qtd_ret1'), relation_query.get('qtd_ret2'), relation_query.get('qtd_ret3'), relation_query.get('qtd_ret4')] if x])
-        num_extens_supress = '{}{}'.format(num2words.num2words(soma_supress, lang='pt-br').upper(), 'A' if soma_supress == 1 else '') if soma_supress != 2 else 'DUAS'
-        num_extens_repor = '{}{}'.format(num2words.num2words(qtd_repor, lang='pt-br').upper(), 'A' if soma_supress == 1 else '') if soma_supress != 2 else 'DUAS'
+        num_extens_supress = num2words.num2words(soma_supress, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZAS', 'DEZES')
+        num_extens_repor = num2words.num2words(qtd_repor, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZAS', 'DEZES')
         
         
         # DEFERIDO SUPRESSÃO PARTICULAR COM REPLANTIO
@@ -228,12 +227,21 @@ DE FORMA DISTRIBUÍDA E EQUILIBRADA.
             
             
             # indeferido
-            '''
-            Em vistoria realizada no dia 04/02/2025 pelo Técnico Guilherme Cavenaghi, na Rua Joaquim Antônio Machado, N 1492, São Deocleciano, constatou-se o que segue:
-As árvore(s) estão(s) bem desenvolvida e com galhos com boa conformação, com uma distância segura das fiações elétricas e outras infraestruturas.
-Como não foi constatada a presença de galhos secos, a árvore está equilibrada, sem galhos frágeis e conflito com as instalações não há a necessidade de manejo.
-Considerando que, a arborização desempenha um papel crucial na manutenção da temperatura em ambientes urbanos. Árvores, especialmente aquelas com copas frondosas, contribuem significativamente para a estabilização térmica das áreas urbanas por meio de sombreamento e evapotranspiração.
-Além de regular a temperatura, as árvores melhoram a qualidade do ar ao absorver poluentes e liberar oxigênio. Um ambiente mais fresco e limpo contribui para o bem-estar dos residentes e reduz o consumo de energia para resfriamento.
+        elif (relation_query.get('Despacho') == 'Indeferido'
+            and relation_query.get('proprietario')
+            and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência']):
+           
+            texto= f'''
+Em vistoria realizada no dia 04/02/2025 pelo Técnico {tecnico}, na {query.get('Endereco')}, constatou-se o que segue:
+As árvore(s) estão(s) bem desenvolvida e com galhos com boa conformação, com uma distância segura das fiações elétricas
+e outras infraestruturas.
+Como não foi constatada a presença de galhos secos, a árvore está equilibrada, sem galhos frágeis e conflito com as instalações
+não há a necessidade de manejo.
+Considerando que, a arborização desempenha um papel crucial na manutenção da temperatura em ambientes urbanos. Árvores,
+especialmente aquelas com copas frondosas, contribuem significativamente para a estabilização térmica das áreas urbanas
+por meio de sombreamento e evapotranspiração.
+Além de regular a temperatura, as árvores melhoram a qualidade do ar ao absorver poluentes e liberar oxigênio.
+Um ambiente mais fresco e limpo contribui para o bem-estar dos residentes e reduz o consumo de energia para resfriamento.
 Não havendo necessidade para a supressão ou poda, fica indeferido o pedido.
 
 

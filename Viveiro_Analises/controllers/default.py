@@ -21,8 +21,8 @@ def api_get_user_email():
 
 def index():
     response.flash = ("Seja Bem Vindo")
-    session.counter = (session.counter or 0) + 1
-    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'), counter=session.counter)
+    
+    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'))
 
 
 # ---- Smart Grid (example) -----
