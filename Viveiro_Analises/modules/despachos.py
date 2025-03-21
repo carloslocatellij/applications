@@ -161,9 +161,6 @@ ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PE
         '''
         
         
-        #TODO: DEFERIDO SUPRESSÃO PÚBLICA COM REPLANTIO
-        
-        
         # PENDÊNCIA DE ANUÊNCIA DO PROPRIENTÁRIO
         elif (relation_query.get('Despacho') == 'Aguardando' 
               and  relation_query.get('proprietario') in ['', None, 'NULL']):

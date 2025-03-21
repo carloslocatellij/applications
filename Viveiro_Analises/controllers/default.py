@@ -80,7 +80,7 @@ def Processos(): #Menu
     if f=='editar':
         formprocess = SQLFORM(db[table], processo, submit_button=f'Atualizar {tablename}' ) # type: ignore
     elif f=='ver':
-        formprocess = SQLFORM(db[table], processo, readonly=True,  represent_none='',) # type: ignore
+        formprocess = SQLFORM(db[table], processo, readonly=True,) # type: ignore
     else:
         formprocess = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
 
