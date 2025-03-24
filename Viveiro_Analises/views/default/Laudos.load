@@ -175,5 +175,7 @@ input[type="checkbox"]:focus + label {
                         <div style="position: absolute;" id="suggestions" class="suggestions"></div>     
         </table>
     </td>  
+    {{=TD(B('DELETAR REGISTRO: '), form.custom.delete, _class="card", _width="15%", _style="border: 1px solid; color: darkgred")}}
+
     {{=form.custom.submit}} 
     {{=form.custom.end}}

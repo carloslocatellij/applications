@@ -12,7 +12,7 @@ if 0==1:
 def Modal(title, content, id, vbutton=False):
     ''' Cria um elemento modal html com titulo e informações a receber '''
 
-    xis = '×'
+    xis = 'X'
     vbutton = vbutton
     
     return CAT(XML('<button class="btn btn-primary" data-toggle="up-modal" data-target="#{}">{}</button>'.format(id, vbutton)) if vbutton else '',
@@ -25,7 +25,7 @@ def Modal(title, content, id, vbutton=False):
      _class="up-modal-header"),
      _class="up-modal-content"),
      _class="up-modal-dialog", _style="max-width: 80%"),
-     _class="up-modal", _id='grade'))
+     _class="up-modal", _id=id))
 
 def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
     campos = [Field(k, **v)  for k, v in fields.items()] 

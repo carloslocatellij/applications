@@ -126,7 +126,7 @@ Ilmo.(a) Sr.(a) {query.get('Requerente')}
 
 Fica estabelecido, de conformidade com os termos do Art. 59º da Lei nº 13.031, de 26 de setembro de 2018, regulamentada no Anexo I do Decreto nº 18.301, de 02 de maio de 2019, a AUTORIZAÇÃO para a extração de árvores, sendo as quantidades {soma_supress} ({num_extens_supress}) e respectiva(s) espécie(s): {relation_query.get('Supressoes')}.
 
-Endereço: {query.get('Endereco')}, nos termos do compromisso, de sua responsabilidade, assinado no dia \_\_\_\_\_\_\_\_\_de \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_de \_\_\_\_\_\_\_\_\_\_\_.
+Endereço: {query.get('Endereco')}, nos termos do compromisso, de sua responsabilidade, assinado no dia \_\_\_\_\_\__de \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_de \_\_\_\_\_\_\_\_\_.
 
 DECLARAÇÃO DE RESPONSABILIDADE
 
@@ -145,8 +145,25 @@ Técnico responsável: {tecnico} '''
               and relation_query.get('qtd_repor') 
               and query.get('tipo_imovel') in ['público', ]):
             
-            texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {query.get('Supressoes')}; PLANTIO DE SUBSTITUIÇÃO {qtd_repor} ({num_extens_repor}) MUDA(S) DE ÁRVORE(S) DE PORTE {relation_query.get('porte_repor')}.
+            if relation_query.get('qtd_poda1'):
+            
+                texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {query.get('Supressoes')}; PLANTIO DE SUBSTITUIÇÃO {qtd_repor} ({num_extens_repor}) MUDA(S) DE ÁRVORE(S) DE PORTE {relation_query.get('porte_repor')}.
 E PODA DE LIMPEZA E ADEQUAÇÃO DE  {soma_poda} ({num_extens_poda}) ÁRVORE(S) DA(S) ESPÉCIE(S): {query.get('Podas')}. NO ENDEREÇO: {query.get('Endereco')}.
+
+SEGUIR NORMA ABNT NBR 16246-1:2013.
+
+A PODA REALIZADA EM VOLUME MAIOR QUE 25% (VINTE E CINCO POR CENTO) DA COPA ORIGINAL DA ÁRVORE É CONSIDERADA DRÁSTICA E PODE CAUSAR SÉRIOS DANOS À SAÚDE DA ÁRVORE.
+
+LEI 13.031/2018
+ART. 66.
+PARAGRAFO 2°. A REALIZAÇÃO DA PODA DE ÁRVORES, ARBUSTOS E OUTRAS PLANTAS LENHOSAS EM ÁREAS URBANAS, DEVERÃO SEGUIR OS PROCEDIMENTOS DAS NORMAS TÉCNICAS, EM CONFORMIDADE COM A LEGISLAÇÃO APLICÁVEL.
+
+DECRETO 18.301/2019
+ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PERMITIDA PODA NA QUAL A COPA DA ÁRVORE FIQUE COM FORMA GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
+        '''
+            else:
+                texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {query.get('Supressoes')}; PLANTIO DE SUBSTITUIÇÃO {qtd_repor} ({num_extens_repor}) MUDA(S) DE ÁRVORE(S) DE PORTE {relation_query.get('porte_repor')}.
+NO ENDEREÇO: {query.get('Endereco')}.
 
 SEGUIR NORMA ABNT NBR 16246-1:2013.
 
@@ -168,6 +185,16 @@ ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PE
             texto = f'''PENDÊNCIA: EM VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, VERIFICOU-SE QUE A SUPRESSÃO DA(S) ÁRVORE(S) SERÁ AUTORIZADA APÓS A ENTREGA DA ANUÊNCIA DO PROPRIETÁRIO DO IMÓVEL.
 
 PROTOCOLAR A CÓPIA DESTE DOCUMENTO NO POUPATEMPO OU PREFEITURA REGIONAL NORTE. '''
+
+
+        # PENDÊNCIA DE ALVARÁ OU PROJETO:
+        elif (relation_query.get('Despacho') == 'Com Pendência' 
+              and (relation_query.get('p9') or relation_query.get('p10'))):
+
+            texto = f'''PARA CONTINUIDADE DA ANÁLISE DA SOLICITAÇÃO DEVERÁ APRESENTAR CÓPIA DO ALVARÁ E PROJETO DE REFORMA APROVADO PELA SECRETARIA MUNICIPAL DE OBRAS .
+            
+PROTOCOLAR A CÓPIA DESTES DOCUMENTOS NO POUPATEMPO OU PREFEITURA REGIONAL NORTE FAZENDO REFERÊNCIA A ESTE PRESENTE PROTOCOLO.
+'''
 
 
             # DENÚNCIA SMAURB - PODA
@@ -224,12 +251,35 @@ DE FORMA DISTRIBUÍDA E EQUILIBRADA.
             
             
             # indeferido
+        # INDEFERIDO PARTICULAR - SEM PODA
         elif (relation_query.get('Despacho') == 'Indeferido'
             and relation_query.get('proprietario')
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência']):
+            
+            
+            texto = f'''
+Ilmo.(a) Sr.(a)
+
+Considerando que, através do protocolo acima mencionado, foi solicitada autorização para supressão do(s) seguinte(s) exemplar(es) arbóreo(s): {relation_query.get('Supressoes')}, e que, neste sentido, foi realizada a vistoria técnica por esta Secretaria Municipal do Meio Ambiente e Urbanismo.
+
+Considerando que o Plano Diretor de Arborização Urbana de São José do Rio Preto - PDAU (Lei Nº 13.031 de 26 setembro de 2018 - Art. 55 e Art. 59), tecnicamente define quais as condições em que a supressão poderá ser autorizada.
+
+Considerando que o vegetal de porte arbóreo, como componente integrante do Meio Ambiente, deve ser protegido devido ser um ser vivo e a sua relevante importância para o bem-estar dos cidadãos, bem como que deve ser preconizada a importância ambiental perante as suas muitas funções ecológicas exercidas, como a regulação térmica, manutenção da qualidade do ar e abrigo à fauna. Por seus benefícios, a árvore, precisa ser considerada um equipamento urbano essencial, e como tal necessita de uma estrutura digna para seu pleno desenvolvimento.
+
+Considerando que a(s) árvore(s) avaliada(s) encontra(m)-se ótimo estado fitossanitário (saudáveis), nos casos em que o motivo da solicitação tratar de danos da calçada, recomenda-se o alargamento do canteiro ao redor da(s) árvore(s) para contornar o problema de danos no calçamento, a utilização de canteiros maiores pode minimizar a quantidade de danos na calçada, portanto, é necessário reservar uma área livre de canteiro com material permeável (grade, grama, pedriscos e outros). 
+
+Sendo assim, a Secretaria Municipal do Meio Ambiente e Urbanismo, após a avaliação dos critérios e parâmetros para a concessão de autorização, pelo Município, INDEFERE o pedido para a supressão da(s) árvore(s) que se encontram sadias e localizadas em área de domínio público. Informamos ainda, que de acordo com a Lei, a realização de poda drástica (acima de 25% do volume da copa) é proibida (Decreto nº 18.301/2019). 
+
+Em caso de solicitação de reconsideração de despacho, faz-se necessário abrir novo requerimento por protocolo, com justificativas e/ou documentação complementar para nova vistoria.
+
+Técnico responsável: {tecnico}
+
+Atenciosamente,'''
            
-            texto= f'''
-Em vistoria realizada no dia 04/02/2025 pelo Técnico {tecnico}, na {query.get('Endereco')}, constatou-se o que segue:
+           
+           # INDEFERIDO PÚBLICO
+            '''
+Em vistoria realizada no dia {relation_query.get('data_do_laudo')} pelo Técnico {tecnico}, na {query.get('Endereco')}, constatou-se o que segue:
 As árvore(s) estão(s) bem desenvolvida e com galhos com boa conformação, com uma distância segura das fiações elétricas
 e outras infraestruturas.
 Como não foi constatada a presença de galhos secos, a árvore está equilibrada, sem galhos frágeis e conflito com as instalações

@@ -119,21 +119,39 @@ def editar_laudo():
     #response.js =  "jQuery('#Laudo').get(0).reload()"
     print(f'editar_laudo = {session.edit_laudo}')
     redirect(URL('default','Processos', extension='', args=[protoc], vars={'f':'ver'}), client_side=True) # type: ignore
-
+    
 
 @auth.requires_login()
 def Registrar_Laudo():
+    
+    #TODO: O botão de registrar laudo deve oferecer caixa de confirmação em caso de não haver supressões no processo.
     print('tentado registrar')
     protoc = request.args(0)
     processo = db(db.Requerimentos.Protocolo == protoc).select().first()
-    print(processo.Protocolo)
+    
+    # form = SQLFORM.factory()
+    # if not any([processo.qtd_ret1, processo.qtd_ret2, processo.qtd_ret3, processo.qtd_ret4]):
+    #     my_extra_element = TR(LABEL('Registrar Laudo mesmo sem supressões no Requerimento.'), INPUT(_name='agree', value=True, _type='checkbox')) # type: ignore
+    #     form[0].insert(-1, my_extra_element) # type: ignore
+    
+    # print(processo.Protocolo)
+    
+    # response.render(BEAUTIFY(Modal('Atenção', form, id='atencao')))
+    
+    # if form.process().accepted:
+    #     if form.vars.agree:  
+    
+    
     try:
-        db.Laudos.validate_and_insert(Protocolo = protoc, proprietario=processo.Requerente, data_do_laudo = processo.data_do_laudo, Despacho=processo.Despacho)
+        db.Laudos.validate_and_insert(Protocolo=protoc, proprietario=processo.Requerente, data_do_laudo=processo.data_do_laudo,
+                                    Despacho=processo.Despacho, qtd_ret1=processo.qtd_ret1, qtd_ret2=processo.qtd_ret2, 
+                                    qtd_ret3=processo.qtd_ret3, qtd_ret4=processo.qtd_ret4, especie_ret1=processo.especie_ret1,
+                                    especie_ret2=processo.especie_ret2, especie_ret3=processo.especie_ret3, especie_ret4=processo.especie_ret4)
         session.edit_laudo = True
     except Exception as e:
         session.flash = f'Erro {e}'
     
-    redirect(URL('default','Processos', extension='', args=[protoc], vars={'f':'ver'}), client_side=True) # type: ignore
+    redirect(URL('default','Processos', extension='', args=[protoc], vars={'f':'ver'})) # type: ignore
     
     
 @auth.requires_login()
@@ -143,8 +161,10 @@ def Laudos():
     f = request.vars['f'] if request.vars['f']  else 'ver'
     target='Load'
 
+    #TODO: precisa de uma forma de deleção
+
     if f=='editar':
-        form = SQLFORM(db[table], laudo, submit_button=f'Atualizar {db[table]._tablename[:-1]}')
+        form = SQLFORM(db[table], laudo, submit_button=f'Atualizar {db[table]._tablename[:-1]}', deletable=True)
     elif f=='ver':
         form = SQLFORM(db[table], laudo, readonly=True, represent_none='')
     else:
@@ -213,7 +233,7 @@ def Despachar_Processos(): #Menu
 def Lista_de_Registros():
     import re
     
-    REGEX = re.compile('^(\w+).(\w+).(\w+)\=\=(\d+)$')
+    REGEX = re.compile(r'^(\w+).(\w+).(\w+)\=\=(\d+)$')
     match = REGEX.match(request.vars.query)
     if not match:
         redirect(URL('error')) # type: ignore
