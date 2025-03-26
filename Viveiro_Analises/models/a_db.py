@@ -61,7 +61,7 @@ if configuration.get('app.production'):
                 configuration.take("db")['password'],
                 configuration.take("db")['uri'], 'Tconect' ) ,
             pool_size=50,
-            migrate_enabled=True, migrate=False, fake_migrate_all=True, lazy_tables=True,
+            migrate_enabled=True, migrate=False, fake_migrate_all=False, lazy_tables=True,
             check_reserved=['mysql'], adapter_args={'safe': True},
             )
 
@@ -142,7 +142,9 @@ else:
 #     #Field('CPF', 'text', requires=IS_CPF()),
 # ]
 
-auth.define_tables(username=True,  migrate=True, fake_migrate=False, )
+auth.define_tables(username=True,  
+                   migrate=True if not configuration.get('app.production') else False,   
+                   fake_migrate=True if not configuration.get('app.production') else False, )
 
 #auth.settings.update_fields = [ 'first_name', 'last_name', 'username', 'email', 'IdDepto']
 

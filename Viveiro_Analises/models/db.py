@@ -36,7 +36,8 @@ Bairros = db.define_table(
     Field("Regiao", 'integer',requires= IS_IN_SET(regiao_cor, zero=None)),
     primarykey=["Bairro"],
     format="Bairro",
-    migrate=True,
+    migrate=True if not configuration.get('app.production') else False,
+    fake_migrate=True if not configuration.get('app.production') else False
 )
 
 
@@ -48,8 +49,8 @@ Ruas = db.define_table(
     rname="`{}`".format(tab_ruas),
     primarykey=["ID"],
     format="%(Endereco1)s - %(Denominacao)s",
-    migrate=True,
-    fake_migrate=True,
+    migrate=True if not configuration.get('app.production') else False,
+    fake_migrate=True if not configuration.get('app.production') else False,
 )
 
 Requerimentos = db.define_table(
@@ -138,8 +139,8 @@ Requerimentos = db.define_table(
     rname="`{}`".format(tabela_solicitacoes),
     primarykey=["Protocolo"],
     format="%(Protocolo)s",
-    migrate=False,
-    fake_migrate=False,
+    migrate=True if not configuration.get('app.production') else False,
+    fake_migrate=True if not configuration.get('app.production') else False,
 )
 
 
@@ -302,8 +303,8 @@ Laudos = db.define_table(
     ),
     primarykey=["Protocolo"],
     rname="`{}`".format(tabela_laudos),
-    migrate=True,
-    fake_migrate=False,
+    migrate=True if not configuration.get('app.production') else False,
+    fake_migrate=True if not configuration.get('app.production') else False,
 )
 
 

@@ -198,15 +198,26 @@ def Despachar_Processos(): #Menu
     
     if processo:
         prime_query = db(db.Requerimentos.Protocolo == processo).select().render(0).as_dict()
+        relation_query = db(db.Laudos.Protocolo == processo)
+        query_protoc_ref = ''
         
-        relation_query = db(db.Laudos.Protocolo == processo) 
-         
+        if  prime_query.get('protocolo_anterior'):
+            
+            if db(db.Laudos.Protocolo == prime_query.get('protocolo_anterior')).count() > 0:
+                query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')) &
+                                      (db.Laudos.Protocolo == prime_query.get('protocolo_anterior'))).select().render(0).as_dict()
+                
+            else:
+                query_protoc_ref = db(db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior'))
+                if query_protoc_ref.count() > 0:
+                    query_protoc_ref = query_protoc_ref.select().render(0).as_dict()
+                    
         if relation_query.count() > 0:
             relation_query = relation_query.select().render(0).as_dict()
         else:
             relation_query = None
             
-        texto_despacho = Despachar(prime_query, relation_query)
+        texto_despacho = Despachar(prime_query, relation_query, query_protoc_ref)
 
         markdowner = Markdown2(html4tags=True,  )
         
