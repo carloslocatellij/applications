@@ -18,12 +18,12 @@
 
 
 <div class="container"  class="card" style="border: 1px solid; padding: 5px; word-wrap: break-word; color: darkslategray">
-    <!-- {{=A('<<Anterior', _href=URL(c='default',f='Processos', args=[int(processo) -1], vars={'f':'ver'}), _class='btn btn-primary',)if
+    <!-- {{=A('<<Anterior', _href=URL(c='default',f='Requerimentos', args=[int(processo) -1], vars={'f':'ver'}), _class='btn btn-primary',)if
     processo else ''}}
-    {{=A('Proximo>>', _href=URL(c='default',f='Processos', args=[int(processo) +1], vars={'f':'ver'}), _class='btn btn-primary',)if
+    {{=A('Proximo>>', _href=URL(c='default',f='Requerimentos', args=[int(processo) +1], vars={'f':'ver'}), _class='btn btn-primary',)if
     processo else ''}} -->
-{{=A(SPAN('Editar', _class="glyphicon glyphicon-envelope"), _href=URL(c='default',f='Processos', args=[processo], vars={ 'f':'editar'}), _class='btn btn-primary') if processo else '' }}
-{{=A('Novo', _href=URL(c='default',f='Processos',  vars={}), _class='btn btn-primary',) if processo else ''}}
+{{=A(SPAN('Editar', _class="glyphicon glyphicon-envelope"), _href=URL(c='default',f='Requerimentos', args=[processo], vars={ 'f':'editar'}), _class='btn btn-primary') if processo else '' }}
+{{=A('Novo', _href=URL(c='default',f='Requerimentos',  vars={}), _class='btn btn-primary',) if processo else ''}}
 {{=A('Despacho', _href=URL(c='default',f='Despachar_Processos', vars={'processo': processo}), _class='btn btn-primary',)if processo else ''}}
 
 </div>

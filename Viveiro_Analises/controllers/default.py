@@ -69,7 +69,7 @@ def download():
 
 
 @auth.requires_login()
-def Processos(): #Menu
+def Requerimentos(): #Menu
     table='Requerimentos'
     tablename = f'{db[table]._tablename[:-1]}'
     processo = request.args(0) or None
@@ -80,13 +80,13 @@ def Processos(): #Menu
     if f=='editar':
         formprocess = SQLFORM(db[table], processo, submit_button=f'Atualizar {tablename}' ) # type: ignore
     elif f=='ver':
-        formprocess = SQLFORM(db[table], processo, readonly=True,) # type: ignore
+        formprocess = SQLFORM(db[table], processo, readonly=True, ) 
     else:
         formprocess = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
 
     if formprocess.process(keepvalues= True).accepted:
         session.flash = f'Dados do protocolo atualizados' if processo else 'Protocolo Registrado'
-        redirect(URL('default', 'Processos', args=[formprocess.vars.Protocolo], vars={'f':'ver'})) # type: ignore
+        redirect(URL('default', 'Requerimentos', args=[formprocess.vars.Protocolo], vars={'f':'ver'})) # type: ignore
 
     elif formprocess.errors:
         response.flash = 'Corrija os Erros indicados'
@@ -118,7 +118,7 @@ def editar_laudo():
     session.edit_laudo = True if session.edit_laudo == False else False
     #response.js =  "jQuery('#Laudo').get(0).reload()"
     print(f'editar_laudo = {session.edit_laudo}')
-    redirect(URL('default','Processos', extension='', args=[protoc], vars={'f':'ver'}), client_side=True) # type: ignore
+    redirect(URL('default','Requerimentos', extension='', args=[protoc], vars={'f':'ver'}), client_side=True) # type: ignore
     
 
 @auth.requires_login()
@@ -151,7 +151,7 @@ def Registrar_Laudo():
     except Exception as e:
         session.flash = f'Erro {e}'
     
-    redirect(URL('default','Processos', extension='', args=[protoc], vars={'f':'ver'})) # type: ignore
+    redirect(URL('default','Requerimentos', extension='', args=[protoc], vars={'f':'ver'})) # type: ignore
     
     
 @auth.requires_login()
@@ -174,7 +174,7 @@ def Laudos():
     if form.process().accepted:
         session.flash = f'Dados do Laudo atualizados' if laudo else 'Laudo Registrado'
         editar_laudo()
-        redirect(URL('default','Processos', extension='', args=[laudo], vars={'f':'ver'}), client_side=True) # type: ignore
+        redirect(URL('default','Requerimentos', extension='', args=[laudo], vars={'f':'ver'}), client_side=True) # type: ignore
         
          
     elif form.errors:
@@ -224,8 +224,8 @@ def Despachar_Processos(): #Menu
         texto_md = markdowner.convert(texto_despacho) or None
         texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"').replace('<p>', '').replace('</p>', '')
         copybtn = TAG.button('<Copiar>', _class='btn btn-info', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
-        returnbtn = A('Voltar', _href=URL('default', 'Processos', args=[processo], vars={'f':'ver'}), _class='btn btn-primary')# type: ignore
-        newbtn = A('Novo', _href=URL('default', 'Processos'), _class='btn btn-primary')# type: ignore
+        returnbtn = A('Voltar', _href=URL('default', 'Requerimentos', args=[processo], vars={'f':'ver'}), _class='btn btn-primary')# type: ignore
+        newbtn = A('Novo', _href=URL('default', 'Requerimentos'), _class='btn btn-primary')# type: ignore
    
         conteudo = XML(texto_md) # type: ignore
     else:
@@ -241,17 +241,24 @@ def Despachar_Processos(): #Menu
 
 
 @auth.requires_login()
+
+
+@auth.requires_login()
 def Lista_de_Registros():
     import re
-    
-    REGEX = re.compile(r'^(\w+).(\w+).(\w+)\=\=(\d+)$')
+    REGEX = re.compile(r'^(\\w+).(\\w+).(\\w+)\\=\\=(\\d+)$')
     match = REGEX.match(request.vars.query)
     if not match:
         redirect(URL('error')) # type: ignore
 
     table, field, id = match.group(2), match.group(3), match.group(4)
     records = db(db[table][field]==id)
-    links = [dict(header='Ver', body=lambda row: A('Ver', _href=URL(c=session.controller, f=table, args=row.Protocolo, vars={'f': 'ver'})))] # type: ignore
+    links = [
+    dict(header='Ver', body=lambda row: A('Ver', _href=URL(c=request.args(1) , f= table, # type: ignore
+     args=row.id, vars={'f': 'ver'}))),
+    dict(header='Editar', body=lambda row: A('Editar', _href=URL(c=request.args(1) , f= table, # type: ignore
+     args=row.id, vars={'f': 'editar'})))
+     ]
 
-    return dict(records=SQLFORM.grid(records,  links=links,user_signature=False, editable=False, searchable=False, deletable=False, create=False,csv=False,
-    represent_none='', maxtextlength = 120, _class="table"), table=table)
+    return dict(records=SQLFORM.grid(records,  links=links,user_signature=False, editable=False, searchable=False,
+    deletable=False, create=False,csv=False, maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left'), table=table)
