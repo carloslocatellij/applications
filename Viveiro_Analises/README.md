@@ -107,7 +107,7 @@ Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes
 
 ## ✒️ Autores
 
-* **Seu Nome** - *Desenvolvimento* - [SeuUsuario](https://github.com/SeuUsuario)
+* **Seu Nome** - *Desenvolvimento* - [carloslocatellij](https://github.com/carloslocatellij)
 
 ## 📄 Notas
 
@@ -117,4 +117,4 @@ Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes
 
 ---
 
-⌨️ com ❤️ por [Seu Nome](https://github.com/SeuUsuario)
+⌨️ com ❤️ por [Carlos A. Locatelli J.](https://github.com/carloslocatellij)
