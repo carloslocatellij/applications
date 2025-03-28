@@ -55,7 +55,7 @@ Ruas = db.define_table(
 
 Requerimentos = db.define_table(
     "Requerimentos",
-    Field("Protocolo", unique=True, requires= [IS_INT_IN_RANGE("0", "2025000999999") ]),
+    Field("Protocolo", requires= [IS_INT_IN_RANGE("202000", "2030009999999") ]),
     Field("Requerente", requires=[IS_UPPER(), Remove_Acentos()]),
     Field(
         "data_entrada",

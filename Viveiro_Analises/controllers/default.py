@@ -82,9 +82,12 @@ def Requerimentos(): #Menu
     elif f=='ver':
         formprocess = SQLFORM(db[table], processo, readonly=True, ) 
     else:
+        db.Requerimentos.Protocolo.requires = IS_NOT_IN_DB(db, 'Requerimentos.Protocolo', error_message='Já está registrado.')
+        
         formprocess = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
+        
 
-    if formprocess.process(keepvalues= True).accepted:
+    if formprocess.process().accepted:
         session.flash = f'Dados do protocolo atualizados' if processo else 'Protocolo Registrado'
         redirect(URL('default', 'Requerimentos', args=[formprocess.vars.Protocolo], vars={'f':'ver'})) # type: ignore
 

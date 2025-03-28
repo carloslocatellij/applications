@@ -209,6 +209,7 @@
 'Is Active': 'Is Active',
 'JSON': 'JSON',
 'JSON export of visible columns': 'JSON exportar colunas visíveis',
+'Já está registrado.': 'Já está registrado.',
 'Já existe um Processo Registrado com este nº de Protocolo': 'Já existe um Processo Registrado com este nº de Protocolo',
 'Key': 'Chave',
 'Kwh': 'Kwh',

@@ -368,5 +368,7 @@ Técnico responsável: {relation_query.get('tecnico')}
         
         else:
             texto = 'Não foi possível a geração do texto.'
-        
+    '''
+    O IMÓVEL ESTÁ LOCALIZADO EM ÁREA RURAL, FICANDO DESTA FORMA ALÉM DAS ATRIBUIÇÕES DA PREFEITURA MUNICIPAL. RECOMENDAMOS QUE SEJA FEITO REQUERIMENTO/CONSULTA JUNTO A CETESB.
+'''
     return texto
