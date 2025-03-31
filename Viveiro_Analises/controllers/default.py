@@ -161,31 +161,32 @@ def Registrar_Laudo():
 def Laudos():
     table= 'Laudos'
     laudo = request.args(0) or None
-    f = request.vars['f'] if request.vars['f']  else 'ver'
-    target='Load'
 
     #TODO: precisa de uma forma de deleção
 
-    if f=='editar':
-        form = SQLFORM(db[table], laudo, submit_button=f'Atualizar {db[table]._tablename[:-1]}', deletable=True)
-    elif f=='ver':
-        form = SQLFORM(db[table], laudo, readonly=True, represent_none='')
-    else:
-        form = SQLFORM(db[table], submit_button=f'Registrar {db[table]._tablename[:-1]}')
-        
+    try:
+        if session.edit_laudo==True:
+            form = SQLFORM(db[table], laudo, submit_button=f'Atualizar {db[table]._tablename[:-1]}', deletable=True)
+        else:
+            form = SQLFORM(db[table], laudo, readonly=True, represent_none='')
 
+    except Exception as e:
+        form = SQLFORM(db[table], submit_button=f'Registrar {db[table]._tablename[:-1]}')
+    
+        
     if form.process().accepted:
         session.flash = f'Dados do Laudo atualizados' if laudo else 'Laudo Registrado'
         editar_laudo()
         redirect(URL('default','Requerimentos', extension='', args=[laudo], vars={'f':'ver'}), client_side=True) # type: ignore
-        
-         
     elif form.errors:
         response.flash = 'Corrija os Erros indicados'
     else:
         pass
 
+
     return response.render(dict(form=form, laudo=laudo))
+
+
 
 
 @auth.requires_login()
