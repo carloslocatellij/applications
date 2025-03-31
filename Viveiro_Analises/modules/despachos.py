@@ -332,6 +332,19 @@ VI. efetuar poda que comprometa o potencial de área máxima de sombreamento da 
 (...)
             '''
             
+        elif (relation_query.get('Despacho') == 'Indeferido'
+            and relation_query.get('proprietario')
+            and query.get('tipo_imovel') in ['rural']):
+            texto = f'''
+EM RESPOSTA AO REQUERIMENTO REFERENTE À AUTORIZAÇÃO DE SUPRESSÃO DE APROXIMADAMENTE {soma_supress} {num_extens_supress} LOCALIZADA(S)
+NA RUA/AV. {query.get('Endereco')} QUE, POR SE TRATAR DE IMÓVEL LOCALIZADO EM ÁREA RUARAL, SOLICITAMOS AO PROPRIETÁRIO DO IMÓVEL QUE
+CONSULTE A COMPANHIA AMBIENTAL DO ESTADO DE SÃO PAULO (CETESB), AGÊNCIA DE SÃO JOSÉ DO RIO PRETO, LOCALIZADA NA 
+AV. FLORIANO ANDRÉ CABRERA, S/N, BAIRRO JARDIM SÃO MARCOS, OU O 4º BATALHÃO DE POLÍCIA MILITAR AMBIENTAL, LOCALIZADA NA
+AV. GOV. ADHEMAR PEREIRA DE BARROS Nº 2100 - VILA DINIZ, PARA OBTER INFORMAÇÃO SOBRE DEVIDAS EXIGÊNCIAS LEGAIS NECESSÁRIAS PARA
+EFETUAR A SUPRESSÃO DO(S) EXEMPLAR(ES) ARBÓREO(S). 
+'''            
+            
+
         # PARCIALMENTE DEFERIDO
         elif (relation_query.get('Despacho') == 'Parcialmente Deferido'
             and relation_query.get('proprietario')): 
@@ -368,7 +381,5 @@ Técnico responsável: {relation_query.get('tecnico')}
         
         else:
             texto = 'Não foi possível a geração do texto.'
-    '''
-    O IMÓVEL ESTÁ LOCALIZADO EM ÁREA RURAL, FICANDO DESTA FORMA ALÉM DAS ATRIBUIÇÕES DA PREFEITURA MUNICIPAL. RECOMENDAMOS QUE SEJA FEITO REQUERIMENTO/CONSULTA JUNTO A CETESB.
-'''
+
     return texto

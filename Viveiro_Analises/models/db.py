@@ -116,6 +116,7 @@ Requerimentos = db.define_table(
                 "Em Análise",
                 "Aguardando",
                 "Com Pendência",
+                "Pendente de Compesação"
                 "",
             ]
         ),
@@ -125,14 +126,14 @@ Requerimentos = db.define_table(
         rname="`local arvore`",
         label="Local",
         requires=IS_IN_SET(
-            ["calçada", "calçada com fiação", "área interna", "área aberta"]
+            ["calçada", "calçada com fiação", "área interna", "área aberta", "praça", "canteiro central"]
         ),
     ),
     Field(
         "tipo_imovel",
         rname="`tipo imovel`",
         label="Tipo de Imóvel",
-        requires=IS_IN_SET(["público", "privado", "institucional", "terreno"]),
+        requires=IS_IN_SET(["público", "privado", "institucional", "terreno", "rural"]),
     ),
     Field("protocolo_anterior", 'reference Requerimentos',
           requires=IS_EMPTY_OR(IS_IN_DB(db, "Requerimentos.Protocolo" ))),
