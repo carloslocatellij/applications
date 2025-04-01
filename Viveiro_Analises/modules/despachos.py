@@ -107,10 +107,13 @@ EM {query_protoc_ref.get('data_do_laudo')}, SENDO ENCAMINHADA AO SETOR COMPETENT
             and relation_query.get('proprietario')
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
             
+            com_req_podas= f'e para poda de: {query.get('Podas')}, ' if query.get('qtd_podas1') else ''
+            com_podas_autorizadas= f'E para Poda de: {soma_poda_autorizada} ({num_extens_poda_autorizada}),  e respectiva(s) espécie(s): {relation_query.get('Podas')}' if relation_query.get('qtd_poda1') else '' 
+            
             texto = f'''
 Ilmo.(a) Sr.(a) {query.get('Requerente')}
 
-Fica estabelecido, de conformidade com os termos do Art. 59º da Lei nº 13.031, de 26 de setembro de 2018, regulamentada no Anexo I do Decreto nº 18.301, de 02 de maio de 2019, a AUTORIZAÇÃO para a extração de árvores, sendo as quantidades {soma_supress} ({num_extens_supress}) e respectiva(s) espécie(s): {relation_query.get('Supressoes')}.
+Fica estabelecido, de conformidade com os termos do Art. 59º da Lei nº 13.031, de 26 de setembro de 2018, regulamentada no Anexo I do Decreto nº 18.301, de 02 de maio de 2019, a AUTORIZAÇÃO para a extração de árvores, sendo as quantidades {soma_supress} ({num_extens_supress}) e respectiva(s) espécie(s): {relation_query.get('Supressoes')}. {com_podas_autorizadas}
 
 Endereço: {query.get('Endereco')}, nos termos do compromisso de plantio de muda de árvores, de sua responsabilidade, assinado no dia \_\_\_\_\_\_\_\_\_de \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_de \_\_\_\_\_\_\_\_\_\_\_.
 
@@ -124,14 +127,17 @@ A responsabilidade pela supressão/poda de árvore(s) e destinação dos resídu
 Técnico responsável: {tecnico or ''}  '''
 
 
+
         # DEFERIDO SUPRESSÃO PARTICULAR SEM REPLANTIO
         elif (relation_query.get('Despacho') == 'Deferido' 
             and relation_query.get('proprietario')
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
+            com_req_podas= f'e para poda de: {query.get('Podas')}, ' if query.get('qtd_podas1') else ''
+            com_podas_autorizadas= f'E para Poda de: {soma_poda_autorizada} ({num_extens_poda_autorizada}),  e respectiva(s) espécie(s): {relation_query.get('Podas')}' if relation_query.get('qtd_poda1') else '' 
             texto= f'''
 Ilmo.(a) Sr.(a) {query.get('Requerente')}
 
-Fica estabelecido, de conformidade com os termos do Art. 59º da Lei nº 13.031, de 26 de setembro de 2018, regulamentada no Anexo I do Decreto nº 18.301, de 02 de maio de 2019, a AUTORIZAÇÃO para a extração de árvores, sendo as quantidades {soma_supress} ({num_extens_supress}) e respectiva(s) espécie(s): {relation_query.get('Supressoes')}.
+Fica estabelecido, de conformidade com os termos do Art. 59º da Lei nº 13.031, de 26 de setembro de 2018, regulamentada no Anexo I do Decreto nº 18.301, de 02 de maio de 2019, a AUTORIZAÇÃO para a extração de árvores, sendo as quantidades {soma_supress} ({num_extens_supress}) e respectiva(s) espécie(s): {relation_query.get('Supressoes')}. {com_podas_autorizadas}
 
 Endereço: {query.get('Endereco')}, nos termos do compromisso, de sua responsabilidade, assinado no dia \_\_\_\_\_\__de \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_de \_\_\_\_\_\_\_\_\_.
 
@@ -152,7 +158,7 @@ Técnico responsável: {tecnico} '''
               and relation_query.get('qtd_repor') 
               and query.get('tipo_imovel') in ['público', ]):
             
-            # DEFERIDO SUPRESSÃO PÚBLICA COM REPLANTIO -SEM PODA
+            # DEFERIDO SUPRESSÃO PÚBLICA COM REPLANTIO - COM PODA
             if relation_query.get('qtd_poda1'):
                 texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {query.get('Supressoes')}; PLANTIO DE SUBSTITUIÇÃO {qtd_repor} ({num_extens_repor}) MUDA(S) DE ÁRVORE(S) DE PORTE {relation_query.get('porte_repor')}.
 E PODA DE LIMPEZA E ADEQUAÇÃO DE  {soma_poda} ({num_extens_poda}) ÁRVORE(S) DA(S) ESPÉCIE(S): {query.get('Podas')}. NO ENDEREÇO: {query.get('Endereco')}.
@@ -169,7 +175,7 @@ DECRETO 18.301/2019
 ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PERMITIDA PODA NA QUAL A COPA DA ÁRVORE FIQUE COM FORMA GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
         '''
             
-            # DEFERIDO SUPRESSÃO PÚBLICA COM REPLANTIO - COM PODA
+            # DEFERIDO SUPRESSÃO PÚBLICA COM REPLANTIO - SEM PODA
             else:
                 texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {query.get('Supressoes')}; PLANTIO DE SUBSTITUIÇÃO {qtd_repor} ({num_extens_repor}) MUDA(S) DE ÁRVORE(S) DE PORTE {relation_query.get('porte_repor')}.
 NO ENDEREÇO: {query.get('Endereco')}.

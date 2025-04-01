@@ -116,11 +116,8 @@ def Requerimentos(): #Menu
 
 
 def editar_laudo():
-    print('chamou editar_laudo')
     protoc = request.args(0)
     session.edit_laudo = True if session.edit_laudo == False else False
-    #response.js =  "jQuery('#Laudo').get(0).reload()"
-    print(f'editar_laudo = {session.edit_laudo}')
     redirect(URL('default','Requerimentos', extension='', args=[protoc], vars={'f':'ver'}), client_side=True) # type: ignore
     
 
@@ -161,8 +158,6 @@ def Registrar_Laudo():
 def Laudos():
     table= 'Laudos'
     laudo = request.args(0) or None
-
-    #TODO: precisa de uma forma de deleção
 
     try:
         if session.edit_laudo==True:
