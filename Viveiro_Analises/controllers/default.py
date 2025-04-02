@@ -206,11 +206,11 @@ def Despachar_Processos(): #Menu
                 query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')) &
                                       (db.Laudos.Protocolo == prime_query.get('protocolo_anterior'))).select().render(0).as_dict()
                 
-            else:
-                query_protoc_ref = db(db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior'))
-                if query_protoc_ref.count() > 0:
-                    query_protoc_ref = query_protoc_ref.select().render(0).as_dict()
+            elif db(db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')):
+                    query_protoc_ref = db(db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')).select().render(0).as_dict
                     
+            
+            
         if relation_query.count() > 0:
             relation_query = relation_query.select().render(0).as_dict()
         else:

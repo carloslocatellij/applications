@@ -72,24 +72,39 @@ ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PE
 GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
         
         '''
+        
+        # APENAS PENDÊNCIAS
         elif (query.get('Despacho') == 'Com Pendência'):
             texto = f'''
                 Existem pendências
             '''
             
+        # VISTORIA JÁ REALIZADA - PROTOCOLO ANTERIOR
         elif (query.get('protocolo_anterior')):
-            query_protoc_ref['data_do_laudo'] = query_protoc_ref.get('data_do_laudo').strftime('%d/%m/%Y')
-            tecnico = query_protoc_ref.get('tecnico').upper() if query_protoc_ref.get('tecnico') else 'XXXXXXXXXXXXXX'
+            if query_protoc_ref.get('Requerimentos'):
+                data_do_laudo = query_protoc_ref['Requerimentos'].get('data_do_laudo').strftime('%d/%m/%Y')
+                
+            else:
+                data_do_laudo = query_protoc_ref.get('data_do_laudo').strftime('%d/%m/%Y')
+                
+            tecnico = query_protoc_ref.get('Laudos').get('tecnico').upper() if query_protoc_ref.get('tecnico') else 'XXXXXXXXXXXXXX'
+            supressoes = 'Supressões: ' + query_protoc_ref.get('Laudos').get('Supressoes') or ''
+            podas = 'Podas: ' + query_protoc_ref.get('Laudos').get('Podas') or ''
             texto = f'''
-INFORMAMOS QUE JÁ FOI REALIZADA VISTORIA TÉCNICA PELO TÉCNICO {query_protoc_ref.get('tecnico')} E AUTORIZAÇÃO PELO PROTOCOLO {query_protoc_ref.get('Protocolo')}
-EM {query_protoc_ref.get('data_do_laudo')}, SENDO ENCAMINHADA AO SETOR COMPETENTE PARA AS PROVIDENCIAS NECESSÁRIAS.
+INFORMAMOS QUE JÁ FOI REALIZADA VISTORIA TÉCNICA PELO TÉCNICO {tecnico} E AUTORIZAÇÃO PELO PROTOCOLO {query.get('protocolo_anterior')}
+EM {data_do_laudo}:
+
+{supressoes}
+{podas}
+
+SENDO ENCAMINHADA AO SETOR COMPETENTE PARA AS PROVIDENCIAS NECESSÁRIAS.
 
 '''
         else:
             texto = 'Não foi possível a geração do texto.'
             
             
-    #   SUPRESSÕES  -  TEM LAUDO
+    #   TEM LAUDO
     else:
         tecnico = relation_query.get('tecnico').upper() if relation_query.get('tecnico') else 'XXXXXXXXXXXXXX'
         qtd_repor = relation_query.get('qtd_repor') or 0
