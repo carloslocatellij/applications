@@ -403,6 +403,38 @@ db.Laudos.Podas = Field.Virtual(
     ),
 )
 
+Especies = db.define_table(
+    "Especies",
+    Field("Nome", "string", length=30, notnull=True),
+    Field("Especie", "string", length=40),
+    Field("Familia", "string", length=30),
+    Field("OutroNome", "string", length=250),
+    Field("Bioma", "string", length=15),
+    Field("Regiao", "string", length=15),
+    Field("Ameaca", "string", length=20),
+    Field("GrupoEco", "string", length=10),
+    Field("ClasseSucessao", "string", length=20),
+    Field("Porte", "string", length=10),
+    Field("TamanhoMax", "decimal(3,2)"),
+    Field("IniFloracao", "string", length=15),
+    Field("FimFloracao", "string", length=15),
+    Field("IniFrutificacao", "string", length=15),
+    Field("FimFrutificacao", "string", length=15),
+    Field("CorDaFlor", "string", length=20),
+    Field("TipoFruto", "string", length=10),
+    Field("SinPolinizacao", "string", length=20),
+    Field("SinDispercao", "string", length=20),
+    Field("NativaBr", "boolean"),
+    Field("Frutifera", "boolean"),
+    Field("Calcada", "boolean"),
+    Field("foto", "text"),
+    Field("obs", "text"),
+    format="%(Nome)s",
+    migrate=True if not configuration.get('app.production') else False,
+    fake_migrate=True if not configuration.get('app.production') else False,
+)
+
+
 # DADOS DE TESTE INSERIDOS AUTOMÁTICAMENTE EM AMBIENTE DE TESTE.
 if not configuration.get("app.production"):
     from faker import Faker  # type: ignore
@@ -581,9 +613,9 @@ if not configuration.get("app.production"):
                 Obs=fake.text(),
                 tecnico=fake.random_element(
                     elements=[
-                        "Guilherme Cavenaghi",
-                        "Renan Fabrizzio Lima Viche",
-                        "Otton Garcia Arruda",
+                        "Gandalf the Mage",
+                        "Sauruman the White",
+                        "Galadriel daugther of Finarfin",
                         "",
                     ]
                 ),

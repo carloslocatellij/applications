@@ -81,15 +81,20 @@ GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESP�
             
         # VISTORIA JÁ REALIZADA - PROTOCOLO ANTERIOR
         elif (query.get('protocolo_anterior')):
-            if query_protoc_ref.get('Requerimentos'):
+            if query_protoc_ref.get('Laudos'):
                 data_do_laudo = query_protoc_ref['Requerimentos'].get('data_do_laudo').strftime('%d/%m/%Y')
+                tecnico = query_protoc_ref.get('Laudos').get('tecnico').upper() if query_protoc_ref.get('tecnico') else 'XXXXXXXXXXXXXX'
+                podas = 'Podas: ' + query_protoc_ref.get('Laudos').get('Podas') or ''
+                supressoes = 'Supressões: ' + query_protoc_ref.get('Laudos').get('Supressoes') or ''
                 
             else:
                 data_do_laudo = query_protoc_ref.get('data_do_laudo').strftime('%d/%m/%Y')
-                
-            tecnico = query_protoc_ref.get('Laudos').get('tecnico').upper() if query_protoc_ref.get('tecnico') else 'XXXXXXXXXXXXXX'
-            supressoes = 'Supressões: ' + query_protoc_ref.get('Laudos').get('Supressoes') or ''
-            podas = 'Podas: ' + query_protoc_ref.get('Laudos').get('Podas') or ''
+                podas = 'Podas: ' + query_protoc_ref.get('Podas') or ''
+                supressoes = 'Supressões: ' + query_protoc_ref.get('Supressoes') or ''
+                tecnico = 'XXXXXXXXXXXXXX'
+                    
+            
+            
             texto = f'''
 INFORMAMOS QUE JÁ FOI REALIZADA VISTORIA TÉCNICA PELO TÉCNICO {tecnico} E AUTORIZAÇÃO PELO PROTOCOLO {query.get('protocolo_anterior')}
 EM {data_do_laudo}:
@@ -207,7 +212,10 @@ DECRETO 18.301/2019
 ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PERMITIDA PODA NA QUAL A COPA DA ÁRVORE FIQUE COM FORMA GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
         '''
         
-        #TODO: DEFERIDO SUPRESSÃO PÚBLICA SEM REPLANTIO
+        
+        
+        #TODO: DEFERIDO APENAS PODA PÚBLICA COM LAUDO 
+        # DEFERIDO SUPRESSÃO PÚBLICA SEM REPLANTIO
         elif (relation_query.get('Despacho') == 'Deferido' 
               and not relation_query.get('qtd_repor') 
               and query.get('tipo_imovel') in ['público', ]):
