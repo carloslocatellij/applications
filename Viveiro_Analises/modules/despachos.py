@@ -11,12 +11,10 @@ def Despachar(query, relation_query, query_protoc_ref):
         relation_query['data_do_laudo'] = relation_query.get('data_do_laudo').strftime('%d/%m/%Y')
 
     soma_poda = sum([x for x in [query.get('qtd_poda1'), query.get('qtd_poda2'), query.get('qtd_poda3'), query.get('qtd_poda4')] if x])
-    
     num_extens_poda = num2words.num2words(soma_poda, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
         
     #   APENAS PODA - SEM LAUDO
     if not relation_query:
-        
         
         # IMÓVEL PARTICULAR
         if (query.get('Despacho') == 'Deferido' 
@@ -51,6 +49,7 @@ A responsabilidade pela poda de árvore(s) e destinação dos resíduos gerados 
         
         # IMÓVEL PÚBLICO
         elif (query.get('Despacho') == 'Deferido' 
+        and not query.get('protocolo_anterior')
         and query.get('tipo_imovel') in ['público',  ]):
             texto = f'''
 DE ACORDO COM A VISTORIA REALIZADA EM {query.get('data_do_laudo')} PELO TÉCNICO XXXXXXXXXXXXXXXXXXXX, CONSTATOU-SE A NECESSIDADE DE

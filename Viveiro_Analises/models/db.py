@@ -116,7 +116,7 @@ Requerimentos = db.define_table(
                 "Em Análise",
                 "Aguardando",
                 "Com Pendência",
-                "Pendente de Compesação"
+                "Pendente de Compesação",
                 "",
             ]
         ),
@@ -160,6 +160,7 @@ Laudos = db.define_table(
                     "Em Análise",
                     "Aguardando",
                     "Com Pendência",
+                    "Vistoriado por outro protocolo",
                     "",
                 ]
             )
@@ -327,7 +328,7 @@ db.Requerimentos.Supressoes = Field.Virtual(
     "Supressoes",
     lambda row: " ".join(
         [
-            f"({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} "
+            f"({row.Requerimentos.qtd_ret1 or db.Laudos(db.Laudos.Protocolo == row.Requerimentos.Protocolo).qtd_ret1}) {row.Requerimentos.especie_ret1 or db.Laudos(db.Laudos.Protocolo == row.Requerimentos.Protocolo).especie_ret1} "
             if row.Requerimentos.especie_ret1
             else "",
             f",({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}"

@@ -210,7 +210,6 @@ def Despachar_Processos(): #Menu
                     query_protoc_ref = db(db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')).select().render(0).as_dict()
                     
             
-            
         if relation_query.count() > 0:
             relation_query = relation_query.select().render(0).as_dict()
         else:
