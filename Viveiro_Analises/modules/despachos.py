@@ -332,6 +332,29 @@ Técnico responsável: {tecnico}
 
 Atenciosamente,'''
            
+        elif (relation_query.get('Despacho') == 'Indeferido'
+            and query.get('local_arvore') == 'área interna'
+            and not relation_query.get('proprietario')
+            and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
+            
+            texto = f'''
+Por se tratar de árvore localizada em área interna de propriedade particular, não existe meio legal para notificar o seu vizinho para realizar o manejo da árvore em questão no momento.
+
+Sendo assim, orientamos o(a) Sr(a). Requerente para que tome as providências que julgar convenientes, seguindo os preceitos legais, diretamente com o proprietário do imóvel que detém a árvore.
+
+Orientamos também, que diante a possibilidade de ocorrências severas, pode ser consultado a Defesa Civil.
+
+Informamos também que, de acordo com o Código Civil, Lei nº 10.406/2002,
+
+Seção II – Das Árvores Limítrofes, Art. 1.283. As raízes e os ramos de árvore, que ultrapassarem a estrema do prédio, poderão ser cortados, até o plano vertical divisório, pelo proprietário do terreno invadido.
+
+Para vistoria de árvores localizadas no próprio imóvel ou em calçadas, o meio de solicitar vistorias técnicas é pelo Poupatempo ou Prefeitura Regional Norte ou pelo link: https://cidadao.riopreto.sp.gov.br/?apl=PODA_SUPRESSAO
+
+Não possuímos equipe de manejo de árvores para áreas particulares.
+
+Atenciosamente,
+
+           '''
            
            # INDEFERIDO PÚBLICO
             '''

@@ -53,6 +53,57 @@ Ruas = db.define_table(
     fake_migrate=True if not configuration.get('app.production') else False,
 )
 
+
+def especie_represent(row):
+    esp_repr = db(db.Especies.id == int(row.id)).select().first()
+    
+    if esp_repr.Especie:
+        nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie.split(' ')[1])}"
+    else:
+        nome_cientifico = ''
+    nome = esp_repr.Nome.replace('-', ' ')
+    return f"{nome} - {nome_cientifico}"
+        
+        
+Especies = db.define_table(
+    "Especies",
+    Field('id', 'id'),
+    Field("Nome", "string", length=30, notnull=True),
+    Field("Especie", "string", length=40),
+    Field("Familia", "string", length=30),
+    Field("OutroNome", "string", length=250),
+    Field("Bioma", "string", length=15),
+    Field("Regiao", "string", length=15),
+    Field("Ameaca", "string", length=20),
+    Field("GrupoEco", "string", length=10),
+    Field("ClasseSucessao", "string", length=20),
+    Field("Porte", "string", length=10),
+    Field("TamanhoMax", "decimal(3,2)"),
+    Field("IniFloracao", "string", length=15),
+    Field("FimFloracao", "string", length=15),
+    Field("IniFrutificacao", "string", length=15),
+    Field("FimFrutificacao", "string", length=15),
+    Field("CorDaFlor", "string", length=20),
+    Field("TipoFruto", "string", length=10),
+    Field("SinPolinizacao", "string", length=20),
+    Field("SinDispercao", "string", length=20),
+    Field("NativaBr", "integer", requires=IS_CHKBOX01(on=True, off=False),
+        widget=SQLFORM.widgets.boolean.widget,
+        represent=lambda v, r: "[X]" if v else " "),
+    Field("Frutifera", "integer", requires=IS_CHKBOX01(on=True, off=False),
+        widget=SQLFORM.widgets.boolean.widget,
+        represent=lambda v, r: "[X]" if v else " "),
+    Field("Calcada", "integer", requires=IS_CHKBOX01(on=True, off=False),
+        widget=SQLFORM.widgets.boolean.widget,
+        represent=lambda v, r: "[X]" if v else " "),
+    Field("foto", "text"),
+    Field("obs", "text"),
+    format = (lambda row : especie_represent(row)),
+    migrate=True if not configuration.get('app.production') else False,
+    fake_migrate=True if not configuration.get('app.production') else False,
+)
+
+
 Requerimentos = db.define_table(
     "Requerimentos",
     Field("Protocolo", requires= [IS_INT_IN_RANGE("202000", "2030009999999") ]),
@@ -79,7 +130,7 @@ Requerimentos = db.define_table(
     Field("especie_ret1", rname="`especie ret1`"),
     Field("especie_ret2", rname="`especie ret2`"),
     Field("especie_ret3", rname="`especie ret3`"),
-    Field("especie_ret4", rname="`especie ret4`"),
+    Field("especie_ret4", 'list: string' ,rname="`especie ret4`"),
     Field("qtd_ret1", rname="`qtd ret1`"),
     Field("qtd_ret2", rname="`qtd ret2`"),
     Field("qtd_ret3", rname="`qtd ret3`"),
@@ -87,7 +138,7 @@ Requerimentos = db.define_table(
     Field("especie_poda1", rname="`especie poda1`"),
     Field("especie_poda2", rname="`especie poda2`"),
     Field("especie_poda3", rname="`especie poda3`"),
-    Field("especie_poda4", rname="`especie poda4`"),
+    Field("especie_poda4", 'list: string', rname="`especie poda4`"),
     Field("qtd_poda1", rname="`qtd poda1`"),
     Field("qtd_poda2", rname="`qtd poda2`"),
     Field("qtd_poda3", rname="`qtd poda3`"),
@@ -324,24 +375,30 @@ db.Requerimentos.Endereco = Field.Virtual(
     ),
 )
 
+# for field in db.Requerimentos.fields:
+#     if 'especie' in field and not '4' in field:
+#         db.Requerimentos[field].requires = IS_IN_DB(db, "Especies.Nome", especie_represent)
+
+
+
 db.Requerimentos.Supressoes = Field.Virtual(
     "Supressoes",
     lambda row: " ".join(
         [
-            f"({row.Requerimentos.qtd_ret1 or db.Laudos(db.Laudos.Protocolo == row.Requerimentos.Protocolo).qtd_ret1}) {row.Requerimentos.especie_ret1 or db.Laudos(db.Laudos.Protocolo == row.Requerimentos.Protocolo).especie_ret1} "
-            if row.Requerimentos.especie_ret1
+            f"({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1 or db.Laudos(db.Laudos.Protocolo == row.Requerimentos.Protocolo).especie_ret1} "
+            if row.Requerimentos.qtd_ret1
             else "",
             f",({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}"
-            if row.Requerimentos.especie_ret2
+            if row.Requerimentos.qtd_ret2
             else "",
             f",({row.Requerimentos.qtd_ret3}) {row.Requerimentos.especie_ret3} "
-            if row.Requerimentos.especie_ret3
+            if row.Requerimentos.qtd_ret3
             else "",
             f",({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}"
-            if row.Requerimentos.especie_ret4
+            if row.Requerimentos.qtd_ret4
             else "",
         ]
-    ),
+    ).replace("'", "").replace("[", "").replace("]", ""),
 )
 
 db.Requerimentos.Podas = Field.Virtual(
@@ -349,19 +406,19 @@ db.Requerimentos.Podas = Field.Virtual(
     lambda row: " ".join(
         [
             f"({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1} "
-            if row.Requerimentos.especie_poda1
+            if row.Requerimentos.qtd_poda1
             else "",
             f",({row.Requerimentos.qtd_poda2}) {row.Requerimentos.especie_poda2}"
-            if row.Requerimentos.especie_poda2
+            if row.Requerimentos.qtd_poda2
             else "",
             f",({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3} "
-            if row.Requerimentos.especie_poda3
+            if row.Requerimentos.qtd_poda3
             else "",
             f",({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}"
-            if row.Requerimentos.especie_poda4
+            if row.Requerimentos.qtd_poda4
             else "",
         ]
-    ),
+    ).replace("'", "").replace("[", "").replace("]", ""),
 )
 
 db.Laudos.Supressoes = Field.Virtual(
@@ -402,37 +459,6 @@ db.Laudos.Podas = Field.Virtual(
             else "",
         ]
     ),
-)
-
-Especies = db.define_table(
-    "Especies",
-    Field("Nome", "string", length=30, notnull=True),
-    Field("Especie", "string", length=40),
-    Field("Familia", "string", length=30),
-    Field("OutroNome", "string", length=250),
-    Field("Bioma", "string", length=15),
-    Field("Regiao", "string", length=15),
-    Field("Ameaca", "string", length=20),
-    Field("GrupoEco", "string", length=10),
-    Field("ClasseSucessao", "string", length=20),
-    Field("Porte", "string", length=10),
-    Field("TamanhoMax", "decimal(3,2)"),
-    Field("IniFloracao", "string", length=15),
-    Field("FimFloracao", "string", length=15),
-    Field("IniFrutificacao", "string", length=15),
-    Field("FimFrutificacao", "string", length=15),
-    Field("CorDaFlor", "string", length=20),
-    Field("TipoFruto", "string", length=10),
-    Field("SinPolinizacao", "string", length=20),
-    Field("SinDispercao", "string", length=20),
-    Field("NativaBr", "boolean"),
-    Field("Frutifera", "boolean"),
-    Field("Calcada", "boolean"),
-    Field("foto", "text"),
-    Field("obs", "text"),
-    format="%(Nome)s",
-    migrate=True if not configuration.get('app.production') else False,
-    fake_migrate=True if not configuration.get('app.production') else False,
 )
 
 

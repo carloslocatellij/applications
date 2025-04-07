@@ -1,5 +1,8 @@
 
 
+from gluon.sqlhtml import represent
+
+
 if 0 == 1:
     from gluon import (db, current, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
                        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01,
@@ -77,13 +80,13 @@ def Requerimentos(): #Menu
 
     tem_laudo = db(db.Laudos.Protocolo == processo).count() > 0
 
+
     if f=='editar':
         formprocess = SQLFORM(db[table], processo, submit_button=f'Atualizar {tablename}' ) # type: ignore
     elif f=='ver':
         formprocess = SQLFORM(db[table], processo, readonly=True, ) 
     else:
         db.Requerimentos.Protocolo.requires = IS_NOT_IN_DB(db, 'Requerimentos.Protocolo', error_message='Já está registrado.')
-        
         formprocess = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
         
 
@@ -239,12 +242,47 @@ def Despachar_Processos(): #Menu
 
 
 @auth.requires_login()
+def Especies(): #Menu
+    table = 'Especies'
+    tablename = f'{db[table]._tablename[:-1]}'
+    registro = request.args(0) or None
+    f = request.vars['f'] if request.vars['f']  else None
+
+    if f=='editar':
+        form = SQLFORM(db[table], registro, submit_button=f'Atualizar {tablename}' ) # type: ignore
+    elif f=='ver':
+        form = SQLFORM(db[table], registro, readonly=True, ) 
+    else:
+        db[table].id.requires = IS_NOT_IN_DB(db, f'{table}.id', error_message='Já está registrado.')
+        form = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
+        
+    if form.process().accepted:
+        session.flash = f'Dados atualizados' if registro else 'Registrado'
+        redirect(URL('default', table , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
+    elif form.errors:
+        response.flash = 'Corrija os Erros indicados'
+    else:
+        pass
+    
+    # list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente,
+    #               db.Requerimentos.Endereco, db.Requerimentos.data_do_laudo, db.Requerimentos.telefone1,
+    #               db.Requerimentos.Supressoes, db.Requerimentos.Podas, db.Requerimentos.Despacho,
+    #               db.Requerimentos.local_arvore, db.Requerimentos.tipo_imovel
+    #               ]
+    
+    formbusca = buscador('Especies',  # type: ignore
+                         Nome={'label': 'Nome Popular'},
+                         Especie={'label': 'Nome Científico'},
+                         OutroNome={'label': 'Outros Nomes'}
+                         )
+
+    return response.render(dict(form=form, formbusca=formbusca, especie=registro))
 
 
 @auth.requires_login()
 def Lista_de_Registros():
     import re
-    REGEX = re.compile(r'^(\\w+).(\\w+).(\\w+)\\=\\=(\\d+)$')
+    REGEX = re.compile(r'^(\w+).(\w+).(\w+)\=\=(\d+)$')
     match = REGEX.match(request.vars.query)
     if not match:
         redirect(URL('error')) # type: ignore
@@ -260,3 +298,5 @@ def Lista_de_Registros():
 
     return dict(records=SQLFORM.grid(records,  links=links,user_signature=False, editable=False, searchable=False,
     deletable=False, create=False,csv=False, maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left'), table=table)
+
+
