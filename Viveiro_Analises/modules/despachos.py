@@ -112,12 +112,14 @@ SENDO ENCAMINHADA AO SETOR COMPETENTE PARA AS PROVIDENCIAS NECESSÁRIAS.
     else:
         tecnico = relation_query.get('tecnico').upper() if relation_query.get('tecnico') else 'XXXXXXXXXXXXXX'
         qtd_repor = relation_query.get('qtd_repor') or 0
+        num_extens_repor = num2words.num2words(qtd_repor, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+        
         soma_supress = sum([x for x in [relation_query.get('qtd_ret1'), relation_query.get('qtd_ret2'), relation_query.get('qtd_ret3'), relation_query.get('qtd_ret4')] if x])
         num_extens_supress = num2words.num2words(soma_supress, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
-        num_extens_repor = num2words.num2words(qtd_repor, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
         
         soma_poda_autorizada = sum([x for x in [relation_query.get('qtd_poda1'), relation_query.get('qtd_poda2'), relation_query.get('qtd_poda3'), relation_query.get('qtd_poda4')] if x])
         num_extens_poda_autorizada = num2words.num2words(soma_poda_autorizada, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+        
         observacoes= f'De acordo com as observações: "{relation_query.get('Obs')}"' if relation_query.get('Obs') else ''
         
         
@@ -214,6 +216,31 @@ ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PE
         
         
         #TODO: DEFERIDO APENAS PODA PÚBLICA COM LAUDO 
+        
+        elif (relation_query.get('Despacho') == 'Deferido' 
+              and not relation_query.get('qtd_repor')
+              and not relation_query.get('qtd_ret1')
+              and query.get('tipo_imovel') in ['público', ]):
+            
+            com_podas_autorizadas= f'PODA DE: {soma_poda_autorizada} ({num_extens_poda_autorizada}),  ÁRVORES DAS ESPÉCIES: {relation_query.get('Podas')}' if relation_query.get('qtd_poda1') else '' 
+            
+            
+            texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE {com_podas_autorizadas};
+NO ENDEREÇO: {query.get('Endereco')}.
+
+SEGUIR NORMA ABNT NBR 16246-1:2013.
+
+A PODA REALIZADA EM VOLUME MAIOR QUE 25% (VINTE E CINCO POR CENTO) DA COPA ORIGINAL DA ÁRVORE É CONSIDERADA DRÁSTICA E PODE CAUSAR SÉRIOS DANOS À SAÚDE DA ÁRVORE.
+
+LEI 13.031/2018
+ART. 66.
+PARAGRAFO 2°. A REALIZAÇÃO DA PODA DE ÁRVORES, ARBUSTOS E OUTRAS PLANTAS LENHOSAS EM ÁREAS URBANAS, DEVERÃO SEGUIR OS PROCEDIMENTOS DAS NORMAS TÉCNICAS, EM CONFORMIDADE COM A LEGISLAÇÃO APLICÁVEL.
+
+DECRETO 18.301/2019
+ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PERMITIDA PODA NA QUAL A COPA DA ÁRVORE FIQUE COM FORMA GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
+        '''
+    
+    
         # DEFERIDO SUPRESSÃO PÚBLICA SEM REPLANTIO
         elif (relation_query.get('Despacho') == 'Deferido' 
               and not relation_query.get('qtd_repor') 
@@ -233,6 +260,8 @@ PARAGRAFO 2°. A REALIZAÇÃO DA PODA DE ÁRVORES, ARBUSTOS E OUTRAS PLANTAS LEN
 DECRETO 18.301/2019
 ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PERMITIDA PODA NA QUAL A COPA DA ÁRVORE FIQUE COM FORMA GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
         '''
+        
+        
         
         # PENDÊNCIA DE ANUÊNCIA DO PROPRIENTÁRIO
         elif (relation_query.get('Despacho') == 'Com Pendência' 
@@ -332,6 +361,8 @@ Técnico responsável: {tecnico}
 
 Atenciosamente,'''
            
+           
+        # INDEFERIDO PRIVADO - ÁREA INTERNA - VIZINHO
         elif (relation_query.get('Despacho') == 'Indeferido'
             and query.get('local_arvore') == 'área interna'
             and not relation_query.get('proprietario')
@@ -353,6 +384,20 @@ Para vistoria de árvores localizadas no próprio imóvel ou em calçadas, o mei
 Não possuímos equipe de manejo de árvores para áreas particulares.
 
 Atenciosamente,
+
+           '''
+        elif (relation_query.get('Despacho') == 'Indeferido'
+            and not relation_query.get('proprietario')
+            and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
+            
+            texto = f'''
+Por se tratar de árvore localizada no passeio de fronte a área de propriedade particular, não existe meio legal para notificar o seu vizinho para realizar o manejo da árvore em questão.
+
+Sendo assim, orientamos o(a) Sr(a). Requerente para que tome as providências que julgar convenientes, seguindo os preceitos legais, diretamente com o proprietário do imóvel que detém a árvore.
+
+Orientamos também, que diante a possibilidade de ocorrências severas, pode ser consultado a Defesa Civil.
+
+Para vistoria de árvores localizadas no próprio imóvel ou em calçadas, o meio de solicitar vistorias técnicas é pelo Poupatempo ou Prefeitura Regional Norte ou pelo link: https://cidadao.riopreto.sp.gov.br/?apl=PODA_SUPRESSAO
 
            '''
            
