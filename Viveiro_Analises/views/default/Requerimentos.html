@@ -1,6 +1,67 @@
 {{extend 'layout.html'}}
     {{block head}}
+<!-- ...existing code... -->
+<style>
+        .list-reference-widget {
+                margin-bottom: 10px;
+        }
 
+        .selected-items {
+                margin-top: 10px;
+        }
+
+        .selected-item {
+                display: inline-block;
+                margin: 2px;
+                padding: 2px 5px;
+                background: #f0f0f0;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+        }
+
+        .remove-item {
+                margin-left: 5px;
+                color: #999;
+                cursor: pointer;
+        }
+
+        .remove-item:hover {
+                color: #f00;
+        }
+</style>
+
+<script>
+        jQuery(function ($) {
+                $('.list-reference-widget').each(function () {
+                        var widget = $(this);
+                        var select = widget.find('.reference-select');
+                        var selected = widget.find('.selected-items');
+
+                        select.on('change', function () {
+                                var val = $(this).val();
+                                var text = $(this).find('option:selected').text();
+                                if (val) {
+                                        selected.append(
+                                                $('<div class="selected-item">').append(
+                                                        text,
+                                                        $('<input type="hidden">').attr({
+                                                                name: widget.attr('id'),
+                                                                value: val
+                                                        }),
+                                                        $('<span class="remove-item">').text('×')
+                                                )
+                                        );
+                                        $(this).val('');
+                                }
+                        });
+
+                        selected.on('click', '.remove-item', function () {
+                                $(this).parent().remove();
+                        });
+                });
+        });
+</script>
+<!-- ...existing code... -->
     {{end}}
 
     <script type="text/javascript">

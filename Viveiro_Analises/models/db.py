@@ -1,5 +1,7 @@
 from datetime import datetime
 from my_validador import *  # type: ignore
+from gluon import *
+from form_elements import *
 
 if 0 == 1:
     from gluon import *  # type: ignore
@@ -22,7 +24,7 @@ if configuration.get("app.production"):
 else:
     tabela_solicitacoes = """tab_Solicitacoes"""
     tabela_laudos = """tab_Protocolos"""
-    tab_ruas = """Ruas"""
+    tab_ruas = """tab_Ruas"""
 
 
 regiao_cor ={1:'CENTRAL', 2:'BOSQUE', 3:'TALHADO', 4:'REPRESA', 5:'VILA TONINHO', 6:'SCHIMITT',
@@ -55,12 +57,27 @@ Ruas = db.define_table(
 
 
 def especie_represent(row):
-    esp_repr = db(db.Especies.id == int(row.id)).select().first()
+    """Função para representar espécies"""
+    if not row:
+        return ''
+    
+    if isinstance(row, (int, str)):
+        esp_repr = db(db.Especies.id == int(row)).select().first()
+    else:
+        esp_repr = row
+        
+    if not esp_repr:
+        return ''
     
     if esp_repr.Especie:
-        nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie.split(' ')[1])}"
+        if len(esp_repr.Especie.split(' ')) > 1:
+            nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie.split(' ')[1])}"
+        else:
+            nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie)}"
+            
     else:
         nome_cientifico = ''
+        
     nome = esp_repr.Nome.replace('-', ' ')
     return f"{nome} - {nome_cientifico}"
         
@@ -127,10 +144,15 @@ Requerimentos = db.define_table(
     Field("cep"),
     Field("telefone1"),
     Field("email", rname="`e-mail`"),
-    Field("especie_ret1", rname="`especie ret1`"),
+Field("especie_ret1", "list:reference Especies",
+      requires=IS_LIST_OF_REFERENCES(db, 'Especies', ['id', 'Nome'], 
+                                   error_message='Espécie inválida'),
+      widget=list_reference_widget,
+      represent=lambda ids, row: [especie_represent(db.Especies[id]) for id in ids] if ids else [],
+      rname="`especie ret1`"),
     Field("especie_ret2", rname="`especie ret2`"),
     Field("especie_ret3", rname="`especie ret3`"),
-    Field("especie_ret4", 'list: string' ,rname="`especie ret4`"),
+    Field("especie_ret4", 'string' ,rname="`especie ret4`"),
     Field("qtd_ret1", rname="`qtd ret1`"),
     Field("qtd_ret2", rname="`qtd ret2`"),
     Field("qtd_ret3", rname="`qtd ret3`"),
@@ -138,7 +160,7 @@ Requerimentos = db.define_table(
     Field("especie_poda1", rname="`especie poda1`"),
     Field("especie_poda2", rname="`especie poda2`"),
     Field("especie_poda3", rname="`especie poda3`"),
-    Field("especie_poda4", 'list: string', rname="`especie poda4`"),
+    Field("especie_poda4", 'string', rname="`especie poda4`"),
     Field("qtd_poda1", rname="`qtd poda1`"),
     Field("qtd_poda2", rname="`qtd poda2`"),
     Field("qtd_poda3", rname="`qtd poda3`"),
@@ -648,3 +670,4 @@ if not configuration.get("app.production"):
                     ]
                 ),
             )
+

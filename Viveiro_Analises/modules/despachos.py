@@ -284,7 +284,7 @@ PROTOCOLAR A CÓPIA DESTES DOCUMENTOS NO POUPATEMPO OU PREFEITURA REGIONAL NORTE
 
             # DENÚNCIA SMAURB - PODA
         elif (relation_query.get('Despacho') == 'Deferido' 
-                and  not relation_query.get('qtd_ret1')  and relation_query.get('qtd_poda1')
+                and not relation_query.get('qtd_ret1')  and relation_query.get('qtd_poda1')
                 and relation_query.get('proprietario') in ['', None, 'NULL'] and relation_query.get('morador') in ['', None, 'NULL']):
             
             texto = f'''
@@ -336,7 +336,7 @@ DE FORMA DISTRIBUÍDA E EQUILIBRADA.
             
             
             # indeferido
-        # INDEFERIDO PARTICULAR - SEM PODA
+        # INDEFERIDO PRIVADO - SEM PODA
         elif (relation_query.get('Despacho') == 'Indeferido'
             and relation_query.get('proprietario')
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
@@ -386,6 +386,9 @@ Não possuímos equipe de manejo de árvores para áreas particulares.
 Atenciosamente,
 
            '''
+           
+           
+        # INDEFERIDO PRIVADO - ÁREA EXTERNA - VIZINHO
         elif (relation_query.get('Despacho') == 'Indeferido'
             and not relation_query.get('proprietario')
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
@@ -401,31 +404,29 @@ Para vistoria de árvores localizadas no próprio imóvel ou em calçadas, o mei
 
            '''
            
+           
            # INDEFERIDO PÚBLICO
-            '''
-Em vistoria realizada no dia {relation_query.get('data_do_laudo')} pelo Técnico {tecnico}, na {query.get('Endereco')}, constatou-se o que segue:
-As árvore(s) estão(s) bem desenvolvida e com galhos com boa conformação, com uma distância segura das fiações elétricas
-e outras infraestruturas.
-Como não foi constatada a presença de galhos secos, a árvore está equilibrada, sem galhos frágeis e conflito com as instalações
-não há a necessidade de manejo.
-Considerando que, a arborização desempenha um papel crucial na manutenção da temperatura em ambientes urbanos. Árvores,
-especialmente aquelas com copas frondosas, contribuem significativamente para a estabilização térmica das áreas urbanas
-por meio de sombreamento e evapotranspiração.
-Além de regular a temperatura, as árvores melhoram a qualidade do ar ao absorver poluentes e liberar oxigênio.
-Um ambiente mais fresco e limpo contribui para o bem-estar dos residentes e reduz o consumo de energia para resfriamento.
-Não havendo necessidade para a supressão ou poda, fica indeferido o pedido.
+        elif (relation_query.get('Despacho') == 'Indeferido'
+            and query.get('tipo_imovel') in ['público']):
+            plural = True if soma_poda  > 1 or soma_supress > 1 else False
+            
+            texto = f'''
+Em vistoria realizada no dia {relation_query.get('data_do_laudo')} pelo Técnico {tecnico}, no endereço {query.get('Endereco')}, foi constatado o seguinte:
+{'As árvores estão saudáveis' if plural else 'A árvore está saudável'}, bem desenvolvida(s) e com galhos em boa condição, sem riscos quanto a estruturas, sem galhos secos ou frágeis, e sem conflitos com instalações ao redor.
 
+As árvores ajudam a manter a temperatura mais agradável na cidade, fornecem sombra e melhoram a qualidade do ar. Por isso, elas são muito importantes para o bem-estar de todos.
+
+Como não há necessidade de poda ou remoção, o pedido foi indeferido.
 
 LEI Nº 13.031 DE 26 DE SETEMBRO DE 2018
-Seção II
-Das Infrações
-Art. 76. Constitui infração toda ação ou omissão contrária às disposições da presente Lei, respondendo solidariamente e sem prejuízo da responsabilidade penal e civil:
+Seção II - Das Infrações
+Art. 76. Constitui infração qualquer ação ou omissão contrária a esta Lei, sendo responsáveis:
 a) o proprietário do imóvel e/ou mandante;
 b) o autor da ação;
-c) quem, de qualquer modo, concorrer para a prática da infração. (...)
-V. efetuar poda que comprometa o potencial de altura máxima da espécie;
-VI. efetuar poda que comprometa o potencial de área máxima de sombreamento da espécie;
-(...)
+c) quem contribuir para a infração.
+
+É proibido:
+- Fazer podas que prejudiquem o crescimento ou a sombra natural da árvore.
             '''
             
         elif (relation_query.get('Despacho') == 'Indeferido'
