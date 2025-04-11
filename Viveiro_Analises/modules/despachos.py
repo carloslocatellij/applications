@@ -160,7 +160,7 @@ Ilmo.(a) Sr.(a) {query.get('Requerente')}
 
 Fica estabelecido, de conformidade com os termos do Art. 59º da Lei nº 13.031, de 26 de setembro de 2018, regulamentada no Anexo I do Decreto nº 18.301, de 02 de maio de 2019, a AUTORIZAÇÃO para a extração de árvores, sendo as quantidades {soma_supress} ({num_extens_supress}) e respectiva(s) espécie(s): {relation_query.get('Supressoes')}. {com_podas_autorizadas}
 
-Endereço: {query.get('Endereco')}, nos termos do compromisso, de sua responsabilidade, assinado no dia \_\_\_\_\_\__de \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_de \_\_\_\_\_\_\_\_\_.
+Endereço: {query.get('Endereco')}, nos termos do compromisso, de sua responsabilidade, assinado no dia \_\_\_\_\_de \_\_\_\_\_\_\_\_\_\_\_\_\_\_de \_\_\_\_\_\_.
 
 DECLARAÇÃO DE RESPONSABILIDADE
 
@@ -342,7 +342,26 @@ DE FORMA DISTRIBUÍDA E EQUILIBRADA.
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
             
             
-            texto = f'''
+            texto = f'''Ilmo.(a) Sr.(a) {relation_query.get('proprietario')},
+
+Após análise do protocolo acima mencionado, informamos que foi solicitada a autorização para supressão do(s) seguinte(s) exemplar(es) arbóreo(s): {relation_query.get('Supressoes')}.
+
+Com base na vistoria técnica realizada por esta Secretaria Municipal do Meio Ambiente e Urbanismo, constatou-se que a(s) árvore(s) encontra(m)-se em ótimo estado fitossanitário (saudáveis).
+
+Recomendamos, nos casos de danos ao calçamento, o alargamento do canteiro ao redor da(s) árvore(s) como solução para minimizar os problemas. O uso de canteiros maiores, com material permeável (como grade, grama ou pedriscos), pode reduzir os danos à calçada e proporcionar melhores condições para o desenvolvimento da(s) árvore(s).
+
+Considerando a importância das árvores para o meio ambiente e o bem-estar urbano, bem como as disposições do Plano Diretor de Arborização Urbana de São José do Rio Preto (Lei Nº 13.031/2018 - Art. 55 e Art. 59), o pedido de supressão foi **indeferido**.
+
+Informamos ainda que a realização de poda drástica (acima de 25% do volume da copa) é proibida, conforme o Decreto nº 18.301/2019.
+
+Caso deseje solicitar reconsideração deste despacho, será necessário abrir um novo requerimento com justificativas e/ou documentação complementar para nova análise.
+
+**Técnico responsável:** {tecnico}
+
+Atenciosamente,
+            '''
+            #TEXTO NORMAL:
+            '''
 Ilmo.(a) Sr.(a)
 
 Considerando que, através do protocolo acima mencionado, foi solicitada autorização para supressão do(s) seguinte(s) exemplar(es) arbóreo(s): {relation_query.get('Supressoes')}, e que, neste sentido, foi realizada a vistoria técnica por esta Secretaria Municipal do Meio Ambiente e Urbanismo.
@@ -360,6 +379,11 @@ Em caso de solicitação de reconsideração de despacho, faz-se necessário abr
 Técnico responsável: {tecnico}
 
 Atenciosamente,'''
+            '''Ilmo.(a) Sr.(a) {relation_query.get('proprietario')},
+
+Após análise do protocolo, informamos que o pedido de supressão do(s) exemplar(es) arbóreo(s): {relation_query.get('Supressoes')} foi **indeferido**. A(s) árvore(s) encontra(m)-se saudável(is). Recomendamos o alargamento do canteiro para minimizar danos ao calçamento. Poda drástica é proibida (Decreto nº 18.301/2019). Para reconsideração, abra novo requerimento.
+
+**Técnico responsável:** {tecnico}'''
            
            
         # INDEFERIDO PRIVADO - ÁREA INTERNA - VIZINHO
@@ -427,6 +451,27 @@ V. efetuar poda que comprometa o potencial de altura máxima da espécie;
 VI. efetuar poda que comprometa o potencial de área máxima de sombreamento da espécie;
 (...)
             '''
+            #TEXTO ALTERNATIVO:
+            '''
+Em vistoria realizada no dia {relation_query.get('data_do_laudo')} pelo Técnico {tecnico}, na {query.get('Endereco')}, constatou-se que:
+
+- As árvores estão bem desenvolvidas, com galhos em boa conformação e a uma distância segura das fiações elétricas e outras infraestruturas.
+- Não foram identificados galhos secos, frágeis ou em conflito com instalações, e as árvores apresentam equilíbrio estrutural.
+- Não há necessidade de manejo, pois as árvores contribuem para a regulação térmica e a qualidade do ar, desempenhando um papel essencial no ambiente urbano.
+
+Dessa forma, considerando que não há justificativa técnica para a supressão ou poda, o pedido foi **indeferido**.
+
+**Base Legal:**
+- **Lei nº 13.031 de 26 de setembro de 2018**
+  - Art. 76: Constitui infração toda ação ou omissão contrária às disposições da presente Lei, respondendo solidariamente:
+    - O proprietário do imóvel e/ou mandante;
+    - O autor da ação;
+    - Quem concorrer para a prática da infração.
+  - V: Efetuar poda que comprometa o potencial de altura máxima da espécie;
+  - VI: Efetuar poda que comprometa o potencial de área máxima de sombreamento da espécie.
+
+Atenciosamente,
+            '''
             
         elif (relation_query.get('Despacho') == 'Indeferido'
             and relation_query.get('proprietario')
@@ -456,7 +501,7 @@ Considerando que, através do protocolo acima mencionado, foi solicitada autoriz
 
 Considerando que o Código Florestal Municipal (Lei Complementar Municipal 053/1996), tecnicamente define algumas condições em que a supressão poderá ser autorizada.
 
-Considerando que as árvores encontram-se ótimo estado fitossanitário e não foram constatados danos na estrutura do imóvel ou do calçamento. Recomenda-se o alargamento do canteiro ao redor da(s) árvore(s).
+Considerando que as árvores encontram-se em ótimo estado fitossanitário e não foram constatados danos na estrutura do imóvel ou do calçamento. Recomenda-se o alargamento do canteiro ao redor da(s) árvore(s).
 
 Sendo assim, a Secretaria Municipal do Meio Ambiente e Urbanismo, após a avaliação dos critérios e parâmetros para a concessão de autorização, pelo Município, **INDEFERE** o pedido para a supressão da(s) árvore(s) que se encontram sadias. {area_publica}
 
@@ -474,7 +519,31 @@ A responsabilidade pela supressão/poda de árvore(s) e destinação dos resídu
 
 Técnico responsável: {relation_query.get('tecnico')}
             '''
-        
+            #TExTO ALTERNATIVO:
+            '''
+            Ilmo.(a) Sr.(a) {relation_query.get('proprietario')},
+
+Após análise do protocolo acima mencionado, informamos que foi solicitada a autorização para supressão do(s) seguinte(s) exemplar(es) arbóreo(s): {query.get('Supressoes')}, {com_req_podas} e realizada a vistoria técnica por esta Secretaria Municipal do Meio Ambiente e Urbanismo.
+
+**Decisão:**
+- **Indeferido:** O pedido para supressão da(s) árvore(s) que se encontram em bom estado fitossanitário, sem danos estruturais ao imóvel ou calçamento. Recomenda-se o alargamento do canteiro ao redor da(s) árvore(s) para minimizar possíveis problemas.
+{area_publica}
+- **Autorizado:** A extração de {soma_supress} ({num_extens_supress}) árvore(s) da(s) espécie(s): {relation_query.get('Supressoes')}. {com_podas_autorizadas}
+
+**Endereço:** {query.get('Endereco')}
+
+**Compromisso de Plantio:**
+O requerente compromete-se a plantar {relation_query.get('qtd_repor')} ({num_extens_repor}) muda(s) de árvore(s) de porte ({relation_query.get('porte_repor')}) no prazo de 60 (sessenta) dias a partir do recebimento desta autorização. O canteiro deve seguir o padrão ESPAÇO ÁRVORE, com dimensões mínimas de 40% da largura da calçada e comprimento equivalente ao dobro da largura, respeitando as normas de acessibilidade.
+
+**Observações:** {observacoes}
+
+**Responsabilidades:**
+- A poda ou supressão deve ser realizada por profissional habilitado.
+- O requerente é responsável pela destinação adequada dos resíduos gerados. Pequenas quantidades (até 1m³) podem ser levadas a um ponto de apoio (mais informações: https://www.riopreto.sp.gov.br/pontodeapoio/). Quantidades maiores devem ser encaminhadas à Fazendinha Ambiental. Em caso de dúvidas, contatar a Secretaria Municipal de Serviços Gerais pelo telefone (17) 3216-6310.
+- O não cumprimento do prazo acarretará penalidades previstas em lei.
+
+**Técnico responsável:** {relation_query.get('tecnico')}
+            '''
         else:
             texto = 'Não foi possível a geração do texto.'
 

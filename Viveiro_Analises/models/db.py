@@ -437,7 +437,7 @@ db.Laudos.Supressoes = Field.Virtual(
             else "",
             f",({row.Laudos.qtd_ret4}) {row.Laudos.especie_ret4}"
             if row.Laudos.especie_ret4 and not ',' in row.Laudos.especie_ret4
-            else "",
+            else f"{row.Laudos.especie_ret4 or ''}",
         ]
     ).replace("'", "").replace("[", "").replace("]", ""),
 )
