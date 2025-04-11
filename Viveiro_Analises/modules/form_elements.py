@@ -1,13 +1,11 @@
-from gluon import current, SQLFORM, DIV, SELECT, OPTION, INPUT, SPAN, SCRIPT, STYLE
+from gluon import SQLFORM, DIV, SELECT, OPTION, INPUT, SPAN, SCRIPT, STYLE
 
 
-class IS_LIST_OF_REFERENCES:
+class IS_LIST_OF_REFERENCES(object):
     """Validador personalizado para lista de referências"""
     
-    def __init__(self, db, tablename, fields, error_message='Item inválido'):
-        self.db = db
+    def __init__(self, tablename, error_message='Item inválido'):
         self.tablename = tablename
-        self.fields = fields
         self.error_message = error_message
         
     def __call__(self, value):
@@ -17,37 +15,33 @@ class IS_LIST_OF_REFERENCES:
         if isinstance(value, str):
             value = [v.strip() for v in value.split(',') if v.strip()]
             
-        errors = []
-        validated_ids = []
-        
-        for item in value:
-            if str(item).isdigit():
-                # Verifica se o ID existe na tabela
-                if self.db(self.db[self.tablename].id == item).count():
-                    validated_ids.append(int(item))
-                else:
-                    errors.append(self.error_message)
-                    
-        if errors:
-            return (value, errors)
-        return (validated_ids, None)
+        # O campo list:reference já faz a validação básica
+        return (value, None)
+    
     
 def list_reference_widget(field, value, **attributes):
     """Widget personalizado que combina lista e select box"""
+    if value is None:
+        value = []
+        
+    # Pega o db do próprio field
+    db = field._db
     
     # Obtém a tabela referenciada
-    db = current.db
     tablename = field.type.split(':')[1]
     
     # Cria o select box
     select = SELECT(
         OPTION('', _value=''),
         _class='form-control reference-select',
-        _name=field.name + '_select'
+        _name=field.name + '_select',
+        **attributes
     )
     
     # Adiciona as opções do select
-    for row in db(db[tablename]).select():
+    query = db[tablename].id > 0
+    rows = db(query).select()
+    for row in rows:
         select.append(OPTION(
             especie_represent(row), 
             _value=row.id
@@ -55,11 +49,12 @@ def list_reference_widget(field, value, **attributes):
     
     # Cria a lista de itens selecionados
     selected_list = DIV(_class='selected-items')
+    
     if value:
         if isinstance(value, str):
             value = [v.strip() for v in value.split(',') if v.strip()]
         for item_id in value:
-            row = db(db[tablename].id == item_id).select().first()
+            row = db[tablename][item_id]
             if row:
                 selected_list.append(
                     DIV(
@@ -96,28 +91,9 @@ def list_reference_widget(field, value, **attributes):
         });
         
         selected.on('click', '.remove-item', function() {
-            $(this).parent().remove();
+            $(this).parent().remove(); 
         });
     });
     """ % dict(field_id=field.name, field_name=field.name))
     
-    # Estilo para os elementos
-    style = STYLE("""
-    .selected-items { margin-top: 10px; }
-    .selected-item {
-        display: inline-block;
-        margin: 2px;
-        padding: 2px 5px;
-        background: #f0f0f0;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-    }
-    .remove-item {
-        margin-left: 5px;
-        color: #999;
-        cursor: pointer;
-    }
-    .remove-item:hover { color: #f00; }
-    """)
-    
-    return DIV(select, selected_list, script, style, _id=field.name)
+    return DIV(select, selected_list, script, _id=field.name, _class='list-reference-widget')
