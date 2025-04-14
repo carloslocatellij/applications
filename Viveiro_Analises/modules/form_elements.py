@@ -1,24 +1,49 @@
 from gluon import SQLFORM, DIV, SELECT, OPTION, INPUT, SPAN, SCRIPT, STYLE
 
-
-class IS_LIST_OF_REFERENCES(object):
-    """Validador personalizado para lista de referências"""
+def especie_represent(row):
+    """Função para representar espécies"""
+    if not row:
+        return ''
     
-    def __init__(self, tablename, error_message='Item inválido'):
-        self.tablename = tablename
-        self.error_message = error_message
+    if isinstance(row, (int, str)):
+        esp_repr = db(db.Especies.id == int(row)).select().first()
+    else:
+        esp_repr = row
         
-    def __call__(self, value):
-        if not value:
-            return ([], None)
-            
-        if isinstance(value, str):
-            value = [v.strip() for v in value.split(',') if v.strip()]
-            
-        # O campo list:reference já faz a validação básica
-        return (value, None)
+    if not esp_repr:
+        return ''
     
-    
+    if esp_repr.Especie:
+        if len(esp_repr.Especie.split(' ')) > 1:
+            nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie.split(' ')[1])}"
+        else:
+            nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie)}"
+            
+    else:
+        nome_cientifico = ''
+        
+    nome = esp_repr.Nome.replace('-', ' ')
+    return f"{nome} - {nome_cientifico}"  
+
+      
+class IS_LIST_OF_REFERENCES(object):
+        """Validador personalizado para lista de referências"""
+        
+        def __init__(self, tablename, error_message='Item inválido'):
+            self.tablename = tablename
+            self.error_message = error_message
+            
+        def __call__(self, value):
+            if not value:
+                return ([], None)
+                
+            if isinstance(value, str):
+                value = [v.strip() for v in value.split(',') if v.strip()]
+                
+            # O campo list:reference já faz a validação básica
+            return (value, None)
+        
+        
 def list_reference_widget(field, value, **attributes):
     """Widget personalizado que combina lista e select box"""
     if value is None:
@@ -28,7 +53,7 @@ def list_reference_widget(field, value, **attributes):
     db = field._db
     
     # Obtém a tabela referenciada
-    tablename = field.type.split(':')[1]
+    tablename = 'Especies'
     
     # Cria o select box
     select = SELECT(
@@ -72,28 +97,29 @@ def list_reference_widget(field, value, **attributes):
         var select = field.find('.reference-select');
         var selected = field.find('.selected-items');
         
-        select.on('change', function() {
-            var val = $(this).val();
-            var text = $(this).find('option:selected').text();
-            if (val) {
-                selected.append(
-                    $('<div class="selected-item">').append(
-                        text,
-                        $('<input type="hidden">').attr({
-                            name: '%(field_name)s',
-                            value: val
-                        }),
-                        $('<span class="remove-item">').text('×')
-                    )
-                );
-                $(this).val('');
-            }
-        });
-        
-        selected.on('click', '.remove-item', function() {
-            $(this).parent().remove(); 
-        });
-    });
-    """ % dict(field_id=field.name, field_name=field.name))
     
+    select.on('change', function() {
+        var val = $(this).val();
+        var text = $(this).find('option:selected').text();
+        if (val) {
+            selected.append(
+                $('<div class="selected-item">').append(
+                    text,
+                    $('<input type="hidden">').attr({
+                        name: '%(field_name)s',
+                        value: val
+                    }),
+                    $('<span class="remove-item">').text('×')
+                )
+            );
+            $(this).val('');
+        }
+    });
+    
+    selected.on('click', '.remove-item', function() {
+        $(this).parent().remove(); 
+    });
+});
+""" % dict(field_id=field.name, field_name=field.name))
+
     return DIV(select, selected_list, script, _id=field.name, _class='list-reference-widget')

@@ -144,7 +144,7 @@ Requerimentos = db.define_table(
     Field("cep"),
     Field("telefone1"),
     Field("email", rname="`e-mail`"),
-Field("especie_ret1", "list:reference Especies",
+Field("especie_ret1", "string",
       requires=IS_LIST_OF_REFERENCES('Especies'),
       widget=list_reference_widget,
       represent=lambda ids, row: [especie_represent(db.Especies[id]) for id in ids] if ids else [],
