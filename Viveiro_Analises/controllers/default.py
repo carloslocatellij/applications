@@ -113,6 +113,7 @@ def Requerimentos(): #Menu
                          data_do_laudo={'type': 'date' ,'label': 'Data'},
                          Requerente={'label': 'Requerente' },
                          Endereco1={'name':'Endereco1', 'label':'Endereço'},
+                         Bairro={},
                          cep= {'type':'integer',  'label':'cep'}, list_fields=list_fields )
         
     return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca, tem_laudo=tem_laudo))
@@ -147,7 +148,10 @@ def Registrar_Laudo():
     
     try:
         db.Laudos.validate_and_insert(Protocolo=protoc, proprietario=processo.Requerente, data_do_laudo=processo.data_do_laudo,
-                                    Despacho=processo.Despacho, qtd_ret1=processo.qtd_ret1, qtd_ret2=processo.qtd_ret2, 
+                                    Despacho=processo.Despacho, qtd_poda1=processo.qtd_poda1, qtd_poda2=processo.qtd_poda2,
+                                    qtd_poda3=processo.qtd_poda3, qtd_poda4=processo.qtd_poda4, especie_poda1=processo.especie_poda1,
+                                    especie_poda2=processo.especie_poda2, especie_poda3=processo.especie_poda3, 
+                                    especie_poda4=processo.especie_poda4, qtd_ret1=processo.qtd_ret1, qtd_ret2=processo.qtd_ret2, 
                                     qtd_ret3=processo.qtd_ret3, qtd_ret4=processo.qtd_ret4, especie_ret1=processo.especie_ret1,
                                     especie_ret2=processo.especie_ret2, especie_ret3=processo.especie_ret3, especie_ret4=processo.especie_ret4)
         session.edit_laudo = True

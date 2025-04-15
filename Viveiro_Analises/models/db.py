@@ -89,13 +89,13 @@ Especies = db.define_table(
     Field("SinDispercao", "string", length=20),
     Field("NativaBr", "integer", requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " "),
+        represent=lambda v, r: " [ X ]  " if v else " "),
     Field("Frutifera", "integer", requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " "),
+        represent=lambda v, r: " [ X ]  " if v else " "),
     Field("Calcada", "integer", requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " "),
+        represent=lambda v, r: " [ X ]  " if v else " "),
     Field("foto", "text"),
     Field("obs", "text"),
     format = (lambda row : especie_represent(row)),
@@ -318,7 +318,7 @@ Laudos = db.define_table(
         label="Conflito com fiação elétrica",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p2",
@@ -326,7 +326,7 @@ Laudos = db.define_table(
         label="Prejuízo a rede de água/esgoto",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p3",
@@ -334,7 +334,7 @@ Laudos = db.define_table(
         label="Danos à estrutura da construção",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p4",
@@ -342,7 +342,7 @@ Laudos = db.define_table(
         label="Restrição à passagem de pedestres",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p5",
@@ -350,7 +350,7 @@ Laudos = db.define_table(
         label="Porte ou espécie inadequada",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p6",
@@ -358,7 +358,7 @@ Laudos = db.define_table(
         label="Árvore senescente, debilitada por poda/pragas/parasitas",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p7",
@@ -366,7 +366,7 @@ Laudos = db.define_table(
         label="Árvore morta/seca",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p8",
@@ -374,7 +374,7 @@ Laudos = db.define_table(
         label="Passagem de veículos",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p9",
@@ -382,7 +382,7 @@ Laudos = db.define_table(
         label="Obras, reforma, construção, demolição",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p10",
@@ -390,7 +390,7 @@ Laudos = db.define_table(
         label="Projetos e/ou atividades",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p11",
@@ -398,7 +398,7 @@ Laudos = db.define_table(
         label="Risco à população, patrimônio",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field("Obs", rname="`Obs.`"),
     Field(
