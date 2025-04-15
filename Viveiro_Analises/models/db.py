@@ -1,4 +1,5 @@
 from datetime import datetime
+from gluon.sqlhtml import represent
 from my_validador import *  # type: ignore
 from gluon import *
 from form_elements import *
@@ -61,30 +62,61 @@ def especie_represent(row):
     if not row:
         return ''
     
-    if isinstance(row, (int, str)):
-        esp_repr = db(db.Especies.id == int(row)).select().first()
-    else:
-        esp_repr = row
-        
-    if not esp_repr:
-        return ''
-    
-    if esp_repr.Especie:
-        if len(esp_repr.Especie.split(' ')) > 1:
-            nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie.split(' ')[1])}"
+    try:
+        # Se for uma string, tenta converter para ID
+        if isinstance(row, str):
+            # Se a string contiver vírgulas, é uma lista de IDs
+            if ',' in row:
+                ids = [int(x.strip()) for x in row.split(',') if x.strip()]
+                especies = []
+                for id in ids:
+                    esp = db(db.Especies.id == id).select().first()
+                    if esp:
+                        especies.append(_format_especie(esp))
+                return ', '.join(especies)
+            # Se for um único ID
+            try:
+                esp_repr = db(db.Especies.id == int(row)).select().first()
+            except (ValueError, TypeError):
+                esp_repr = row
+        # Se for um número inteiro
+        elif isinstance(row, int):
+            esp_repr = db(db.Especies.id == row).select().first()
+        # Se for um registro do banco
         else:
-            nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie)}"
+            esp_repr = row
             
-    else:
-        nome_cientifico = ''
+        if not esp_repr:
+            return str(row)
+            
+        return _format_especie(esp_repr)
         
-    nome = esp_repr.Nome.replace('-', ' ')
-    return f"{nome} - {nome_cientifico}"
+    except Exception as e:
+        return str(row)
+
+def _format_especie(esp):
+    """Formata a representação de uma espécie"""
+    if not esp:
+        return ''
+        
+    try:
+        if esp.Especie:
+            if len(esp.Especie.split(' ')) > 1:
+                nome_cientifico = f"{str(esp.Especie[0])}. {str(esp.Especie.split(' ')[1])}"
+            else:
+                nome_cientifico = f"{str(esp.Especie[0])}. {str(esp.Especie)}"
+        else:
+            nome_cientifico = ''
+            
+        nome = esp.Nome.replace('-', ' ')
+        return f"{nome} - {nome_cientifico}"
+    except:
+        return str(esp)
         
         
 Especies = db.define_table(
     "Especies",
-    Field('id', 'id'),
+    Field('id', 'id', represent=especie_represent),
     Field("Nome", "string", length=30, notnull=True),
     Field("Especie", "string", length=40),
     Field("Familia", "string", length=30),
@@ -123,7 +155,7 @@ Especies = db.define_table(
 
 Requerimentos = db.define_table(
     "Requerimentos",
-    Field("Protocolo", requires= [IS_INT_IN_RANGE("202000", "2030009999999") ]),
+    Field("Protocolo", requires=[IS_INT_IN_RANGE("202000", "2030009999999")]),
     Field("Requerente", requires=[IS_UPPER(), Remove_Acentos()]),
     Field(
         "data_entrada",
@@ -144,15 +176,15 @@ Requerimentos = db.define_table(
     Field("cep"),
     Field("telefone1"),
     Field("email", rname="`e-mail`"),
-Field("especie_ret1", "string",
-      requires=IS_LIST_OF_REFERENCES('Especies'),
-      widget=list_reference_widget,
-      represent=lambda ids, row: [especie_represent(db.Especies[id]) for id in ids] if ids else [],
-      rname="`especie ret1`"),
+    Field("especie_ret1", "string", multiple=True,
+          requires=IS_LIST_OF_REFERENCES('Especies'),
+          widget=list_reference_widget,
+          represent=especie_represent,
+          rname="`especie ret1`"),
     Field("especie_ret2", rname="`especie ret2`"),
     Field("especie_ret3", rname="`especie ret3`"),
-    Field("especie_ret4", 'string' ,rname="`especie ret4`"),
-    Field("qtd_ret1", rname="`qtd ret1`"),
+    Field("especie_ret4", 'string', rname="`especie ret4`"),
+    Field("qtd_ret1", 'integer', widget=SQLFORM.widgets.integer.widget, rname="`qtd ret1`"),
     Field("qtd_ret2", rname="`qtd ret2`"),
     Field("qtd_ret3", rname="`qtd ret3`"),
     Field("qtd_ret4", rname="`qtd ret4`"),
@@ -529,35 +561,35 @@ if not configuration.get("app.production"):
                 telefone1=fake.phone_number(),
                 email=fake.email(),
                 especie_ret1=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_ret1=fake.random_int(min=1, max=10),
                 especie_ret2=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_ret2=fake.random_int(min=1, max=10),
                 especie_ret3=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_ret3=fake.random_int(min=1, max=10),
                 especie_ret4=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_ret4=fake.random_int(min=1, max=10),
                 especie_poda1=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_poda1=fake.random_int(min=1, max=10),
                 especie_poda2=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_poda2=fake.random_int(min=1, max=10),
                 especie_poda3=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_poda3=fake.random_int(min=1, max=10),
                 especie_poda4=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_poda4=fake.random_int(min=1, max=10),
                 podador_coleta=fake.random_element(elements=["Sim", "Não", ""]),
@@ -603,19 +635,19 @@ if not configuration.get("app.production"):
                 proprietario=fake.name(),
                 morador=fake.name(),
                 especie_ret1=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_ret1=fake.random_int(min=1, max=10),
                 especie_ret2=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_ret2=fake.random_int(min=1, max=10),
                 especie_ret3=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_ret3=fake.random_int(min=1, max=10),
                 especie_ret4=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_ret4=fake.random_int(min=1, max=10),
                 qtd_repor=fake.random_int(min=1, max=10),
@@ -630,19 +662,19 @@ if not configuration.get("app.production"):
                     ]
                 ),
                 especie_poda1=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_poda1=fake.random_int(min=1, max=10),
                 especie_poda2=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_poda2=fake.random_int(min=1, max=10),
                 especie_poda3=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_poda3=fake.random_int(min=1, max=10),
                 especie_poda4=fake.random_element(
-                    elements=["Ipe", "Pau-Brasil", "Pau-Ferro", "Pau-Jacaré"]
+                    elements=[1,2,3,4,5,6,7,8]
                 ),
                 qtd_poda4=fake.random_int(min=1, max=10),
                 tipo=fake.random_element(
