@@ -16,7 +16,7 @@ def Despachar(query, relation_query, query_protoc_ref):
     #   APENAS PODA - SEM LAUDO
     if not relation_query:
         
-        # IMÓVEL PARTICULAR
+        # IMÓVEL PARTICULAR - DEFERIDO
         if (query.get('Despacho') == 'Deferido' 
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'comercio', 'terreno']):
             texto = f'''AUTORIZADA A PODA DE NO MÁXIMO 25% DO VOLUME DA COPA DA(S) ÁRVORE(S) DE FORMA DISTRIBUÍDA E EQUILIBRADA, SENDO: PODA DE LIMPEZA E ADEQUAÇÃO DE {soma_poda} ({num_extens_poda}) ÁRVORE(S) DA(S) ESPÉCIE(S): {query.get('Podas')},  LOCALIZADA(S) NA {query.get('Endereco')}. A PODA REALIZADA EM VOLUME MAIOR QUE 25% (VINTE E CINCO POR CENTO) DA COPA ORIGINAL DA ÁRVORE É CONSIDERADA DRÁSTICA E PODE CAUSAR SÉRIOS DANOS À SAÚDE DA ÁRVORE.
@@ -310,7 +310,7 @@ EM VISTORIA REALIZADA NO DIA {relation_query.get('data_do_laudo')} PELO TÉCNICO
 DEVENDO SER REALIZADO O REPLANTIO DE {relation_query.get('qtd_repor')} ({num_extens_repor}) MUDA(S) DE ÁRVORE(S)
 DE PORTE ({relation_query.get('porte_repor')}) 
 SENDO ASSIM, SOLICITAMOS, POR GENTILEZA, QUE O PROPRIETÁRIO DO IMÓVEL SEJA NOTIFICADO PARA QUE O MESMO TOME AS
-PROVIDÊNCIAS PARA A(S) SUPRESSÃO(ÔES (JÁ AUTORIZADA(S)). 
+PROVIDÊNCIAS PARA A(S) SUPRESSÃO(ÕES) (JÁ AUTORIZADA(S)). 
 A PODA DEVE SER REALIZADA POR PODADOR HABILITADO, COM O CORTE DE NO MÁXIMO 25% DO VOLUME DA COPA DA(S) ÁRVORE(S)
 DE FORMA DISTRIBUÍDA E EQUILIBRADA.
             '''
@@ -395,7 +395,7 @@ Após análise do protocolo, informamos que o pedido de supressão do(s) exempla
             texto = f'''
 Por se tratar de árvore localizada em área interna de propriedade particular, não existe meio legal para notificar o seu vizinho para realizar o manejo da árvore em questão no momento.
 
-Sendo assim, orientamos o(a) Sr(a). Requerente para que tome as providências que julgar convenientes, seguindo os preceitos legais, diretamente com o proprietário do imóvel que detém a árvore.
+Sendo assim, orientamos para que sejam tomadas as providências convenientes, seguindo os preceitos legais, diretamente com o proprietário do imóvel que detém a árvore.
 
 Orientamos também, que diante a possibilidade de ocorrências severas, pode ser consultado a Defesa Civil.
 

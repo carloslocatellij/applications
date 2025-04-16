@@ -39,9 +39,46 @@ def grid():
 
 
 # ---- Embedded wiki (example) ----
+@auth.requires_login()
 def wiki(): #Menu
+    from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
+    from gluon.contrib.markdown import WIKI as markdown
     auth.wikimenu() # add the wiki to the menu
-    return auth.wiki() 
+#     """ ##
+#       [see](web2py.com/examples/static/sphinx/gluon/gluon.contrib.markdown.html)
+#       [Markdown see](https://groups.google.com/g/web2py/c/om9aXi3xg3Y/m/jE4t-KwpBQAJ)
+#     """
+    response.view = 'test_wiki.html'
+#     response.flash = T("Welcome!")
+#     my_md = '''## Welcome to the cov19cty App!
+# ### To generate County Comparison Charts:
+# 1. Click Menu >> Gen Chart >> Multi-County Input Form
+#   1. Add Your Counties to compare (state, county, typeOfData)
+#   2. Define Your Time Series
+# 2. Click Menu >> Gen Chart >> Show Multi-County Chart
+#     '''
+#     my_html = markdown(my_md)
+#     # return dict( message=my_html )
+#     return my_html mark = XML(meu_mark)
+
+    meu_mark ='''
+# Meu Titulo
+
+## Outro Titulo
+
+* <input type="checkbox" checked="checked" /> 1
+* <input type="checkbox" checked="checked" /> 2
+* <input type="checkbox" /> 3
+
+
+    '''
+    content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body
+    
+    markdowner = Markdown2(html4tags=True, tab_width=4, )
+    meu_mark = markdowner.convert(content)
+
+
+    return dict(wiki = auth.wiki() ,content=meu_mark)
 
 # ---- Action for login/register/etc (required for auth) -----
 def user():

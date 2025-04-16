@@ -402,6 +402,7 @@
 'Welcome to web2py!': 'Bem-vindo ao web2py!',
 'Which called the function %s located in the file %s': 'Que chamou a função %s localizada no arquivo %s',
 'Wiki Example': 'Wiki Example',
+'Wiki Page': 'Wiki Page',
 'Working...': 'Trabalhando...',
 'XML': 'XML',
 'XML export of columns shown': 'XML export of columns shown',
