@@ -233,3 +233,5 @@ response.show_toolbar = configuration.get('app.toolbar')
 # >>> rows = db(db.mytable.myfield == 'value').select(db.mytable.ALL)
 # >>> for row in rows: print row.id, row.myfield
 # -------------------------------------------------------------------------
+
+auth.wiki(resolve=False)

@@ -1,5 +1,8 @@
 
 
+from gluon.sqlhtml import represent
+
+
 if 0 == 1:
     from gluon import (db, current, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
                        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01,
@@ -36,9 +39,46 @@ def grid():
 
 
 # ---- Embedded wiki (example) ----
+@auth.requires_login()
 def wiki(): #Menu
+    from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
+    from gluon.contrib.markdown import WIKI as markdown
     auth.wikimenu() # add the wiki to the menu
-    return auth.wiki() 
+#     """ ##
+#       [see](web2py.com/examples/static/sphinx/gluon/gluon.contrib.markdown.html)
+#       [Markdown see](https://groups.google.com/g/web2py/c/om9aXi3xg3Y/m/jE4t-KwpBQAJ)
+#     """
+    response.view = 'test_wiki.html'
+#     response.flash = T("Welcome!")
+#     my_md = '''## Welcome to the cov19cty App!
+# ### To generate County Comparison Charts:
+# 1. Click Menu >> Gen Chart >> Multi-County Input Form
+#   1. Add Your Counties to compare (state, county, typeOfData)
+#   2. Define Your Time Series
+# 2. Click Menu >> Gen Chart >> Show Multi-County Chart
+#     '''
+#     my_html = markdown(my_md)
+#     # return dict( message=my_html )
+#     return my_html mark = XML(meu_mark)
+
+    meu_mark ='''
+# Meu Titulo
+
+## Outro Titulo
+
+* <input type="checkbox" checked="checked" /> 1
+* <input type="checkbox" checked="checked" /> 2
+* <input type="checkbox" /> 3
+
+
+    '''
+    content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body
+    
+    markdowner = Markdown2(html4tags=True, tab_width=4, )
+    meu_mark = markdowner.convert(content)
+
+
+    return dict(wiki = auth.wiki() ,content=meu_mark)
 
 # ---- Action for login/register/etc (required for auth) -----
 def user():
@@ -77,13 +117,13 @@ def Requerimentos(): #Menu
 
     tem_laudo = db(db.Laudos.Protocolo == processo).count() > 0
 
+
     if f=='editar':
         formprocess = SQLFORM(db[table], processo, submit_button=f'Atualizar {tablename}' ) # type: ignore
     elif f=='ver':
         formprocess = SQLFORM(db[table], processo, readonly=True, ) 
     else:
         db.Requerimentos.Protocolo.requires = IS_NOT_IN_DB(db, 'Requerimentos.Protocolo', error_message='Já está registrado.')
-        
         formprocess = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
         
 
@@ -110,6 +150,7 @@ def Requerimentos(): #Menu
                          data_do_laudo={'type': 'date' ,'label': 'Data'},
                          Requerente={'label': 'Requerente' },
                          Endereco1={'name':'Endereco1', 'label':'Endereço'},
+                         Bairro={},
                          cep= {'type':'integer',  'label':'cep'}, list_fields=list_fields )
         
     return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca, tem_laudo=tem_laudo))
@@ -144,7 +185,10 @@ def Registrar_Laudo():
     
     try:
         db.Laudos.validate_and_insert(Protocolo=protoc, proprietario=processo.Requerente, data_do_laudo=processo.data_do_laudo,
-                                    Despacho=processo.Despacho, qtd_ret1=processo.qtd_ret1, qtd_ret2=processo.qtd_ret2, 
+                                    Despacho=processo.Despacho, qtd_poda1=processo.qtd_poda1, qtd_poda2=processo.qtd_poda2,
+                                    qtd_poda3=processo.qtd_poda3, qtd_poda4=processo.qtd_poda4, especie_poda1=processo.especie_poda1,
+                                    especie_poda2=processo.especie_poda2, especie_poda3=processo.especie_poda3, 
+                                    especie_poda4=processo.especie_poda4, qtd_ret1=processo.qtd_ret1, qtd_ret2=processo.qtd_ret2, 
                                     qtd_ret3=processo.qtd_ret3, qtd_ret4=processo.qtd_ret4, especie_ret1=processo.especie_ret1,
                                     especie_ret2=processo.especie_ret2, especie_ret3=processo.especie_ret3, especie_ret4=processo.especie_ret4)
         session.edit_laudo = True
@@ -210,7 +254,6 @@ def Despachar_Processos(): #Menu
                     query_protoc_ref = db(db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')).select().render(0).as_dict()
                     
             
-            
         if relation_query.count() > 0:
             relation_query = relation_query.select().render(0).as_dict()
         else:
@@ -240,12 +283,47 @@ def Despachar_Processos(): #Menu
 
 
 @auth.requires_login()
+def Especies(): #Menu
+    table = 'Especies'
+    tablename = f'{db[table]._tablename[:-1]}'
+    registro = request.args(0) or None
+    f = request.vars['f'] if request.vars['f']  else None
+
+    if f=='editar':
+        form = SQLFORM(db[table], registro, submit_button=f'Atualizar {tablename}' ) # type: ignore
+    elif f=='ver':
+        form = SQLFORM(db[table], registro, readonly=True, ) 
+    else:
+        db[table].id.requires = IS_NOT_IN_DB(db, f'{table}.id', error_message='Já está registrado.')
+        form = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
+        
+    if form.process().accepted:
+        session.flash = f'Dados atualizados' if registro else 'Registrado'
+        redirect(URL('default', table , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
+    elif form.errors:
+        response.flash = 'Corrija os Erros indicados'
+    else:
+        pass
+    
+    # list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente,
+    #               db.Requerimentos.Endereco, db.Requerimentos.data_do_laudo, db.Requerimentos.telefone1,
+    #               db.Requerimentos.Supressoes, db.Requerimentos.Podas, db.Requerimentos.Despacho,
+    #               db.Requerimentos.local_arvore, db.Requerimentos.tipo_imovel
+    #               ]
+    
+    formbusca = buscador('Especies',  # type: ignore
+                         Nome={'label': 'Nome Popular'},
+                         Especie={'label': 'Nome Científico'},
+                         OutroNome={'label': 'Outros Nomes'}
+                         )
+
+    return response.render(dict(form=form, formbusca=formbusca, especie=registro))
 
 
 @auth.requires_login()
 def Lista_de_Registros():
     import re
-    REGEX = re.compile(r'^(\\w+).(\\w+).(\\w+)\\=\\=(\\d+)$')
+    REGEX = re.compile(r'^(\w+).(\w+).(\w+)\=\=(\d+)$')
     match = REGEX.match(request.vars.query)
     if not match:
         redirect(URL('error')) # type: ignore
@@ -261,3 +339,5 @@ def Lista_de_Registros():
 
     return dict(records=SQLFORM.grid(records,  links=links,user_signature=False, editable=False, searchable=False,
     deletable=False, create=False,csv=False, maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left'), table=table)
+
+

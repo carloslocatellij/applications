@@ -40,11 +40,30 @@ def Modal(title, content, id, vbutton=False):
         )
     )
 
-def buscador(tabela, regform=request.function, list_fields=[], **fields):
-    campos = [Field(k, **v) for k, v in fields.items()] 
+
+def padronizaprotoc(protoc):
+    import re
+    REGEX = re.compile(r'^(\d\d\d\d)(0+)(\d+)$')
+    match = REGEX.match(protoc)
+    
+    if not match:
+        
+        print('Não é protcolo')
+    else:
+        
+        
+        return match.group(1) + match.group(3)
+    
+
+def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
+    campos = [Field(k, **v)  for k, v in fields.items()] 
     formbusca = SQLFORM.factory(*campos, formstyle='table3cols', formname='formbusca')
 
-    busca = db(db[tabela].Protocolo > 0)
+    try:
+        busca = db(db[tabela].Protocolo > 0)
+    except:
+        busca = db(db[tabela].id > 0)
+    
     tab2 = None
 
     if formbusca.process():
@@ -67,11 +86,25 @@ def buscador(tabela, regform=request.function, list_fields=[], **fields):
                 else:
                     q.append((db[tabela][k] == session[k]))
 
-        busca = db(*q) if len(q) > 0 else db[tabela].Protocolo == '0'
-    grade = ''
+        try:
+            busca = db(*q) if len(q) > 0 else db[tabela].Protocolo == '0'
+        except:
+            busca = db(*q) if len(q) > 0 else db[tabela].id == '0'
 
-    links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary', _href=URL(c=session.controller, f=regform, args=row[tabela]['Protocolo'] if tab2 is not None else row['Protocolo'], vars={'f': 'ver'})))]
-    grade = SQLFORM.grid(busca, represent_none='', links=links, editable=False, searchable=False, deletable=False, create=False, details=False, paginate=30, csv=True, maxtextlength=120, _class="table", user_signature=False, fields=list_fields, links_placement='left', orderby=~db.Requerimentos.data_do_laudo)
+    grade =''
+    
+    links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=session.controller,
+                              f=regform, args=row[tabela]['Protocolo' if tabela=='Requerimentos' else 'id'] 
+                              if tab2 != None else row['Protocolo' if tabela=='Requerimentos' else 'id'], vars={'f': 'ver'})))]
+    
+    grade = SQLFORM.grid( busca, represent_none='', links=links, editable=False, searchable=False, deletable=False,
+                         create=False, details=False, paginate=30, csv=True,  maxtextlength = 120, _class="table",
+                         user_signature=False, fields=list_fields, links_placement = 'left',
+                          orderby=~db.Requerimentos.data_do_laudo if tabela=='Requerimentos' else None)
+
+    
+   
+    
 
     return dict(formbusca=formbusca, grade=Modal('Busca', grade, 'Busca', ))
 

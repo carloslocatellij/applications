@@ -53,6 +53,57 @@ Ruas = db.define_table(
     fake_migrate=True if not configuration.get('app.production') else False,
 )
 
+
+def especie_represent(row):
+    esp_repr = db(db.Especies.id == int(row.id)).select().first()
+    
+    if esp_repr.Especie:
+        nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie.split(' ')[1])}"
+    else:
+        nome_cientifico = ''
+    nome = esp_repr.Nome.replace('-', ' ')
+    return f"{nome} - {nome_cientifico}"
+        
+        
+Especies = db.define_table(
+    "Especies",
+    Field('id', 'id'),
+    Field("Nome", "string", length=30, notnull=True),
+    Field("Especie", "string", length=40),
+    Field("Familia", "string", length=30),
+    Field("OutroNome", "string", length=250),
+    Field("Bioma", "string", length=15),
+    Field("Regiao", "string", length=15),
+    Field("Ameaca", "string", length=20),
+    Field("GrupoEco", "string", length=10),
+    Field("ClasseSucessao", "string", length=20),
+    Field("Porte", "string", length=10),
+    Field("TamanhoMax", "decimal(3,2)"),
+    Field("IniFloracao", "string", length=15),
+    Field("FimFloracao", "string", length=15),
+    Field("IniFrutificacao", "string", length=15),
+    Field("FimFrutificacao", "string", length=15),
+    Field("CorDaFlor", "string", length=20),
+    Field("TipoFruto", "string", length=10),
+    Field("SinPolinizacao", "string", length=20),
+    Field("SinDispercao", "string", length=20),
+    Field("NativaBr", "integer", requires=IS_CHKBOX01(on=True, off=False),
+        widget=SQLFORM.widgets.boolean.widget,
+        represent=lambda v, r: " [ X ]  " if v else " "),
+    Field("Frutifera", "integer", requires=IS_CHKBOX01(on=True, off=False),
+        widget=SQLFORM.widgets.boolean.widget,
+        represent=lambda v, r: " [ X ]  " if v else " "),
+    Field("Calcada", "integer", requires=IS_CHKBOX01(on=True, off=False),
+        widget=SQLFORM.widgets.boolean.widget,
+        represent=lambda v, r: " [ X ]  " if v else " "),
+    Field("foto", "text"),
+    Field("obs", "text"),
+    format = (lambda row : especie_represent(row)),
+    migrate=True if not configuration.get('app.production') else False,
+    fake_migrate=True if not configuration.get('app.production') else False,
+)
+
+
 Requerimentos = db.define_table(
     "Requerimentos",
     Field("Protocolo", requires= [IS_INT_IN_RANGE("202000", "2030009999999") ]),
@@ -79,7 +130,7 @@ Requerimentos = db.define_table(
     Field("especie_ret1", rname="`especie ret1`"),
     Field("especie_ret2", rname="`especie ret2`"),
     Field("especie_ret3", rname="`especie ret3`"),
-    Field("especie_ret4", rname="`especie ret4`"),
+    Field("especie_ret4", 'list: string' ,rname="`especie ret4`"),
     Field("qtd_ret1", rname="`qtd ret1`"),
     Field("qtd_ret2", rname="`qtd ret2`"),
     Field("qtd_ret3", rname="`qtd ret3`"),
@@ -87,7 +138,7 @@ Requerimentos = db.define_table(
     Field("especie_poda1", rname="`especie poda1`"),
     Field("especie_poda2", rname="`especie poda2`"),
     Field("especie_poda3", rname="`especie poda3`"),
-    Field("especie_poda4", rname="`especie poda4`"),
+    Field("especie_poda4", 'list: string', rname="`especie poda4`"),
     Field("qtd_poda1", rname="`qtd poda1`"),
     Field("qtd_poda2", rname="`qtd poda2`"),
     Field("qtd_poda3", rname="`qtd poda3`"),
@@ -116,7 +167,7 @@ Requerimentos = db.define_table(
                 "Em Análise",
                 "Aguardando",
                 "Com Pendência",
-                "Pendente de Compesação"
+                "Pendente de Compesação",
                 "",
             ]
         ),
@@ -145,6 +196,67 @@ Requerimentos = db.define_table(
 )
 
 
+db.Requerimentos.Endereco1.type = "string"
+db.Requerimentos.Endereco = Field.Virtual(
+    "Endereco",
+    lambda row: str(
+        ", ".join(
+            [
+                f"RUA/AV. {row.Requerimentos.Endereco1}" or "",
+                f"Nº {row.Requerimentos.Numero1}" or "",
+                f"BAIRRO: {row.Requerimentos.Bairro}" or "",
+            ]
+        )
+    ),
+)
+
+# for field in db.Requerimentos.fields:
+#     if 'especie' in field and not '4' in field:
+#         db.Requerimentos[field].requires = IS_IN_DB(db, "Especies.Nome", especie_represent)
+
+
+db.Requerimentos.Supressoes = Field.Virtual(
+    "Supressoes",
+    lambda row: " ".join(
+        [
+            f"({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} "
+            if row.Requerimentos.qtd_ret1
+            else "",
+            f",({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}"
+            if row.Requerimentos.qtd_ret2
+            else "",
+            f",({row.Requerimentos.qtd_ret3}) {row.Requerimentos.especie_ret3} "
+            if row.Requerimentos.qtd_ret3
+            else "",
+            f",({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}"
+            if row.Requerimentos.qtd_ret4
+            else "",
+        ]
+    ).replace("'", "").replace("[", "").replace("]", ""),
+)
+
+
+db.Requerimentos.Podas = Field.Virtual(
+    "Podas",
+    lambda row: " ".join(
+        [
+            f"({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1} "
+            if row.Requerimentos.qtd_poda1
+            else "",
+            f",({row.Requerimentos.qtd_poda2}) {row.Requerimentos.especie_poda2}"
+            if row.Requerimentos.qtd_poda2
+            else "",
+            f",({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3} "
+            if row.Requerimentos.qtd_poda3
+            else "",
+            f",({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}"
+            if row.Requerimentos.qtd_poda4
+            else "",
+        ]
+    ).replace("'", "").replace("[", "").replace("]", ""),
+)
+
+
 Laudos = db.define_table(
     "Laudos",
     Field("Protocolo", "reference Requerimentos"),
@@ -160,6 +272,7 @@ Laudos = db.define_table(
                     "Em Análise",
                     "Aguardando",
                     "Com Pendência",
+                    "Vistoriado por outro protocolo",
                     "",
                 ]
             )
@@ -205,7 +318,7 @@ Laudos = db.define_table(
         label="Conflito com fiação elétrica",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p2",
@@ -213,7 +326,7 @@ Laudos = db.define_table(
         label="Prejuízo a rede de água/esgoto",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p3",
@@ -221,7 +334,7 @@ Laudos = db.define_table(
         label="Danos à estrutura da construção",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p4",
@@ -229,7 +342,7 @@ Laudos = db.define_table(
         label="Restrição à passagem de pedestres",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p5",
@@ -237,7 +350,7 @@ Laudos = db.define_table(
         label="Porte ou espécie inadequada",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p6",
@@ -245,7 +358,7 @@ Laudos = db.define_table(
         label="Árvore senescente, debilitada por poda/pragas/parasitas",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p7",
@@ -253,7 +366,7 @@ Laudos = db.define_table(
         label="Árvore morta/seca",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p8",
@@ -261,7 +374,7 @@ Laudos = db.define_table(
         label="Passagem de veículos",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p9",
@@ -269,7 +382,7 @@ Laudos = db.define_table(
         label="Obras, reforma, construção, demolição",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p10",
@@ -277,7 +390,7 @@ Laudos = db.define_table(
         label="Projetos e/ou atividades",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
         "p11",
@@ -285,7 +398,7 @@ Laudos = db.define_table(
         label="Risco à população, patrimônio",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
-        represent=lambda v, r: "[X]" if v else " ",
+        represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field("Obs", rname="`Obs.`"),
     Field(
@@ -309,60 +422,6 @@ Laudos = db.define_table(
 )
 
 
-db.Requerimentos.Endereco1.type = "string"
-db.Requerimentos.Endereco = Field.Virtual(
-    "Endereco",
-    lambda row: str(
-        ", ".join(
-            [
-                f"RUA/AV. {row.Requerimentos.Endereco1}" or "",
-                f"Nº {row.Requerimentos.Numero1}" or "",
-                f"BAIRRO: {row.Requerimentos.Bairro}" or "",
-            ]
-        )
-    ),
-)
-
-db.Requerimentos.Supressoes = Field.Virtual(
-    "Supressoes",
-    lambda row: " ".join(
-        [
-            f"({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} "
-            if row.Requerimentos.especie_ret1
-            else "",
-            f",({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}"
-            if row.Requerimentos.especie_ret2
-            else "",
-            f",({row.Requerimentos.qtd_ret3}) {row.Requerimentos.especie_ret3} "
-            if row.Requerimentos.especie_ret3
-            else "",
-            f",({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}"
-            if row.Requerimentos.especie_ret4
-            else "",
-        ]
-    ),
-)
-
-db.Requerimentos.Podas = Field.Virtual(
-    "Podas",
-    lambda row: " ".join(
-        [
-            f"({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1} "
-            if row.Requerimentos.especie_poda1
-            else "",
-            f",({row.Requerimentos.qtd_poda2}) {row.Requerimentos.especie_poda2}"
-            if row.Requerimentos.especie_poda2
-            else "",
-            f",({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3} "
-            if row.Requerimentos.especie_poda3
-            else "",
-            f",({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}"
-            if row.Requerimentos.especie_poda4
-            else "",
-        ]
-    ),
-)
-
 db.Laudos.Supressoes = Field.Virtual(
     "Supressoes",
     lambda row: " ".join(
@@ -377,10 +436,10 @@ db.Laudos.Supressoes = Field.Virtual(
             if row.Laudos.especie_ret3
             else "",
             f",({row.Laudos.qtd_ret4}) {row.Laudos.especie_ret4}"
-            if row.Laudos.especie_ret4
-            else "",
+            if row.Laudos.especie_ret4 and not ',' in row.Laudos.especie_ret4
+            else f"{row.Laudos.especie_ret4 or ''}",
         ]
-    ),
+    ).replace("'", "").replace("[", "").replace("]", ""),
 )
 
 db.Laudos.Podas = Field.Virtual(
@@ -396,43 +455,12 @@ db.Laudos.Podas = Field.Virtual(
             f",({row.Laudos.qtd_poda3}) {row.Laudos.especie_poda3} "
             if row.Laudos.especie_poda3
             else "",
-            f",({row.Laudos.qtd_poda4}) {row.Laudos.especie_poda4}"
-            if row.Laudos.especie_poda4
-            else "",
+            f",({row.Laudos.qtd_poda4 })" if row.Laudos.qtd_poda4 and not ',' in row.Laudos.especie_poda4 else "",
+                f"{row.Laudos.especie_poda4 if row.Laudos.especie_poda4 else ''}"
         ]
-    ),
+    ).replace("'", "").replace("[", "").replace("]", ""),
 )
 
-Especies = db.define_table(
-    "Especies",
-    Field("Nome", "string", length=30, notnull=True),
-    Field("Especie", "string", length=40),
-    Field("Familia", "string", length=30),
-    Field("OutroNome", "string", length=250),
-    Field("Bioma", "string", length=15),
-    Field("Regiao", "string", length=15),
-    Field("Ameaca", "string", length=20),
-    Field("GrupoEco", "string", length=10),
-    Field("ClasseSucessao", "string", length=20),
-    Field("Porte", "string", length=10),
-    Field("TamanhoMax", "decimal(3,2)"),
-    Field("IniFloracao", "string", length=15),
-    Field("FimFloracao", "string", length=15),
-    Field("IniFrutificacao", "string", length=15),
-    Field("FimFrutificacao", "string", length=15),
-    Field("CorDaFlor", "string", length=20),
-    Field("TipoFruto", "string", length=10),
-    Field("SinPolinizacao", "string", length=20),
-    Field("SinDispercao", "string", length=20),
-    Field("NativaBr", "boolean"),
-    Field("Frutifera", "boolean"),
-    Field("Calcada", "boolean"),
-    Field("foto", "text"),
-    Field("obs", "text"),
-    format="%(Nome)s",
-    migrate=True if not configuration.get('app.production') else False,
-    fake_migrate=True if not configuration.get('app.production') else False,
-)
 
 
 # DADOS DE TESTE INSERIDOS AUTOMÁTICAMENTE EM AMBIENTE DE TESTE.

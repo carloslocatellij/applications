@@ -1,0 +1,101 @@
+{{extend 'layout.html'}}
+{{block head}}
+{{end}}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        try {
+            document.getElementById('Especies_Nome').focus();
+        } catch { console.log('Modo de Edição'); }
+    });
+</script>
+
+<h2 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+{{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'),
+**atributo),SPAN(_class="caret") }}
+{{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled") }}
+
+<div class="container" class="card"
+    style="border: 1px solid; padding: 5px; word-wrap: break-word; color: darkslategray">
+    {{=A(SPAN('Editar', _class="glyphicon glyphicon-envelope"), _href=URL(c='default',f='Especies',
+    args=[especie], vars={ 'f':'editar'}), _class='btn btn-primary') if especie else '' }}
+    {{=A('Novo', _href=URL(c='default',f='Especies', vars={}), _class='btn btn-primary',) if especie else ''}}
+</div>
+
+<div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+    {{=form.custom.begin}}
+    <table width="100%">
+        <tr>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Nome:')}}<div align='left' class="card">
+                    {{=form.custom.widget['Nome']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Espécie:')}}<div align='left' class="card">
+                    {{=form.custom.widget['Especie']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Família:')}}<div align='left' class="card">
+                    {{=form.custom.widget['Familia']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Outro Nome:')}}<div align='left' class="card">
+                    {{=form.custom.widget['OutroNome']}}</div>
+            </td>
+        </tr>
+        <tr>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Bioma:')}}<div align='left' class="card">
+                    {{=form.custom.widget['Bioma']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Região:')}}<div align='left' class="card">
+                    {{=form.custom.widget['Regiao']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Ameaça:')}}<div align='left' class="card">
+                    {{=form.custom.widget['Ameaca']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Grupo Ecológico:')}}<div align='left' class="card">
+                    {{=form.custom.widget['GrupoEco']}}</div>
+            </td>
+        </tr>
+        <tr>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Classe Sucessão:')}}<div align='left' class="card"></div>
+                    {{=form.custom.widget['ClasseSucessao']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Porte:')}}<div align='left' class="card">
+                    {{=form.custom.widget['Porte']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Tamanho Máx.:')}}<div align='left' class="card">
+                    {{=form.custom.widget['TamanhoMax']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Cor da Flor:')}}<div align='left' class="card">
+                    {{=form.custom.widget['CorDaFlor']}}</div>
+            </td>
+        </tr>
+        <tr>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Tipo de Fruto:')}}<div align='left' class="card">
+                    {{=form.custom.widget['TipoFruto']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Polinização:')}}<div align='left' class="card"></div>
+                    {{=form.custom.widget['SinPolinizacao']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Dispersão:')}}<div align='left' class="card">
+                    {{=form.custom.widget['SinDispercao']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Nativa do Brasil:')}}<div align='left' class="card">
+                    {{=form.custom.widget['NativaBr']}}</div>
+            </td>
+        </tr>
+        <tr>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Frutífera:')}}<div align='left' class="card">
+                    {{=form.custom.widget['Frutifera']}}</div>
+            </td>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Calçada:')}}<div align='left' class="card">
+                    {{=form.custom.widget['Calcada']}}</div>
+            </td>
+            <td colspan="2" width="50%" align='left' style="padding-inline: 10px">{{=B('Observações:')}}<div align='left' class="card">
+                    {{=form.custom.widget['obs']}}</div>
+            </td>
+        </tr>
+    </table>
+    {{=form.custom.submit}}
+    {{=form.custom.end}}
+</div>
