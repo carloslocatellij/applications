@@ -43,6 +43,7 @@ def grid():
 def wiki(): #Menu
     from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
     from gluon.contrib.markdown import WIKI as markdown
+    from gluon.contrib.markmin import markmin2html
     auth.wikimenu() # add the wiki to the menu
 #     """ ##
 #       [see](web2py.com/examples/static/sphinx/gluon/gluon.contrib.markdown.html)
@@ -72,13 +73,13 @@ def wiki(): #Menu
 
 
     '''
-    content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body
+    content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body # type: ignore
     
     markdowner = Markdown2(html4tags=True, tab_width=4, )
     meu_mark = markdowner.convert(content)
 
 
-    return dict(wiki = auth.wiki() ,content=meu_mark)
+    return dict(wiki = auth.wiki() ,content=XML(meu_mark)) # type: ignore
 
 # ---- Action for login/register/etc (required for auth) -----
 def user():

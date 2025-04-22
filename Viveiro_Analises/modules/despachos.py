@@ -261,6 +261,36 @@ DECRETO 18.301/2019
 ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PERMITIDA PODA NA QUAL A COPA DA ÁRVORE FIQUE COM FORMA GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
         '''
         
+        # PENDÊNCIA DE COMPENSAÇÃO AMBIENTAL:
+        
+        elif (query.get('Despacho') == 'Pendente de Compesação'):
+            texto = f'''
+## Autorização para Supressão de Árvores
+#### A Secretaria do Meio Ambiente e Urbanismo, conforme a Lei nº 13.031/2018 e o Decreto nº 18.301/2019, autoriza a supressão de {soma_supress} ({num_extens_supress}) árvores, mediante as seguintes condições:
+Árvores a serem suprimidas:
+
+ {query.get('Supressoes')}
+
+* Árvore na área interna.
+
+### Condições para a autorização:
+#### O solicitante deve doar XX (XXXXXXXX) mudas de árvores ao Viveiro Municipal de São José do Rio Preto, seguindo as especificações da Portaria SMAURB nº 01/2023. :
+- 25 mudas por árvore nativa suprimida (Área interna). 
+- 50 mudas por árvore nativa ameaçada de extinção  (Área interna). 
+- 10 mudas por árvore exótica suprimida  (Área interna). 
+- 2 mudas por árvore na calçada
+
+#### As mudas devem ter no mínimo 1,5 metro de altura, estar saudáveis e em ótimo estado vegetativo. 
+#### Cada muda deve ter etiqueta de identificação da espécie (nome popular e científico). 
+#### As mudas devem ser separadas por espécie, com lista da quantidade total de cada uma. 
+#### A entrega das mudas deve ser agendada com Fernando no Viveiro Municipal, pelo telefone (17) 3225-9769, informando o número do protocolo. 
+- Após a entrega das mudas e apresentação do alvará e projeto de construções aprovadas pela Secretaria Municipal de Obras, a autorização de supressão será liberada. 
+
+### Informações adicionais:
+#### A lista de espécies aceitas para compensação ambiental está disponível na Portaria SMAURB nº 01/2023, acessível em: https://www.riopreto.sp.gov.br/wp-content/uploads/arquivosPortalGOV/meio-ambiente/smaurb-PORTARIA_SMAURB_01_2023.pdf
+Após a confirmação da efetiva entrega das respectivas mudas ao Viveiro Municipal, e apresentação do alvará e projeto de construção aprovado pela Secretaria Municipal de Obras, o requerente poderá retirar a autorização para a supressão de {soma_supress} ({num_extens_supress}) árvore(s) referenciada(s). 
+            
+            '''
         
         
         # PENDÊNCIA DE ANUÊNCIA DO PROPRIENTÁRIO
