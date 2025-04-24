@@ -128,7 +128,7 @@ SENDO ENCAMINHADA AO SETOR COMPETENTE PARA AS PROVIDENCIAS NECESSÁRIAS.
             and relation_query.get('proprietario')
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
             
-            com_req_podas= f'e para poda de: {query.get('Podas')}, ' if query.get('qtd_podas1') else ''
+            com_req_podas= f'e para poda de: {relation_query.get('Podas')}, ' if relation_query.get('qtd_podas1') else ''
             com_podas_autorizadas= f'E para Poda de: {soma_poda_autorizada} ({num_extens_poda_autorizada}),  e respectiva(s) espécie(s): {relation_query.get('Podas')}' if relation_query.get('qtd_poda1') else '' 
             
             texto = f'''
@@ -153,7 +153,7 @@ Técnico responsável: {tecnico or ''}  '''
         elif (relation_query.get('Despacho') == 'Deferido' 
             and relation_query.get('proprietario')
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
-            com_req_podas= f'e para poda de: {query.get('Podas')}, ' if query.get('qtd_podas1') else ''
+            com_req_podas= f'e para poda de: {relation_query.get('Podas')}, ' if relation_query.get('qtd_podas1') else ''
             com_podas_autorizadas= f'E para Poda de: {soma_poda_autorizada} ({num_extens_poda_autorizada}),  e respectiva(s) espécie(s): {relation_query.get('Podas')}' if relation_query.get('qtd_poda1') else '' 
             texto= f'''
 Ilmo.(a) Sr.(a) {query.get('Requerente')}
@@ -181,8 +181,8 @@ Técnico responsável: {tecnico} '''
             
             # DEFERIDO SUPRESSÃO PÚBLICA COM REPLANTIO - COM PODA
             if relation_query.get('qtd_poda1'):
-                texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {query.get('Supressoes')}; PLANTIO DE SUBSTITUIÇÃO {qtd_repor} ({num_extens_repor}) MUDA(S) DE ÁRVORE(S) DE PORTE {relation_query.get('porte_repor')}.
-E PODA DE LIMPEZA E ADEQUAÇÃO DE  {soma_poda} ({num_extens_poda}) ÁRVORE(S) DA(S) ESPÉCIE(S): {query.get('Podas')}. NO ENDEREÇO: {query.get('Endereco')}.
+                texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {relation_query.get('Supressoes')}; PLANTIO DE SUBSTITUIÇÃO {qtd_repor} ({num_extens_repor}) MUDA(S) DE ÁRVORE(S) DE PORTE {relation_query.get('porte_repor')}.
+E PODA DE LIMPEZA E ADEQUAÇÃO DE  {soma_poda} ({num_extens_poda}) ÁRVORE(S) DA(S) ESPÉCIE(S): {relation_query.get('Podas')}. NO ENDEREÇO: {query.get('Endereco')}.
 
 SEGUIR NORMA ABNT NBR 16246-1:2013.
 
@@ -198,7 +198,7 @@ ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PE
             
             # DEFERIDO SUPRESSÃO PÚBLICA COM REPLANTIO - SEM PODA
             else:
-                texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {query.get('Supressoes')}; PLANTIO DE SUBSTITUIÇÃO {qtd_repor} ({num_extens_repor}) MUDA(S) DE ÁRVORE(S) DE PORTE {relation_query.get('porte_repor')}.
+                texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {relation_query.get('Supressoes')}; PLANTIO DE SUBSTITUIÇÃO {qtd_repor} ({num_extens_repor}) MUDA(S) DE ÁRVORE(S) DE PORTE {relation_query.get('porte_repor')}.
 NO ENDEREÇO: {query.get('Endereco')}.
 
 SEGUIR NORMA ABNT NBR 16246-1:2013.
@@ -246,7 +246,7 @@ ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PE
               and not relation_query.get('qtd_repor') 
               and query.get('tipo_imovel') in ['público', ]):
             
-            texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {query.get('Supressoes')};
+            texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {relation_query.get('Supressoes')};
 NO ENDEREÇO: {query.get('Endereco')}.
 
 SEGUIR NORMA ABNT NBR 16246-1:2013.
@@ -269,7 +269,7 @@ ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PE
 #### A Secretaria do Meio Ambiente e Urbanismo, conforme a Lei nº 13.031/2018 e o Decreto nº 18.301/2019, autoriza a supressão de {soma_supress} ({num_extens_supress}) árvores, mediante as seguintes condições:
 Árvores a serem suprimidas:
 
- {query.get('Supressoes')}
+ {relation_query.get('Supressoes')}
 
 * Árvore na área interna.
 

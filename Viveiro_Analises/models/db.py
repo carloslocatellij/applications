@@ -122,7 +122,9 @@ Requerimentos = db.define_table(
     ),
     # requires=IS_IN_DB(db, 'Ruas.Endereco1')),
     Field("Numero1"),
-    Field("Bairro", requires=IS_IN_DB(db, "Bairros.Bairro", "%(Bairro)s")),
+    Field("Bairro",requires=IS_IN_DB(db, "Bairros.Bairro", "%(Bairro)s"),
+    widget=SQLFORM.widgets.autocomplete(
+     request, db.Bairros.Bairro,  limitby=(0, 7), min_length=3)),
     Field("cpf_cnpj", rname="`cpf-cnpj`"),
     Field("cep"),
     Field("telefone1"),
@@ -293,7 +295,7 @@ Laudos = db.define_table(
     Field("qtd_ret2", rname="`qtd ret2`"),
     Field("especie_ret3", "string", rname="`especie ret3`"),
     Field("qtd_ret3", rname="`qtd ret3`"),
-    Field("especie_ret4", "string", rname="`especie ret4`"),
+    Field("especie_ret4", "list:string", rname="`especie ret4`"),
     Field("qtd_ret4", rname="`qtd ret4`"),
     Field("qtd_repor", rname="`qtd repor`"),
     Field(
@@ -310,7 +312,7 @@ Laudos = db.define_table(
     Field("qtd_poda2", rname="`qtd poda2`"),
     Field("especie_poda3", "string", rname="`especie poda3`"),
     Field("qtd_poda3", rname="`qtd poda3`"),
-    Field("especie_poda4", "string", rname="`especie poda4`"),
+    Field("especie_poda4", "list:string", rname="`especie poda4`"),
     Field("qtd_poda4", rname="`qtd poda4`"),
     Field("tipo"),
     Field(
@@ -436,11 +438,11 @@ db.Laudos.Supressoes = Field.Virtual(
             f", ({row.Laudos.qtd_ret3}) {row.Laudos.especie_ret3}"
             if row.Laudos.especie_ret3
             else "",
-            f", ({row.Laudos.qtd_ret4}) {row.Laudos.especie_ret4}"
-            if row.Laudos.especie_ret4 and not ',' in row.Laudos.especie_ret4
-            else f", {row.Laudos.especie_ret4 or ''}",
+            f", {row.Laudos.especie_ret4 or ''}"
+            if ',' in str(row.Laudos.especie_ret4)
+            else f", ({row.Laudos.qtd_ret4}) {row.Laudos.especie_ret4}",
         ]
-    ).replace("'", "").replace("[", "").replace("]", ""),
+    ).replace("'", "").replace("[", "").replace("]", "").replace('"', ''),
 )
 
 db.Laudos.Podas = Field.Virtual(
@@ -456,11 +458,11 @@ db.Laudos.Podas = Field.Virtual(
             f", ({row.Laudos.qtd_poda3}) {row.Laudos.especie_poda3}"
             if row.Laudos.especie_poda3
             else "",
-            f", ({row.Laudos.qtd_poda4}) {row.Laudos.especie_poda4}"
-            if row.Laudos.especie_poda4 and not ',' in row.Laudos.especie_poda4
-            else f", {row.Laudos.especie_poda4 or ''}"
+            f", {row.Laudos.especie_poda4}"
+            if ',' in str(row.Laudos.especie_poda4)
+            else f", ({row.Laudos.qtd_poda4}) {row.Laudos.especie_poda4}"
         ]
-    ).replace("'", "").replace("[", "").replace("]", ""),
+    ).replace("'", "").replace("[", "").replace("]", "").replace('"', ''),
 )
 
 
