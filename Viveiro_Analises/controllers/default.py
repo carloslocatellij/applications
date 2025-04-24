@@ -239,7 +239,8 @@ def Despachar_Processos(): #Menu
     conteudo= ''
     copybtn= ''
     form=''
-    
+    returnbtn = A('Voltar', _href=URL('default', 'Requerimentos', args=[processo], vars={'f':'ver'}), _class='btn btn-primary')# type: ignore
+    newbtn = A('Novo', _href=URL('default', 'Requerimentos'), _class='btn btn-primary')# type: ignore
     if processo:
         prime_query = db(db.Requerimentos.Protocolo == processo).select().render(0).as_dict()
         relation_query = db(db.Laudos.Protocolo == processo)
@@ -267,8 +268,7 @@ def Despachar_Processos(): #Menu
         texto_md = markdowner.convert(texto_despacho) or None
         texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"').replace('<p>', '').replace('</p>', '')
         copybtn = TAG.button('<Copiar>', _class='btn btn-info', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
-        returnbtn = A('Voltar', _href=URL('default', 'Requerimentos', args=[processo], vars={'f':'ver'}), _class='btn btn-primary')# type: ignore
-        newbtn = A('Novo', _href=URL('default', 'Requerimentos'), _class='btn btn-primary')# type: ignore
+        
    
         conteudo = XML(texto_md) # type: ignore
     else:
@@ -306,12 +306,7 @@ def Especies(): #Menu
     else:
         pass
     
-    # list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente,
-    #               db.Requerimentos.Endereco, db.Requerimentos.data_do_laudo, db.Requerimentos.telefone1,
-    #               db.Requerimentos.Supressoes, db.Requerimentos.Podas, db.Requerimentos.Despacho,
-    #               db.Requerimentos.local_arvore, db.Requerimentos.tipo_imovel
-    #               ]
-    
+   
     formbusca = buscador('Especies',  # type: ignore
                          Nome={'label': 'Nome Popular'},
                          Especie={'label': 'Nome Científico'},
@@ -319,6 +314,38 @@ def Especies(): #Menu
                          )
 
     return response.render(dict(form=form, formbusca=formbusca, especie=registro))
+
+
+@auth.requires_login()
+def Bairros(): #Menu
+    table = 'Bairros'
+    tablename = f'{db[table]._tablename[:-1]}'
+    registro = request.args(0) or None
+    f = request.vars['f'] if request.vars['f']  else None
+
+    if f=='editar':
+        form = SQLFORM(db[table], registro, submit_button=f'Atualizar {tablename}' ) # type: ignore
+    elif f=='ver':
+        form = SQLFORM(db[table], registro, readonly=True, ) 
+    else:
+        db[table][table[:-1]].requires = IS_NOT_IN_DB(db, f'{table}.{table[:-1]}', error_message='Já está registrado.')
+        form = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
+        
+    if form.process().accepted:
+        session.flash = f'Dados atualizados' if registro else 'Registrado'
+        redirect(URL('default', table , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
+    elif form.errors:
+        response.flash = 'Corrija os Erros indicados'
+    else:
+        pass
+    
+    formbusca = buscador(table,  # type: ignore
+                         Bairro ={'label': table[:-1]},
+                         )
+
+    return response.render(dict(form=form, formbusca=formbusca, registro=registro))
+
+
 
 
 @auth.requires_login()

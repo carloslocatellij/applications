@@ -126,11 +126,6 @@ input[type="checkbox"]:focus + label {
                         </tr>
                                 <tr>
                                         <table>
-                                                <td width="8%" align='left'>{{=B('Qtd. a Repor:')}}{{=form.custom.widget['qtd_repor']}}</td>
-
-                                                <td width="20%" align='left'>{{=B('Porte a Repor:')}} <div align='center' class="card">
-                                                        {{=form.custom.widget['porte_repor']}}</div></td>
-
                                                 <td width="20%" align='left'>{{=B('Tipo de Imóvel:')}} <div align='center' class="card">
                                                         {{=form.custom.widget['tipo']}}</div></td>
                                         </table>
@@ -158,6 +153,12 @@ input[type="checkbox"]:focus + label {
                         </table>
 
                         <br>
+                        <table>
+                                        <td width="8%" align='left'>{{=B('Qtd. a Repor:')}}{{=form.custom.widget['qtd_repor']}}</td>
+
+                                        <td width="20%" align='left'>{{=B('Porte a Repor:')}} <div align='center' class="card">
+                                                {{=form.custom.widget['porte_repor']}}</div></td>
+                        </table>
                             <td width="25%" align='left' style="padding-inline: 10px">{{=B('Técnico:  ')}}<div align='left' class="card">{{=form.custom.widget['tecnico']}}</td></div>            
 
                         </table>
@@ -175,7 +176,11 @@ input[type="checkbox"]:focus + label {
                         <div style="position: absolute;" id="suggestions" class="suggestions"></div>     
         </table>
     </td>  
-    {{=TD(B('DELETAR REGISTRO: '), form.custom.delete, _class="card", _width="15%", _style="border: 1px solid; color: darkgred")}}
+
+        {{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+        {{=A('DELETAR REGISTRO?', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('DELET'), **atributo),SPAN(_class="caret") }}
+        {{=DIV(TD(B('DELETAR REGISTRO!  '),  DIV(form.custom.delete, _style="border: 1px solid; padding-inline: 20px; color: darkgred"), _class="card", _width="15%", ), _id='DELET', _class="collapse list-danger")}}
 
     {{=form.custom.submit}} 
     {{=form.custom.end}}

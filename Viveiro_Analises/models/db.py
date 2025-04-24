@@ -30,11 +30,11 @@ regiao_cor ={1:'CENTRAL', 2:'BOSQUE', 3:'TALHADO', 4:'REPRESA', 5:'VILA TONINHO'
 
 Bairros = db.define_table(
     "Bairros",
+    Field('id', 'id'),
     Field("Bairro", "string"),
     Field("Perimetro", "string"),
     Field("Area", "string"),
     Field("Regiao", 'integer',requires= IS_IN_SET(regiao_cor, zero=None)),
-    primarykey=["Bairro"],
     format="Bairro",
     migrate=True if not configuration.get('app.production') else False,
     fake_migrate=True if not configuration.get('app.production') else False
@@ -127,7 +127,8 @@ Requerimentos = db.define_table(
     Field("cep"),
     Field("telefone1"),
     Field("email", rname="`e-mail`"),
-    Field("especie_ret1", rname="`especie ret1`"),
+    Field("especie_ret1", widget=SQLFORM.widgets.autocomplete(
+     request, db.Especies.Nome, limitby=(0, 7), min_length=3),rname="`especie ret1`"),
     Field("especie_ret2", rname="`especie ret2`"),
     Field("especie_ret3", rname="`especie ret3`"),
     Field("especie_ret4", 'list: string' ,rname="`especie ret4`"),
@@ -219,16 +220,16 @@ db.Requerimentos.Supressoes = Field.Virtual(
     "Supressoes",
     lambda row: " ".join(
         [
-            f"({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1} "
+            f"({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1}"
             if row.Requerimentos.qtd_ret1
             else "",
-            f",({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}"
+            f", ({row.Requerimentos.qtd_ret2}) {row.Requerimentos.especie_ret2}"
             if row.Requerimentos.qtd_ret2
             else "",
-            f",({row.Requerimentos.qtd_ret3}) {row.Requerimentos.especie_ret3} "
+            f", ({row.Requerimentos.qtd_ret3}) {row.Requerimentos.especie_ret3}"
             if row.Requerimentos.qtd_ret3
             else "",
-            f",({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}"
+            f", ({row.Requerimentos.qtd_ret4}) {row.Requerimentos.especie_ret4}"
             if row.Requerimentos.qtd_ret4
             else "",
         ]
@@ -240,16 +241,16 @@ db.Requerimentos.Podas = Field.Virtual(
     "Podas",
     lambda row: " ".join(
         [
-            f"({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1} "
+            f"({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1}"
             if row.Requerimentos.qtd_poda1
             else "",
-            f",({row.Requerimentos.qtd_poda2}) {row.Requerimentos.especie_poda2}"
+            f", ({row.Requerimentos.qtd_poda2}) {row.Requerimentos.especie_poda2}"
             if row.Requerimentos.qtd_poda2
             else "",
-            f",({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3} "
+            f", ({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3}"
             if row.Requerimentos.qtd_poda3
             else "",
-            f",({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}"
+            f", ({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}"
             if row.Requerimentos.qtd_poda4
             else "",
         ]
@@ -426,18 +427,18 @@ db.Laudos.Supressoes = Field.Virtual(
     "Supressoes",
     lambda row: " ".join(
         [
-            f"({row.Laudos.qtd_ret1}) {row.Laudos.especie_ret1} "
+            f"({row.Laudos.qtd_ret1}) {row.Laudos.especie_ret1}"
             if row.Laudos.especie_ret1
             else "",
-            f",({row.Laudos.qtd_ret2}) {row.Laudos.especie_ret2}"
+            f", ({row.Laudos.qtd_ret2}) {row.Laudos.especie_ret2}"
             if row.Laudos.especie_ret2
             else "",
-            f",({row.Laudos.qtd_ret3}) {row.Laudos.especie_ret3} "
+            f", ({row.Laudos.qtd_ret3}) {row.Laudos.especie_ret3}"
             if row.Laudos.especie_ret3
             else "",
-            f",({row.Laudos.qtd_ret4}) {row.Laudos.especie_ret4}"
+            f", ({row.Laudos.qtd_ret4}) {row.Laudos.especie_ret4}"
             if row.Laudos.especie_ret4 and not ',' in row.Laudos.especie_ret4
-            else f"{row.Laudos.especie_ret4 or ''}",
+            else f", {row.Laudos.especie_ret4 or ''}",
         ]
     ).replace("'", "").replace("[", "").replace("]", ""),
 )
@@ -446,17 +447,18 @@ db.Laudos.Podas = Field.Virtual(
     "Podas",
     lambda row: " ".join(
         [
-            f"({row.Laudos.qtd_poda1}) {row.Laudos.especie_poda1} "
+            f"({row.Laudos.qtd_poda1}) {row.Laudos.especie_poda1}"
             if row.Laudos.especie_poda1
             else "",
-            f",({row.Laudos.qtd_poda2}) {row.Laudos.especie_poda2}"
+            f", ({row.Laudos.qtd_poda2}) {row.Laudos.especie_poda2}"
             if row.Laudos.especie_poda2
             else "",
-            f",({row.Laudos.qtd_poda3}) {row.Laudos.especie_poda3} "
+            f", ({row.Laudos.qtd_poda3}) {row.Laudos.especie_poda3}"
             if row.Laudos.especie_poda3
             else "",
-            f",({row.Laudos.qtd_poda4 })" if row.Laudos.qtd_poda4 and not ',' in row.Laudos.especie_poda4 else "",
-                f"{row.Laudos.especie_poda4 if row.Laudos.especie_poda4 else ''}"
+            f", ({row.Laudos.qtd_poda4}) {row.Laudos.especie_poda4}"
+            if row.Laudos.especie_poda4 and not ',' in row.Laudos.especie_poda4
+            else f", {row.Laudos.especie_poda4 or ''}"
         ]
     ).replace("'", "").replace("[", "").replace("]", ""),
 )

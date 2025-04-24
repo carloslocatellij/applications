@@ -45,11 +45,15 @@ def padronizaprotoc(protoc):
 def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
     campos = [Field(k, **v)  for k, v in fields.items()] 
     formbusca = SQLFORM.factory(*campos, formstyle='table3cols', formname='formbusca')
+    if 'Protocolo' in db[tabela].fields:
+        busca_id = 'Protocolo'
+    elif 'id' in db[tabela].fields:
+        busca_id = 'id'
+    else:
+        busca_id = tabela[:-1]
 
-    try:
-        busca = db(db[tabela].Protocolo > 0)
-    except:
-        busca = db(db[tabela].id > 0)
+    busca = db(db[tabela][busca_id] > 0 )
+            
     
     tab2 = None
 
@@ -77,15 +81,19 @@ def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
                     q.append((db[tabela][k] == session[k]))
 
         try:
-            busca = db(*q) if len(q) > 0 else db[tabela].Protocolo == '0'
-        except:
             busca = db(*q) if len(q) > 0 else db[tabela].id == '0'
+        except:
+            if 'Protocolo' in db[tabela].fields:
+                busca = db(*q) if len(q) > 0 else db[tabela].Protocolo == '0'
+            else:
+                busca = db(*q) if len(q) > 0 else db[tabela][tabela[:-1]] == ''
+                
 
     grade =''
     
     links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=session.controller,
-                              f=regform, args=row[tabela]['Protocolo' if tabela=='Requerimentos' else 'id'] 
-                              if tab2 != None else row['Protocolo' if tabela=='Requerimentos' else 'id'], vars={'f': 'ver'})))]
+                              f=regform, args=row[tabela][busca_id] 
+                              if tab2 != None else row[busca_id], vars={'f': 'ver'})))]
     
     grade = SQLFORM.grid( busca, represent_none='', links=links, editable=False, searchable=False, deletable=False,
                          create=False, details=False, paginate=30, csv=True,  maxtextlength = 120, _class="table",
@@ -93,7 +101,6 @@ def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
                           orderby=~db.Requerimentos.data_do_laudo if tabela=='Requerimentos' else None)
 
     
-   
     
 
     return dict(formbusca = formbusca, grade=Modal('Busca', grade, 'grade'))

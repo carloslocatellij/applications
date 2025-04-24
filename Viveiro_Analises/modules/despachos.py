@@ -44,7 +44,7 @@ O REQUERENTE CITADO DECLARA ASSUMIR AS RESPONSABILIDADES POR QUAISQUER DANOS OU 
 
 Para qualquer interdição parcial ou total de via pública para realização de serviços, deverá ser requerida autorização junto à Secretaria Municipal de Trânsito, Transportes e Segurança.
 
-A responsabilidade pela poda de árvore(s) e destinação dos resíduos gerados é do requerente. Caso o material resultante da poda seja disposto em local inadequado/não autorizado, o responsável ficará sujeito à penalidade de multa. Em pequenas quantidades (até 1m³), os resíduos podem ser levados até um ponto de apoio (mais informações: https://www.riopreto.sp.gov.br/pontodeapoio/). Troncos e maiores quantidades de resíduos devem ser levados diretamente para a Fazendinha Ambiental; em caso de dúvidas, entrar em contato com a Secretaria Municipal de Serviços Gerais pelo telefone (17) 3216-6310.
+A responsabilidade pela poda de árvore(s) e destinação dos resíduos gerados é do requerente. Pequenas quantidades de resíduos vegetais  (1m³) de podas podem ser levadas a Pontos de Apoio da Prefeitura, consultar:  https://www.riopreto.sp.gov.br/pontodeapoio/. Resíduos florestais, principalmente madeira nativa bruta, exigem destinação a locais cadastrados no Sinaflor, seguindo leis federais e estaduais. O transporte e armazenamento de madeira nativa precisam de controle documental (DOF/Sinaflor) e cadastro no CTF. Destinar madeira nativa sem origem comprovada é infração punível. Recomenda-se procurar locais licenciados para destinação. Dúvidas podem ser esclarecidas com a CETESB, Instituto Florestal ou secretarias municipais (Meio Ambiente: 17 3202-4010; Serviços Gerais: 17 3216-6310).
         '''
         
         # IMÓVEL PÚBLICO
@@ -136,14 +136,14 @@ Ilmo.(a) Sr.(a) {query.get('Requerente')}
 
 Fica estabelecido, de conformidade com os termos do Art. 59º da Lei nº 13.031, de 26 de setembro de 2018, regulamentada no Anexo I do Decreto nº 18.301, de 02 de maio de 2019, a AUTORIZAÇÃO para a extração de árvores, sendo as quantidades {soma_supress} ({num_extens_supress}) e respectiva(s) espécie(s): {relation_query.get('Supressoes')}. {com_podas_autorizadas}
 
-Endereço: {query.get('Endereco')}, nos termos do compromisso de plantio de muda de árvores, de sua responsabilidade, assinado no dia \_\_\_\_\_\_\_\_\_de \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_de \_\_\_\_\_\_\_\_\_\_\_.
+Endereço: {query.get('Endereco')}, nos termos do compromisso de plantio de muda de árvores, de sua responsabilidade, assinado no dia \_\_\_\_\_\_\_de \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_de \_\_\_\_\_\_\_\_\_.
 
 DECLARAÇÃO DE RESPONSABILIDADE E TERMO DE COMPROMISSO DE MEDIDA COMPENSATÓRIA
 
 O requerente acima mencionado declara sob as penas da legislação em vigor, que **assume o compromisso de plantar {relation_query.get('qtd_repor')} ({num_extens_repor}) muda(s) de árvore(s) de porte ({relation_query.get('porte_repor')})** em substituição àquelas a serem removidas no local supracitado, no prazo de 60 (sessenta) dias a partir da data do recebimento desta autorização. Para cada muda a ser plantada, o canteiro permeável deverá ter dimensões no padrão ESPAÇO ÁRVORE, que deve ter como medidas mínimas 40% da largura da calçada e para o comprimento, o dobro da largura, respeitando sempre as medidas que concerne à acessibilidade (1,2m). PROIBIDO POR LEI Nº 13.031/2018 O USO DE MANILHA (TUBO). 
 
 Para qualquer interdição parcial ou total de via pública para realização de serviços, deverá ser requerida autorização junto à Secretaria Municipal de Trânsito, Transportes e Segurança.
-A responsabilidade pela supressão/poda de árvore(s) e destinação dos resíduos gerados é do requerente. Caso o material resultante da supressão/poda seja disposto em local inadequado/não autorizado, o responsável ficará sujeito à penalidade de multa. Em pequenas quantidades (até 1m³), os resíduos podem ser levados até um ponto de apoio (mais informações: https://www.riopreto.sp.gov.br/pontodeapoio/). Troncos e maiores quantidades de resíduos devem ser levados diretamente para a Fazendinha Ambiental; em caso de dúvidas, entrar em contato com a Secretaria Municipal de Serviços Gerais pelo telefone (17) 3216-6310. O NÃO CUMPRIMENTO DO PRAZO ACARRETA A APLICAÇÃO DAS PENALIDADES DA LEI.
+A responsabilidade pela supressão/poda de árvore(s) e destinação dos resíduos gerados é do requerente. Pequenas quantidades de resíduos vegetais  (1m³) de podas podem ser levadas a Pontos de Apoio da Prefeitura, consultar:  https://www.riopreto.sp.gov.br/pontodeapoio/. Resíduos florestais, principalmente madeira nativa bruta, exigem destinação a locais cadastrados no Sinaflor, seguindo leis federais e estaduais. O transporte e armazenamento de madeira nativa precisam de controle documental (DOF/Sinaflor) e cadastro no CTF. Destinar madeira nativa sem origem comprovada é infração punível. Recomenda-se procurar locais licenciados para destinação. Dúvidas podem ser esclarecidas com a CETESB, Instituto Florestal ou secretarias municipais (Meio Ambiente: 17 3202-4010; Serviços Gerais: 17 3216-6310). O NÃO CUMPRIMENTO DO PRAZO ACARRETA A APLICAÇÃO DAS PENALIDADES DA LEI.
 
 Técnico responsável: {tecnico or ''}  '''
 
@@ -167,7 +167,7 @@ DECLARAÇÃO DE RESPONSABILIDADE
 Informamos que o prazo para a supressão da(s) árvore(s) é de 60 (sessenta) dias a partir da data do recebimento desta autorização. PROIBIDO POR LEI Nº 13.031/2018 O USO DE MANILHA (TUBO).
 
 Para qualquer interdição parcial ou total de via pública para realização de serviços, deverá ser requerida autorização junto à Secretaria Municipal de Trânsito, Transportes e Segurança.
-A responsabilidade pela supressão/poda de árvore(s) e destinação dos resíduos gerados é do requerente. Caso o material resultante da supressão/poda seja disposto em local inadequado/não autorizado, o responsável ficará sujeito à penalidade de multa. Em pequenas quantidades (até 1m³), os resíduos podem ser levados até um ponto de apoio (mais informações: https://www.riopreto.sp.gov.br/pontodeapoio/). Troncos e maiores quantidades de resíduos devem ser levados diretamente para a Fazendinha Ambiental; em caso de dúvidas, entrar em contato com a Secretaria Municipal de Serviços Gerais pelo telefone (17) 3216-6310.
+A responsabilidade pela supressão/poda de árvore(s) e destinação dos resíduos gerados é do requerente. Pequenas quantidades de resíduos vegetais  (1m³) de podas podem ser levadas a Pontos de Apoio da Prefeitura, consultar:  https://www.riopreto.sp.gov.br/pontodeapoio/. Resíduos florestais, principalmente madeira nativa bruta, exigem destinação a locais cadastrados no Sinaflor, seguindo leis federais e estaduais. O transporte e armazenamento de madeira nativa precisam de controle documental (DOF/Sinaflor) e cadastro no CTF. Destinar madeira nativa sem origem comprovada é infração punível. Recomenda-se procurar locais licenciados para destinação. Dúvidas podem ser esclarecidas com a CETESB, Instituto Florestal ou secretarias municipais (Meio Ambiente: 17 3202-4010; Serviços Gerais: 17 3216-6310).
 
 O NÃO CUMPRIMENTO DO PRAZO, ACARRETA A APLICAÇÃO DAS PENALIDADES DA LEI.
 
@@ -423,7 +423,7 @@ Após análise do protocolo, informamos que o pedido de supressão do(s) exempla
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
             
             texto = f'''
-Por se tratar de árvore localizada em área interna de propriedade particular, não existe meio legal para notificar o seu vizinho para realizar o manejo da árvore em questão no momento.
+Por se tratar de árvore localizada em área interna de propriedade particular, não existe meio legal para notificar o proprietário para realizar o manejo da árvore em questão no momento.
 
 Sendo assim, orientamos para que sejam tomadas as providências convenientes, seguindo os preceitos legais, diretamente com o proprietário do imóvel que detém a árvore.
 
@@ -445,9 +445,9 @@ Atenciosamente,
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
             
             texto = f'''
-Por se tratar de árvore localizada no passeio de fronte a área de propriedade particular, não existe meio legal para notificar o seu vizinho para realizar o manejo da árvore em questão.
+Por se tratar de árvore localizada no passeio de fronte a área de propriedade particular, não existe meio legal para notificar o proprietário para realizar o manejo da árvore em questão.
 
-Sendo assim, orientamos o(a) Sr(a). Requerente para que tome as providências que julgar convenientes, seguindo os preceitos legais, diretamente com o proprietário do imóvel que detém a árvore.
+Sendo assim, orientamos para que sejam tomadas as providências convenientes, seguindo os preceitos legais, diretamente com o proprietário do imóvel que detém a árvore.
 
 Orientamos também, que diante a possibilidade de ocorrências severas, pode ser consultado a Defesa Civil.
 
@@ -545,7 +545,7 @@ DECLARAÇÃO DE RESPONSABILIDADE E TERMO DE COMPROMISSO DE MEDIDA COMPENSATÓRIA
 O requerente acima mencionado declara sob as penas da legislação em vigor, que **assume o compromisso de plantar {relation_query.get('qtd_repor')} ({num_extens_repor}) muda(s) de árvore(S)
 de porte ({relation_query.get('porte_repor')})** em substituição àquelas a serem removidas no local supracitado, no prazo de 60 (sessenta) dias a partir da data do recebimento desta autorização. Para cada muda a ser plantada, o canteiro permeável deverá ter dimensões no padrão ESPAÇO ÁRVORE, que deve ter como medidas mínimas 40% da largura da calçada e para o comprimento, o dobro da largura, respeitando sempre as medidas que concerne à acessibilidade (1,2m). PROIBIDO POR LEI Nº 13.031/2018 O USO DE MANILHA (TUBO). 
 Para qualquer interdição parcial ou total de via pública para realização de serviços, deverá ser requerida autorização junto à Secretaria Municipal de Trânsito, Transportes e Segurança.
-A responsabilidade pela supressão/poda de árvore(s) e destinação dos resíduos gerados é do requerente. Caso o material resultante da supressão/poda seja disposto em local inadequado/não autorizado, o responsável ficará sujeito à penalidade de multa. Em pequenas quantidades (até 1m³), os resíduos podem ser levados até um ponto de apoio (mais informações: https://www.riopreto.sp.gov.br/pontodeapoio/). Troncos e maiores quantidades de resíduos devem ser levados diretamente para a Fazendinha Ambiental; em caso de dúvidas, entrar em contato com a Secretaria Municipal de Serviços Gerais pelo telefone (17) 3216-6310. O NÃO CUMPRIMENTO DO PRAZO ACARRETA A APLICAÇÃO DAS PENALIDADES DA LEI.
+A responsabilidade pela supressão/poda de árvore(s) e destinação dos resíduos gerados é do requerente. Pequenas quantidades de resíduos vegetais  (1m³) de podas podem ser levadas a Pontos de Apoio da Prefeitura, consultar:  https://www.riopreto.sp.gov.br/pontodeapoio/. Resíduos florestais, principalmente madeira nativa bruta, exigem destinação a locais cadastrados no Sinaflor, seguindo leis federais e estaduais. O transporte e armazenamento de madeira nativa precisam de controle documental (DOF/Sinaflor) e cadastro no CTF. Destinar madeira nativa sem origem comprovada é infração punível. Recomenda-se procurar locais licenciados para destinação. Dúvidas podem ser esclarecidas com a CETESB, Instituto Florestal ou secretarias municipais (Meio Ambiente: 17 3202-4010; Serviços Gerais: 17 3216-6310). O NÃO CUMPRIMENTO DO PRAZO ACARRETA A APLICAÇÃO DAS PENALIDADES DA LEI.
 
 Técnico responsável: {relation_query.get('tecnico')}
             '''
@@ -569,7 +569,7 @@ O requerente compromete-se a plantar {relation_query.get('qtd_repor')} ({num_ext
 
 **Responsabilidades:**
 - A poda ou supressão deve ser realizada por profissional habilitado.
-- O requerente é responsável pela destinação adequada dos resíduos gerados. Pequenas quantidades (até 1m³) podem ser levadas a um ponto de apoio (mais informações: https://www.riopreto.sp.gov.br/pontodeapoio/). Quantidades maiores devem ser encaminhadas à Fazendinha Ambiental. Em caso de dúvidas, contatar a Secretaria Municipal de Serviços Gerais pelo telefone (17) 3216-6310.
+- O requerente é responsável pela destinação adequada dos resíduos gerados. Pequenas quantidades de resíduos vegetais  (1m³) de podas podem ser levadas a Pontos de Apoio da Prefeitura, consultar:  https://www.riopreto.sp.gov.br/pontodeapoio/. Resíduos florestais, principalmente madeira nativa bruta, exigem destinação a locais cadastrados no Sinaflor, seguindo leis federais e estaduais. O transporte e armazenamento de madeira nativa precisam de controle documental (DOF/Sinaflor) e cadastro no CTF. Destinar madeira nativa sem origem comprovada é infração punível. Recomenda-se procurar locais licenciados para destinação. Dúvidas podem ser esclarecidas com a CETESB, Instituto Florestal ou secretarias municipais (Meio Ambiente: 17 3202-4010; Serviços Gerais: 17 3216-6310).
 - O não cumprimento do prazo acarretará penalidades previstas em lei.
 
 **Técnico responsável:** {relation_query.get('tecnico')}
