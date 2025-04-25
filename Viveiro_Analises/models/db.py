@@ -440,7 +440,8 @@ db.Laudos.Supressoes = Field.Virtual(
             else "",
             f", {row.Laudos.especie_ret4 or ''}"
             if ',' in str(row.Laudos.especie_ret4)
-            else f", ({row.Laudos.qtd_ret4}) {row.Laudos.especie_ret4}",
+            else f", ({row.Laudos.qtd_ret4  or ''}) {row.Laudos.especie_ret4 or ''}" 
+            if row.Laudos.qtd_ret4 else '',
         ]
     ).replace("'", "").replace("[", "").replace("]", "").replace('"', ''),
 )
@@ -461,6 +462,7 @@ db.Laudos.Podas = Field.Virtual(
             f", {row.Laudos.especie_poda4}"
             if ',' in str(row.Laudos.especie_poda4)
             else f", ({row.Laudos.qtd_poda4}) {row.Laudos.especie_poda4}"
+            if row.Laudos.qtd_poda4 else '',
         ]
     ).replace("'", "").replace("[", "").replace("]", "").replace('"', ''),
 )
@@ -652,3 +654,13 @@ if not configuration.get("app.production"):
                     ]
                 ),
             )
+
+
+def relatorio_periodo(data_inicial, data_final):
+    query = db.Requerimentos.Protocolo == db.Laudos.Protocolo
+    query &= db.Requerimentos.Bairro == db.Bairros.Bairro
+    query &= (db.Laudos.data_do_laudo >= data_inicial) 
+    query &= (db.Laudos.data_do_laudo <= data_final)
+
+    rows = db(query)
+    return rows
