@@ -93,6 +93,10 @@ http://localhost:8000/Viveiro_Analises
 - Pesquisa por endereço
 - Filtros por região
 
+### Cadastro de Especies
+-- Cadastro de espécies
+-- Busca por espécie cadastrada
+
 ## 👥 Contribuição
 
 1. Faça o fork do projeto

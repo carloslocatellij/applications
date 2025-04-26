@@ -1,5 +1,7 @@
 
 
+from dataclasses import fields
+from gluon.http import redirect
 from gluon.sqlhtml import represent
 
 
@@ -25,7 +27,50 @@ def api_get_user_email():
 def index():
     response.flash = ("Seja Bem Vindo")
     
-    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'))
+    grid = None
+    
+    
+    if request.vars.data_ini and request.vars.data_fim:
+        query= relatorio_periodo(request.vars.data_ini, request.vars.data_fim)
+    else:
+        query= None
+    
+    form = SQLFORM.factory(
+        Field('Data_Inicial', type='date', requires=IS_EMPTY_OR(
+            IS_DATE(format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx")
+        )),
+        Field('Data_Final', type='date', requires=IS_EMPTY_OR(
+            IS_DATE(format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx")
+        ))
+    )
+    
+    if form.process().accepted:
+        redirect(URL(f=request.function, vars={'data_ini': form.vars.Data_Inicial, 'data_fim': form.vars.Data_Final }))
+    else:
+        pass
+    
+    db.Laudos.total_remocoes = Field.Virtual(
+        "total_remocoes",
+            lambda row: str(db.Laudos.qtd_ret1 + db.Laudos.qtd_ret2 + 
+            db.Laudos.qtd_ret3 + db.Laudos.qtd_ret4).with_alias('total_remocoes'))
+    
+    fields = [db.Requerimentos.Endereco1,
+        db.Requerimentos.Numero1,
+        db.Requerimentos.Bairro,
+        db.Bairros.Regiao,
+        db.Requerimentos.tipo_imovel,
+        db.Requerimentos.local_arvore,
+        db.Laudos.qtd_repor, db.Laudos.total_remocoes
+        
+        ]
+    if query:
+        grid = SQLFORM.grid(query, fields=fields ,user_signature=False, editable=False, searchable=False,
+    deletable=False, create=False,csv=False, maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left')
+    
+    
+    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),
+                form=form, grid=grid)
+
 
 
 # ---- Smart Grid (example) -----
@@ -43,6 +88,7 @@ def grid():
 def wiki(): #Menu
     from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
     from gluon.contrib.markdown import WIKI as markdown
+    from gluon.contrib.markmin import markmin2html
     auth.wikimenu() # add the wiki to the menu
 #     """ ##
 #       [see](web2py.com/examples/static/sphinx/gluon/gluon.contrib.markdown.html)
@@ -72,13 +118,13 @@ def wiki(): #Menu
 
 
     '''
-    content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body
+    content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body # type: ignore
     
     markdowner = Markdown2(html4tags=True, tab_width=4, )
     meu_mark = markdowner.convert(content)
 
 
-    return dict(wiki = auth.wiki() ,content=meu_mark)
+    return dict(wiki = auth.wiki() ,content=XML(meu_mark)) # type: ignore
 
 # ---- Action for login/register/etc (required for auth) -----
 def user():
@@ -238,7 +284,8 @@ def Despachar_Processos(): #Menu
     conteudo= ''
     copybtn= ''
     form=''
-    
+    returnbtn = A('Voltar', _href=URL('default', 'Requerimentos', args=[processo], vars={'f':'ver'}), _class='btn btn-primary')# type: ignore
+    newbtn = A('Novo', _href=URL('default', 'Requerimentos'), _class='btn btn-primary')# type: ignore
     if processo:
         prime_query = db(db.Requerimentos.Protocolo == processo).select().render(0).as_dict()
         relation_query = db(db.Laudos.Protocolo == processo)
@@ -266,8 +313,7 @@ def Despachar_Processos(): #Menu
         texto_md = markdowner.convert(texto_despacho) or None
         texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"').replace('<p>', '').replace('</p>', '')
         copybtn = TAG.button('<Copiar>', _class='btn btn-info', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
-        returnbtn = A('Voltar', _href=URL('default', 'Requerimentos', args=[processo], vars={'f':'ver'}), _class='btn btn-primary')# type: ignore
-        newbtn = A('Novo', _href=URL('default', 'Requerimentos'), _class='btn btn-primary')# type: ignore
+        
    
         conteudo = XML(texto_md) # type: ignore
     else:
@@ -305,12 +351,7 @@ def Especies(): #Menu
     else:
         pass
     
-    # list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente,
-    #               db.Requerimentos.Endereco, db.Requerimentos.data_do_laudo, db.Requerimentos.telefone1,
-    #               db.Requerimentos.Supressoes, db.Requerimentos.Podas, db.Requerimentos.Despacho,
-    #               db.Requerimentos.local_arvore, db.Requerimentos.tipo_imovel
-    #               ]
-    
+   
     formbusca = buscador('Especies',  # type: ignore
                          Nome={'label': 'Nome Popular'},
                          Especie={'label': 'Nome Científico'},
@@ -318,6 +359,38 @@ def Especies(): #Menu
                          )
 
     return response.render(dict(form=form, formbusca=formbusca, especie=registro))
+
+
+@auth.requires_login()
+def Bairros(): #Menu
+    table = 'Bairros'
+    tablename = f'{db[table]._tablename[:-1]}'
+    registro = request.args(0) or None
+    f = request.vars['f'] if request.vars['f']  else None
+
+    if f=='editar':
+        form = SQLFORM(db[table], registro, submit_button=f'Atualizar {tablename}' ) # type: ignore
+    elif f=='ver':
+        form = SQLFORM(db[table], registro, readonly=True, ) 
+    else:
+        db[table][table[:-1]].requires = IS_NOT_IN_DB(db, f'{table}.{table[:-1]}', error_message='Já está registrado.')
+        form = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
+        
+    if form.process().accepted:
+        session.flash = f'Dados atualizados' if registro else 'Registrado'
+        redirect(URL('default', table , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
+    elif form.errors:
+        response.flash = 'Corrija os Erros indicados'
+    else:
+        pass
+    
+    formbusca = buscador(table,  # type: ignore
+                         Bairro ={'label': table[:-1]},
+                         )
+
+    return response.render(dict(form=form, formbusca=formbusca, registro=registro))
+
+
 
 
 @auth.requires_login()
