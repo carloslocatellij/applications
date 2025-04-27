@@ -331,6 +331,7 @@
 'Registrar': 'Registrar',
 'Registrar Bairro': 'Registrar Bairro',
 'Registrar Especie': 'Registrar Especie',
+'Registrar Laudo': 'Registrar Laudo',
 'Registrar Requerimento': 'Registrar Requerimento',
 'Registrar Requerimentos': 'Registrar Requerimentos',
 'Registrar Retirada': 'Registrar Retirada',

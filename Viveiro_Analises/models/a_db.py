@@ -55,6 +55,7 @@ if configuration.get('app.production'):
             migrate_enabled=True, migrate=False, fake_migrate_all=False, lazy_tables=True,
             check_reserved=['mysql'], adapter_args={'safe': True},
             )
+    
     authdb = DAL('{}://{}:{}@{}/{}'.format(
                 configuration.take("db")['engine'],
                 configuration.take("db")['username'],
@@ -73,7 +74,7 @@ else:
                 migrate_enabled=True,
                 migrate=True, 
                 fake_migrate_all=True, 
-                lazy_tables=True,
+                lazy_tables=False,
                 check_reserved=[configuration.take("db")['engine']],
                 adapter_args={'safe': True},
             )

@@ -26,52 +26,11 @@ def api_get_user_email():
 
 def index():
     response.flash = ("Seja Bem Vindo")
-    
-    grid = None
-    
-    
-    if request.vars.data_ini and request.vars.data_fim:
-        query= relatorio_periodo(request.vars.data_ini, request.vars.data_fim)
-    else:
-        query= None
-    
-    form = SQLFORM.factory(
-        Field('Data_Inicial', type='date', requires=IS_EMPTY_OR(
-            IS_DATE(format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx")
-        )),
-        Field('Data_Final', type='date', requires=IS_EMPTY_OR(
-            IS_DATE(format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx")
-        ))
-    )
-    
-    if form.process().accepted:
-        redirect(URL(f=request.function, vars={'data_ini': form.vars.Data_Inicial, 'data_fim': form.vars.Data_Final }))
-    else:
-        pass
-    
-    db.Laudos.total_remocoes = Field.Virtual(
-        "total_remocoes",
-            lambda row: str(db.Laudos.qtd_ret1 + db.Laudos.qtd_ret2 + 
-            db.Laudos.qtd_ret3 + db.Laudos.qtd_ret4).with_alias('total_remocoes'))
-    
-    fields = [db.Requerimentos.Endereco1,
-        db.Requerimentos.Numero1,
-        db.Requerimentos.Bairro,
-        db.Bairros.Regiao,
-        db.Requerimentos.tipo_imovel,
-        db.Requerimentos.local_arvore,
-        db.Laudos.qtd_repor, db.Laudos.total_remocoes
-        
-        ]
-    if query:
-        grid = SQLFORM.grid(query, fields=fields ,user_signature=False, editable=False, searchable=False,
-    deletable=False, create=False,csv=False, maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left')
-    
+
     
     return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),
-                form=form, grid=grid)
-
-
+                )
+0
 
 # ---- Smart Grid (example) -----
 @auth.requires_membership('admin') # can only be accessed by members of admin groupd
