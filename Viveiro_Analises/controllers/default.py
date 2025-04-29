@@ -26,9 +26,11 @@ def api_get_user_email():
 
 def index():
     response.flash = ("Seja Bem Vindo")
-
+    endereco = SQLFORM.factory(
+        Field('CEP', requires=Busca_CEP())
+    )
     
-    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),
+    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),endereco =endereco
                 )
 0
 
@@ -152,7 +154,8 @@ def Requerimentos(): #Menu
     
     formbusca = buscador('Requerimentos',  # type: ignore
                          Protocolo={'label': 'Protocolo'},
-                         data_do_laudo={'type': 'date' ,'label': 'Data'},
+                         data_do_laudo={'type': 'date' ,'label': 'Data', 'requires': IS_EMPTY_OR(
+                            IS_DATE(format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx") )},
                          Requerente={'label': 'Requerente' },
                          Endereco1={'name':'Endereco1', 'label':'Endereço'},
                          Bairro={},
@@ -314,7 +317,12 @@ def Especies(): #Menu
     formbusca = buscador('Especies',  # type: ignore
                          Nome={'label': 'Nome Popular'},
                          Especie={'label': 'Nome Científico'},
-                         OutroNome={'label': 'Outros Nomes'}
+                         OutroNome={'label': 'Outros Nomes'},
+                         Familia={'label': 'Família'},
+                         Bioma={},
+                         Porte={},
+                         CorDaFlor={'label': 'Cor da Flor'},
+                         
                          )
 
     return response.render(dict(form=form, formbusca=formbusca, especie=registro))

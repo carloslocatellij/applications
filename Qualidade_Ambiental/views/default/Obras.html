@@ -9,8 +9,7 @@
     function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
     }
-    sleep(2000).then(() => { $('#Obras_resptecnico').val("{{=request.vars.pessoa_id}}"); });
-    sleep(2500).then(() => { $('#Obras_resptecnico').val("{{=request.vars.pessoa_id}}"); });
+    sleep(200).then(() => { $('#Obras_resptecnico').val("{{=request.vars.pessoa_id}}"); });
 </script>
 {{else:}}
 {{pass}}
@@ -227,10 +226,7 @@ function ordenarSelect(id_componente) {
 
 $( document ).ready(function() {
     if ($('#Obras_IdEndereco').val() == "") {ordenarSelect('Obras_IdEndereco'); };
-     $('#Obras_IdEndereco').keydown(ordenarSelect('Obras_IdEndereco'));
-    if ($('#Obras_IdGerador').val() == "" ) {ordenarSelect('Obras_IdGerador'); };
-     $('#Obras_IdGerador').keydown(ordenarSelect('Obras_IdGerador'));  }   );
-    if ($('#Obras_resptecnico').val() == "") {ordenarSelect('Obras_resptecnico'); };
+     $('#Obras_IdEndereco').keydown(ordenarSelect('Obras_IdEndereco'));})
 </script>
 
 {{pass}}

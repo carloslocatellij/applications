@@ -124,7 +124,7 @@ Requerimentos = db.define_table(
     ),
     # requires=IS_IN_DB(db, 'Ruas.Endereco1')),
     Field("Numero1"),
-    Field("Bairro",requires=IS_IN_DB(db, "Bairros.Bairro", "%(Bairro)s"),
+    Field("Bairro",requires=IS_IN_DB(db, "Bairros.Bairro", "%(Bairro)s", error_message='Bairro não registrado.'),
     widget=SQLFORM.widgets.autocomplete(
      request, db.Bairros.Bairro,  limitby=(0, 7), min_length=3)),
     Field("cpf_cnpj", rname="`cpf-cnpj`"),
@@ -182,7 +182,7 @@ Requerimentos = db.define_table(
         rname="`local arvore`",
         label="Local",
         requires=IS_IN_SET(
-            ["calçada", "calçada com fiação", "área interna", "área aberta", "praça", "canteiro central"]
+            ["calçada", "calçada com fiação", "área interna", "área aberta", "praça", "canteiro central", "não há árvore"]
         ),
     ),
     Field(
@@ -217,8 +217,8 @@ db.Requerimentos.Endereco = Field.Virtual(
 
 db.Requerimentos.total_podas = Field.Virtual(
     "total_podas",
-        lambda row: sum([int(row.Requerimentos.qtd_poda1), int(row.Requerimentos.qtd_poda2),
-        int(row.Requerimentos.qtd_poda3) , int(row.Requerimentos.qtd_poda4)]
+        lambda row: sum([int(row.Requerimentos.qtd_poda1 or 0), int(row.Requerimentos.qtd_poda2 or 0),
+        int(row.Requerimentos.qtd_poda3 or 0) , int(row.Requerimentos.qtd_poda4 or 0)]
         ))
 
 
@@ -320,77 +320,77 @@ Laudos = db.define_table(
     Field("qtd_poda4", rname="`qtd poda4`"),
     Field("tipo"),
     Field(
-        "p1",
+        "p1", 'integer',
         label="Conflito com fiação elétrica",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
-        "p2",
+        "p2", 'integer',
         label="Prejuízo a rede de água/esgoto",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
-        "p3",
+        "p3", 'integer',
         label="Danos à estrutura da construção",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
-        "p4",
+        "p4", 'integer',
         label="Restrição à passagem de pedestres",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
-        "p5",
+        "p5", 'integer',
         label="Porte ou espécie inadequada",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
-        "p6",
+        "p6", 'integer',
         label="Árvore senescente, debilitada por poda/pragas/parasitas",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
-        "p7",
+        "p7", 'integer',
         label="Árvore morta/seca",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
-        "p8",
+        "p8", 'integer',
         label="Passagem de veículos",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
-        "p9",
+        "p9", 'integer',
         label="Obras, reforma, construção, demolição",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
-        "p10",
+        "p10", 'integer',
         label="Projetos e/ou atividades",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " ",
     ),
     Field(
-        "p11",
+        "p11", 'integer',
         label="Risco à população, patrimônio",
         requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
@@ -403,9 +403,9 @@ Laudos = db.define_table(
         requires=IS_EMPTY_OR(
             IS_IN_SET(
                 [
-                    "Gandalf the Mage",
-                    "Sauruman the White",
-                    "Galadriel daugther of Finarfin",
+                    "Guilherme Cavenaghi",
+                    "Renan Fabrizzio Viche",
+                    "Otton Garcia Arruda",
                     "",
                 ]
             )
@@ -464,31 +464,31 @@ db.Laudos.Podas = Field.Virtual(
 
 db.Laudos.total_remocoes = Field.Virtual(
         "total_remocoes",
-            lambda row: sum([int(row.Laudos.qtd_ret1), int(row.Laudos.qtd_ret2),
-            int(row.Laudos.qtd_ret3) , int(row.Laudos.qtd_ret4)]
+            lambda row: sum([int(row.Laudos.qtd_ret1 or 0), int(row.Laudos.qtd_ret2 or 0),
+            int(row.Laudos.qtd_ret3 or 0) , int(row.Laudos.qtd_ret4 or 0)]
             ))
 
 
 db.Laudos.motivos = Field.Virtual(
     "motivos",
     lambda row: ''.join( [
-        f", {db.Laudos.p1.label}" if row.Laudos.p1 == 'T' else '',
-        f", {db.Laudos.p2.label}" if row.Laudos.p2 == 'T' else '',
-        f", {db.Laudos.p3.label}"if row.Laudos.p3 == 'T' else '',
-        f", {db.Laudos.p4.label}" if row.Laudos.p4 == 'T' else '',
-        f", {db.Laudos.p5.label}" if row.Laudos.p5 == 'T' else '',
-        f", {db.Laudos.p6.label}" if row.Laudos.p6 == 'T' else '',
-        f", {db.Laudos.p7.label}" if row.Laudos.p7 == 'T' else '',
-        f", {db.Laudos.p8.label}" if row.Laudos.p8 == 'T' else '',
-        f", {db.Laudos.p9.label}" if row.Laudos.p9 == 'T' else '',
-        f", {db.Laudos.p10.label}" if row.Laudos.p10 == 'T' else '',
-        f", {db.Laudos.p11.label}" if row.Laudos.p11 == 'T' else '']                     
+        f", {db.Laudos.p1.label}" if row.Laudos.p1 == 1 else '',
+        f", {db.Laudos.p2.label}" if row.Laudos.p2 == 1 else '',
+        f", {db.Laudos.p3.label}" if row.Laudos.p3 == 1 else '',
+        f", {db.Laudos.p4.label}" if row.Laudos.p4 == 1 else '',
+        f", {db.Laudos.p5.label}" if row.Laudos.p5 == 1 else '',
+        f", {db.Laudos.p6.label}" if row.Laudos.p6 == 1 else '',
+        f", {db.Laudos.p7.label}" if row.Laudos.p7 == 1 else '',
+        f", {db.Laudos.p8.label}" if row.Laudos.p8 == 1 else '',
+        f", {db.Laudos.p9.label}" if row.Laudos.p9 == 1 else '',
+        f", {db.Laudos.p10.label}" if row.Laudos.p10 == 1 else '',
+        f", {db.Laudos.p11.label}" if row.Laudos.p11 == 1 else '']                     
                          )
 )
 
 def relat_supress_periodo(data_inicial, data_final):
     query = db.Requerimentos.Protocolo == db.Laudos.Protocolo
-    query &= db.Laudos.Despacho == 'Deferido'   
+    query &= (db.Requerimentos.Bairro == db.Bairros.Bairro)
     query &= (db.Requerimentos.data_do_laudo >= data_inicial) 
     query &= (db.Requerimentos.data_do_laudo <= data_final)
 
@@ -497,8 +497,8 @@ def relat_supress_periodo(data_inicial, data_final):
 
 
 def relat_podas_periodo(data_inicial, data_final):
-    query = db.Requerimentos.Despacho == 'Deferido' 
-    query &=  db.Requerimentos.qtd_poda1 > 0
+    query =  db.Requerimentos.qtd_poda1 > 0
+    query &= (db.Requerimentos.Bairro == db.Bairros.Bairro)
     query &= (db.Requerimentos.data_do_laudo >= data_inicial) 
     query &= (db.Requerimentos.data_do_laudo <= data_final)
 

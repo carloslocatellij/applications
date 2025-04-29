@@ -30,14 +30,19 @@ def Supressões_por_periodo(): #Menu
         pass
         
     fields = [db.Requerimentos.Endereco1, db.Requerimentos.Numero1,     
-        db.Requerimentos.Bairro, db.Bairros.Regiao, db.Requerimentos.tipo_imovel,
-        db.Requerimentos.local_arvore, db.Laudos.qtd_repor, 
-        db.Laudos.total_remocoes, db.Laudos.motivos]
+        db.Requerimentos.Bairro, db.Laudos.Despacho, db.Laudos.total_remocoes,
+        db.Requerimentos.tipo_imovel, db.Requerimentos.local_arvore, 
+        db.Bairros.Regiao, db.Laudos.qtd_repor, db.Laudos.motivos, db.Laudos.Obs]
+    
+    links = [dict(header= 'Ver', body= lambda row: A('Ver', _href=URL(c='default', f='Requerimentos', args=[row.Requerimentos.Protocolo], vars={'f':'ver'} ) )        )] 
     
     if query:
-        grid = SQLFORM.grid( query, fields=fields ,user_signature=False, details=False,
+        from gluon.sqlhtml import ExporterCSV
+        grid = SQLFORM.grid( query, fields=fields ,user_signature=False, details=False, links=links,
             editable=False, searchable=False,deletable=False, create=False, groupby=db.Requerimentos.Protocolo,
-            csv=True, maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left')
+            exportclasses=dict(csv=False, tsv=False, tsv_with_hidden_cols=False, json=False, xml=False,
+                html=False, csv_with_hidden_cols=(ExporterCSV, 'CSV' ),), maxtextlength = 120, _class="table",
+            represent_none= '',links_placement= 'left')
     
     return dict(form=form, grid=grid)
 
@@ -67,10 +72,14 @@ def Podas_por_periodo(): #Menu
     fields = [db.Requerimentos.Endereco1, db.Requerimentos.Numero1,     
         db.Requerimentos.Bairro, db.Bairros.Regiao, db.Requerimentos.tipo_imovel,
         db.Requerimentos.local_arvore, db.Requerimentos.total_podas]
-    
+
+    links = [dict(header= 'Ver', body= lambda row: A('Ver', _href=URL(c='default', f='Requerimentos', args=[row.Requerimentos.Protocolo], vars={'f':'ver'} ) ) )]
+                  
     if query:
-        grid = SQLFORM.grid( query, fields=fields ,user_signature=False, details=False,
+        from gluon.sqlhtml import ExporterCSV
+        grid = SQLFORM.grid( query, fields=fields ,user_signature=False, details=False, links =links,
             editable=False, searchable=False,deletable=False, create=False, groupby=db.Requerimentos.Protocolo,
-            csv=True, maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left')
+            exportclasses=dict(csv=False, tsv=False, tsv_with_hidden_cols=False, json=False, xml=False,
+            html=False, csv_with_hidden_cols=(ExporterCSV, 'CSV' ),), maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left')
     
     return dict(form=form, grid=grid)
