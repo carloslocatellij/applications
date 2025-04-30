@@ -57,6 +57,7 @@
 'Available Databases and Tables': 'Bancos de dados e tabelas disponíveis',
 'Back': 'Volta',
 'Bairro': 'Bairro',
+'Bairro não registrado.': 'Bairro não registrado.',
 'Body': 'Body',
 'Buy this book': 'Compre o livro',
 "Buy web2py's book": 'Compre o livro do web2py',

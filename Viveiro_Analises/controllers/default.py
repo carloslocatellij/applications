@@ -173,8 +173,7 @@ def editar_laudo():
 @auth.requires_login()
 def Registrar_Laudo():
     
-    #TODO: O botão de registrar laudo deve oferecer caixa de confirmação em caso de não haver supressões no processo.
-    print('tentado registrar')
+    #TODO: O botão de registrar laudo deve oferecer caixa de confirmação em caso de não ouver supressões no processo.
     protoc = request.args(0)
     processo = db(db.Requerimentos.Protocolo == protoc).select().first()
     
