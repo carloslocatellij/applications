@@ -25,6 +25,14 @@ else:
     tab_ruas = """Ruas"""
 
 
+db.define_table('Avisos',
+                Field('titulo','string'),
+                Field('corpo', 'text'),
+                Field('recebido_por', 'list:integer', requires=IS_IN_DB(db, 'auth_user.id', multiple=True)),
+                auth.signature
+                )
+
+
 regiao_nome ={1:'CENTRAL', 2:'BOSQUE', 3:'TALHADO', 4:'REPRESA',
             5:'VILA TONINHO', 6:'SCHIMITT',7:'HB', 8:'CIDADE DAS CRIANÇAS',
             9:'PINHEIRINHO' , 10:'CÉU'}
@@ -41,7 +49,6 @@ Bairros = db.define_table(
     migrate=True if not configuration.get('app.production') else False,
     fake_migrate=True if not configuration.get('app.production') else False
 )
-
 
 Ruas = db.define_table(
     "Ruas",
@@ -504,6 +511,33 @@ def relat_podas_periodo(data_inicial, data_final):
 
     rows = db(query, )
     return rows
+
+
+# models/despacho_model.py (or added to db.py)
+# def define_tables():
+#     db.define_table(
+#         'Modelos_de_Despacho',
+#         Field('Nome', type='string', label='Template Name', required=True, unique=True),
+#         Field('Texto', type='text', label='Template Text', required=True),
+#         Field('Descricao', type='text', label='Description'),
+#         Field('Condicoes', type='json', label='Conditions'),  # Store conditions as JSON
+#         migrate=db.migrate,
+#     )
+    
+    # db.define_table(
+    #     'despacho_variaveis',
+    #     Field('template_id', 'reference despacho_template', label='Template'),
+    #     Field('variable_name', type='string', label='Variable Name', required=True),
+    #     Field('description', type='string', label='Variable Description'),
+    #     Field('data_source', type='string', label='Data Source'),  # E.g., 'query', 'relation_query'
+    #     Field('data_field', type='string', label='Data Field'),    # E.g., 'Requerente', 'Endereco'
+    #     Field('default_value', type='string', label='Default Value'),
+    #     migrate=db.migrate,
+    # )
+
+
+
+
 
 
 # DADOS DE TESTE INSERIDOS AUTOMÁTICAMENTE EM AMBIENTE DE TESTE.

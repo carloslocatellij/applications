@@ -36,12 +36,12 @@ if 0==1:
 # once in production, remove reload=True to gain full speed
 # -------------------------------------------------------------------------
 
+configuration = AppConfig(reload=True)
 
 # session.connect(request, response, cookie_key=configuration.take("db")['password'],)
 # session.secure()
 # session.samesite('Strict')
 
-configuration = AppConfig(reload=True)
 
 # - Banco Produção 
 if configuration.get('app.production'):

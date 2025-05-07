@@ -25,12 +25,26 @@ def api_get_user_email():
 
 
 def index():
-    response.flash = ("Seja Bem Vindo")
-    endereco = SQLFORM.factory(
-        Field('CEP', requires=Busca_CEP())
-    )
+    # endereco = SQLFORM.factory(
+    #     Field('CEP', requires=Busca_CEP())
+    # )
     
-    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),endereco =endereco
+    registros_de_avisos = db(
+        (db.Avisos.id > 0) & (~db.Avisos.recebido_por.contains(auth.user_id))).select()
+
+    avisos = [aviso.corpo for aviso in registros_de_avisos] 
+ 
+    if avisos:
+        session.flash = '\n'.join(avisos)
+    
+    for aviso in registros_de_avisos:
+        recebidos = aviso.recebido_por or []
+        recebidos.append(auth.user_id)
+        aviso.update_record(recebido_por=recebidos)
+    db.commit()
+    
+    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),
+                avisos=avisos
                 )
 0
 
@@ -247,6 +261,7 @@ def Despachar_Processos(): #Menu
     form=''
     returnbtn = A('Voltar', _href=URL('default', 'Requerimentos', args=[processo], vars={'f':'ver'}), _class='btn btn-primary')# type: ignore
     newbtn = A('Novo', _href=URL('default', 'Requerimentos'), _class='btn btn-primary')# type: ignore
+    
     if processo:
         prime_query = db(db.Requerimentos.Protocolo == processo).select().render(0).as_dict()
         relation_query = db(db.Laudos.Protocolo == processo)
@@ -311,7 +326,6 @@ def Especies(): #Menu
         response.flash = 'Corrija os Erros indicados'
     else:
         pass
-    
    
     formbusca = buscador('Especies',  # type: ignore
                          Nome={'label': 'Nome Popular'},
@@ -343,7 +357,7 @@ def Bairros(): #Menu
         form = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
         
     if form.process().accepted:
-        session.flash = f'Dados atualizados' if registro else 'Registrado'
+        session.flash = f'Dados do {tablename} atualizados' if registro else '{tablename} Registrado'
         redirect(URL('default', table , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
     elif form.errors:
         response.flash = 'Corrija os Erros indicados'
@@ -354,7 +368,7 @@ def Bairros(): #Menu
                          Bairro ={'label': table[:-1]},
                          )
 
-    return response.render(dict(form=form, formbusca=formbusca, registro=registro))
+    return response.render(dict(form=form, formbusca=formbusca, registro=registro, tabela=table))
 
 
 
