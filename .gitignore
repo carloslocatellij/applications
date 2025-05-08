@@ -247,4 +247,6 @@ build/*
 venv
 .pythonhistory
 admin/
-*/databases/
+*/databases/.
+*.ps1
+*.bat
