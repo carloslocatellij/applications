@@ -205,6 +205,7 @@
 'Index': 'Início',
 'insert new': 'inserir novo',
 'insert new %s': 'inserir novo %s',
+'Insufficient privileges': 'Insufficient privileges',
 'Internal State': 'Estado Interno',
 'Introduction': 'Introdução',
 'Invalid email': 'Email inválido',
