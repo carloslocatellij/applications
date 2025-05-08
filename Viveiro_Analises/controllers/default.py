@@ -26,13 +26,9 @@ def api_get_user_email():
 
 def index():
     response.flash = ("Seja Bem Vindo")
-    endereco = SQLFORM.factory(
-        Field('CEP', requires=Busca_CEP())
-    )
-    
-    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),endereco =endereco
-                )
-0
+
+    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),)
+
 
 # ---- Smart Grid (example) -----
 @auth.requires_membership('admin') # can only be accessed by members of admin groupd
