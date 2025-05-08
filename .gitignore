@@ -248,3 +248,5 @@ venv
 .pythonhistory
 admin/
 */databases/
+*.ps1
+*.bat
