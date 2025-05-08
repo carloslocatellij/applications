@@ -314,7 +314,7 @@ PROTOCOLAR A CÓPIA DESTES DOCUMENTOS NO POUPATEMPO OU PREFEITURA REGIONAL NORTE
 
             # DENÚNCIA SMAURB - PODA
         elif (relation_query.get('Despacho') == 'Deferido' 
-                and  not relation_query.get('qtd_ret1')  and relation_query.get('qtd_poda1')
+                and not relation_query.get('qtd_ret1')  and relation_query.get('qtd_poda1')
                 and relation_query.get('proprietario') in ['', None, 'NULL'] and relation_query.get('morador') in ['', None, 'NULL']):
             
             texto = f'''
@@ -351,10 +351,11 @@ DE FORMA DISTRIBUÍDA E EQUILIBRADA.
                 and relation_query.get('qtd_ret1') and relation_query.get('qtd_poda1')
                 and relation_query.get('proprietario') in ['', None, 'NULL'] and relation_query.get('morador') in ['', None, 'NULL']):
             
+            com_podas_autorizadas= f'E DE PODA DA: {soma_poda_autorizada} ({num_extens_poda_autorizada}),  E RESPECTIVA(S) ESPÉCIE(S): {relation_query.get('Podas')}' if relation_query.get('qtd_poda1') else '' 
             texto = f'''
 EM VISTORIA REALIZADA NO DIA {relation_query.get('data_do_laudo')} PELO TÉCNICO: {tecnico}, NO IMÓVEL LOCALIZADO À: 
 {query.get('Endereco')}, VERIFICOU-SE A NECESSIDADE DA SUPRESSÃO DE 
-{soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {relation_query.get('Supressoes')}. 
+{soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {relation_query.get('Supressoes')}. {com_podas_autorizadas}
 DEVENDO SER REALIZADO O REPLANTIO DE {relation_query.get('qtd_repor')} ({num_extens_repor}) MUDA(S) DE ÁRVORE(S)
 DE PORTE ({relation_query.get('porte_repor')})
 SENDO ASSIM, SOLICITAMOS, POR GENTILEZA, QUE O PROPRIETÁRIO DO IMÓVEL SEJA NOTIFICADO PARA QUE O MESMO TOME AS
