@@ -27,7 +27,7 @@ def api_get_user_email():
 def index():
     response.flash = ("Seja Bem Vindo")
 
-    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),)
+    return dict(menssagem=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),)
 
 
 # ---- Smart Grid (example) -----
@@ -52,34 +52,9 @@ def wiki(): #Menu
 #       [Markdown see](https://groups.google.com/g/web2py/c/om9aXi3xg3Y/m/jE4t-KwpBQAJ)
 #     """
     response.view = 'test_wiki.html'
-#     response.flash = T("Welcome!")
-#     my_md = '''## Welcome to the cov19cty App!
-# ### To generate County Comparison Charts:
-# 1. Click Menu >> Gen Chart >> Multi-County Input Form
-#   1. Add Your Counties to compare (state, county, typeOfData)
-#   2. Define Your Time Series
-# 2. Click Menu >> Gen Chart >> Show Multi-County Chart
-#     '''
-#     my_html = markdown(my_md)
-#     # return dict( message=my_html )
-#     return my_html mark = XML(meu_mark)
-
-    meu_mark ='''
-# Meu Titulo
-
-## Outro Titulo
-
-* <input type="checkbox" checked="checked" /> 1
-* <input type="checkbox" checked="checked" /> 2
-* <input type="checkbox" /> 3
-
-
-    '''
-    content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body # type: ignore
-    
+    content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body # type: ignore   
     markdowner = Markdown2(html4tags=True, tab_width=4, )
     meu_mark = markdowner.convert(content)
-
 
     return dict(wiki = auth.wiki() ,content=XML(meu_mark)) # type: ignore
 
