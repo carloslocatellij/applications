@@ -76,7 +76,7 @@ else:
                 fake_migrate_all=True, 
                 lazy_tables=False,
                 check_reserved=[configuration.take("db")['engine']],
-                adapter_args={'safe': True},
+                adapter_args={'safe': False},
             )
 
 #db._adapter.types = copy.copy(db._adapter.types)

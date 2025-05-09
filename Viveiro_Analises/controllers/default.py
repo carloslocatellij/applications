@@ -30,7 +30,7 @@ def index():
     # )
     
     registros_de_avisos = db(
-        (db.Avisos.id > 0) & (~db.Avisos.recebido_por.contains(auth.user_id))).select()
+        (db.Avisos.id > 0) & (~db.Avisos.recebido_por.belongs([auth.user_id]))).select()
 
     avisos = [aviso.corpo for aviso in registros_de_avisos] 
  
