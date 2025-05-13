@@ -10,7 +10,7 @@ if 0 == 1:
     T = current.T # type: ignore
     
     
-@auth.requires_membership('admin')
+@auth.requires_login()
 def Gerenciar_templates(): #Menu
     """
     Controller para gerenciar templates de despacho
@@ -20,7 +20,7 @@ def Gerenciar_templates(): #Menu
     
     if template_form.accepts(request.vars, session):
         response.flash = 'Template salvo com sucesso'
-        redirect(URL('gerenciar_templates'))
+        redirect(URL('Gerenciar_templates'))
     
     # Grid para visualizar/editar templates existentes
     grid = SQLFORM.grid(db.despacho_template,
@@ -35,7 +35,7 @@ def Gerenciar_templates(): #Menu
     return dict(form=template_form, grid=grid)
 
 
-@auth.requires_membership('admin')
+@auth.requires_login()
 def Gerenciar_variaveis(): 
     """
     Controller para gerenciar variáveis dos templates
@@ -43,7 +43,7 @@ def Gerenciar_variaveis():
     template_id = request.args(0)
     
     if not template_id:
-        redirect(URL('gerenciar_templates'))
+        redirect(URL('Gerenciar_templates'))
     
     # Form para variáveis
     db.despacho_variaveis.template_id.default = template_id
@@ -51,7 +51,7 @@ def Gerenciar_variaveis():
     
     if var_form.accepts(request.vars, session):
         response.flash = 'Variável salva com sucesso'
-        redirect(URL('gerenciar_variaveis', args=[template_id]))
+        redirect(URL(c='despachos',f='gerenciar_variaveis', args=[template_id]))
     
     # Grid para visualizar/editar variáveis do template
     query = db.despacho_variaveis.template_id == template_id

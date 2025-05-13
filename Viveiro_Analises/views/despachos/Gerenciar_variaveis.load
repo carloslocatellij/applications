@@ -1,0 +1,2 @@
+
+{{if len(response._vars)==1:}}{{=response._vars[next(iter(response._vars))]}}{{else:}}{{=BEAUTIFY(response._vars)}}{{pass}}

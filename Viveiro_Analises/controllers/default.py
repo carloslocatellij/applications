@@ -38,6 +38,7 @@ def index():
         session.flash = '\n'.join(avisos)
     
     for aviso in registros_de_avisos:
+        
         recebidos = aviso.recebido_por or []
         recebidos.append(auth.user_id)
         aviso.update_record(recebido_por=recebidos)
@@ -195,11 +196,8 @@ def Registrar_Laudo():
     # if not any([processo.qtd_ret1, processo.qtd_ret2, processo.qtd_ret3, processo.qtd_ret4]):
     #     my_extra_element = TR(LABEL('Registrar Laudo mesmo sem supressões no Requerimento.'), INPUT(_name='agree', value=True, _type='checkbox')) # type: ignore
     #     form[0].insert(-1, my_extra_element) # type: ignore
-    
     # print(processo.Protocolo)
-    
     # response.render(BEAUTIFY(Modal('Atenção', form, id='atencao')))
-    
     # if form.process().accepted:
     #     if form.vars.agree:  
     
@@ -252,7 +250,7 @@ def Laudos():
 @auth.requires_login()
 def Despachar_Processos(): #Menu
     from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2 # type: ignore
-    from despachos import Despachar  # type: ignore
+    from despachador import Despachar  # type: ignore
 
     processo= request.vars.processo or ''  
     prime_query= ''
