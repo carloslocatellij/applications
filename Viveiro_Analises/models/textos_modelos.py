@@ -1,4 +1,5 @@
 from gluon import widget
+from gluon.packages.dal.pydal.validators import IS_LIST_OF
 from my_validador import *  # type: ignore
 
 if 0 == 1:
@@ -26,10 +27,9 @@ db.define_table('despacho_template',
         'pendencia_anuencia', 'pendencia_alvara',
         'denuncia_poda', 'denuncia_supressao'
     ])),
-    Field('condicoes', 'json', 'list:string', 
-          multiple=True, widget=SQLFORM.widgets.options.widget
-          ,requires=IS_IN_SET(db.Requerimentos.fields,  multiple=True,)
-          , label='Condições de Aplicação'),
+    Field('condicoes', 'json', 'list:string',
+        requires=IS_IN_SET(db.Requerimentos.fields ,  multiple=True),
+        label='Condições de Aplicação'),
     format='%(nome)s'
 )
 
