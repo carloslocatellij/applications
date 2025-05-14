@@ -38,9 +38,9 @@ if 0==1:
 
 configuration = AppConfig(reload=False)
 
-session.connect(request, response, cookie_key=configuration.take("db")['password'],)
-session.secure()
-session.samesite('Strict')
+# session.connect(request, response, cookie_key=configuration.take("db")['password'],)
+# session.secure()
+# session.samesite('Strict')
 
 
 # - Banco Produção 

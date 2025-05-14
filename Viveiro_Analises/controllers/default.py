@@ -180,7 +180,6 @@ def Registrar_Laudo():
 def Laudos():
     table= 'Laudos'
     laudo = request.args(0) or None
-
     try:
         if session.edit_laudo==True:
             form = SQLFORM(db[table], laudo, submit_button=f'Atualizar {db[table]._tablename[:-1]}', deletable=True)

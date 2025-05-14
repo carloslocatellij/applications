@@ -148,11 +148,6 @@ Requerimentos = db.define_table(
     Field("qtd_poda2", rname="`qtd poda2`"),
     Field("qtd_poda3", rname="`qtd poda3`"),
     Field("qtd_poda4", rname="`qtd poda4`"),
-    Field(
-        "podador_coleta",
-        rname="`podador coleta`",
-        requires=IS_IN_SET(["Sim", "Não", ""]),
-    ),
     Field("no_carteira", rname="`no. carteira`"),
     Field(
         "data_do_laudo",
