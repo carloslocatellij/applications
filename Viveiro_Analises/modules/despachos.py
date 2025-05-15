@@ -30,7 +30,6 @@ PARAGRAFO 2°. A REALIZAÇÃO DA PODA DE ÁRVORES, ARBUSTOS E OUTRAS PLANTAS LEN
 
 ART. 81. O PODADOR DE ÁRVORE DEVERÁ OBRIGATORIAMENTE SER CADASTRADO NA SECRETARIA MUNICIPAL DO MEIO AMBIENTE E URBANISMO PARA OBTER AUTORIZAÇÃO/LICENÇA PARA A EXECUÇÃO DO SERVIÇO DE SUPRESSÃO OU PODA DE ÁRVORES NO MUNICÍPIO DE SÃO JOSÉ DO RIO PRETO.
 
-
 DECRETO 18.301/2019
 
 ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PERMITIDA PODA NA QUAL A COPA DA ÁRVORE FIQUE COM FORMA GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
@@ -39,11 +38,9 @@ ART. 16. NÃO É PERMITIDA A PODA DE MANUTENÇÃO ENQUANTO A ÁRVORE ESTIVER EM 
 
 
 A AUTORIZAÇÃO SÓ É VALIDA DENTRO DO PRAZO DE 60 (SESSENTA) DIAS.
-
 O REQUERENTE CITADO DECLARA ASSUMIR AS RESPONSABILIDADES POR QUAISQUER DANOS OU PREJUÍZOS À POPULAÇÃO OU AO PATRIMÔNIO PÚBLICO OU PRIVADO QUE VENHAM A OCORRER POR IMPERÍCIA OU IMPRUDÊNCIA PRÓPRIA OU DE QUEM A SEU MANDO EXECUTAR A PODA OBJETO DESTE REQUERIMENTO.
 
 Para qualquer interdição parcial ou total de via pública para realização de serviços, deverá ser requerida autorização junto à Secretaria Municipal de Trânsito, Transportes e Segurança.
-
 A responsabilidade pela poda de árvore(s) e destinação dos resíduos gerados é do requerente. Pequenas quantidades de resíduos vegetais  (1m³) de podas podem ser levadas a Pontos de Apoio da Prefeitura, consultar:  https://www.riopreto.sp.gov.br/pontodeapoio/. Resíduos florestais, principalmente madeira nativa bruta, exigem destinação a locais cadastrados no Sinaflor, seguindo leis federais e estaduais. O transporte e armazenamento de madeira nativa precisam de controle documental (DOF/Sinaflor) e cadastro no CTF. Destinar madeira nativa sem origem comprovada é infração punível. Recomenda-se procurar locais licenciados para destinação. Dúvidas podem ser esclarecidas com a CETESB, Instituto Florestal ou secretarias municipais (Meio Ambiente: 17 3202-4010; Serviços Gerais: 17 3216-6310).
         '''
         
@@ -92,8 +89,6 @@ GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESP�
                 supressoes = 'Supressões: ' + query_protoc_ref.get('Supressoes') or ''
                 tecnico = 'XXXXXXXXXXXXXX'
                     
-            
-            
             texto = f'''
 INFORMAMOS QUE JÁ FOI REALIZADA VISTORIA TÉCNICA PELO TÉCNICO {tecnico} E AUTORIZAÇÃO PELO PROTOCOLO {query.get('protocolo_anterior')}
 EM {data_do_laudo}:
@@ -245,8 +240,9 @@ ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PE
         elif (relation_query.get('Despacho') == 'Deferido' 
               and not relation_query.get('qtd_repor') 
               and query.get('tipo_imovel') in ['público', ]):
+            com_podas_autorizadas= f'E A PODA DE: {soma_poda_autorizada} ({num_extens_poda_autorizada}),  E RESPECTIVAS ESPÉCIES: {relation_query.get('Podas')}' if relation_query.get('qtd_poda1') else '' 
             
-            texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {relation_query.get('Supressoes')};
+            texto = f'''DE ACORDO COM A VISTORIA REALIZADA EM {relation_query.get('data_do_laudo')} PELO TÉCNICO {tecnico}, CONSTATOU-SE A NECESSIDADE DE SUPRESSÃO DE {soma_supress} ({num_extens_supress}) ÁRVORES DAS ESPÉCIES: {relation_query.get('Supressoes')}. {com_podas_autorizadas}
 NO ENDEREÇO: {query.get('Endereco')}.
 
 SEGUIR NORMA ABNT NBR 16246-1:2013.
