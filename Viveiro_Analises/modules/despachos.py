@@ -145,7 +145,8 @@ Técnico responsável: {tecnico or ''}  '''
 
 
         # DEFERIDO SUPRESSÃO PARTICULAR SEM REPLANTIO
-        elif (relation_query.get('Despacho') == 'Deferido' 
+        elif (relation_query.get('Despacho') == 'Deferido'
+            and relation_query.get('qtd_ret1')
             and relation_query.get('proprietario')
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
             com_req_podas= f'e para poda de: {relation_query.get('Podas')}, ' if relation_query.get('qtd_podas1') else ''
@@ -167,6 +168,38 @@ A responsabilidade pela supressão/poda de árvore(s) e destinação dos resídu
 O NÃO CUMPRIMENTO DO PRAZO, ACARRETA A APLICAÇÃO DAS PENALIDADES DA LEI.
 
 Técnico responsável: {tecnico} ''' 
+
+        elif (relation_query.get('Despacho') == 'Deferido'
+            and not relation_query.get('qtd_ret1')
+            and relation_query.get('proprietario')
+            and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
+            com_req_podas= f'e para poda de: {relation_query.get('Podas')}, ' if relation_query.get('qtd_podas1') else ''
+            com_podas_autorizadas= f'E para Poda de: {soma_poda_autorizada} ({num_extens_poda_autorizada}),  e respectiva(s) espécie(s): {relation_query.get('Podas')}' if relation_query.get('qtd_poda1') else '' 
+            texto= f'''AUTORIZADA A PODA DE NO MÁXIMO 25% DO VOLUME DA COPA DA(S) ÁRVORE(S) DE FORMA DISTRIBUÍDA E EQUILIBRADA, SENDO: PODA DE LIMPEZA E ADEQUAÇÃO DE {soma_poda} ({num_extens_poda}) ÁRVORE(S) DA(S) ESPÉCIE(S): {query.get('Podas')},  LOCALIZADA(S) NA {query.get('Endereco')}. A PODA REALIZADA EM VOLUME MAIOR QUE 25% (VINTE E CINCO POR CENTO) DA COPA ORIGINAL DA ÁRVORE É CONSIDERADA DRÁSTICA E PODE CAUSAR SÉRIOS DANOS À SAÚDE DA ÁRVORE.
+
+LEI 13.031/2018
+
+ART. 66.
+
+PARAGRAFO 1º. A PODA DE ESPÉCIMES ARBÓREAS EM CALÇADAS OU ÁREAS PARTICULARES É DE RESPONSABILIDADE DO MUNÍCIPE QUE DEVERÁ CONTRATAR UM PODADOR CADASTRADO NESSE MUNICÍPIO E DEVIDAMENTE CAPACITADO.
+PARAGRAFO 2°. A REALIZAÇÃO DA PODA DE ÁRVORES, ARBUSTOS E OUTRAS PLANTAS LENHOSAS EM ÁREAS URBANAS, DEVERÃO SEGUIR OS PROCEDIMENTOS DAS NORMAS TÉCNICAS, EM CONFORMIDADE COM A LEGISLAÇÃO APLICÁVEL.
+
+ART. 81. O PODADOR DE ÁRVORE DEVERÁ OBRIGATORIAMENTE SER CADASTRADO NA SECRETARIA MUNICIPAL DO MEIO AMBIENTE E URBANISMO PARA OBTER AUTORIZAÇÃO/LICENÇA PARA A EXECUÇÃO DO SERVIÇO DE SUPRESSÃO OU PODA DE ÁRVORES NO MUNICÍPIO DE SÃO JOSÉ DO RIO PRETO.
+
+DECRETO 18.301/2019
+
+ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PERMITIDA PODA NA QUAL A COPA DA ÁRVORE FIQUE COM FORMA GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
+
+ART. 16. NÃO É PERMITIDA A PODA DE MANUTENÇÃO ENQUANTO A ÁRVORE ESTIVER EM FLORAÇÃO E/OU FRUTIFICAÇÃO.
+
+
+A AUTORIZAÇÃO SÓ É VALIDA DENTRO DO PRAZO DE 60 (SESSENTA) DIAS.
+O REQUERENTE CITADO DECLARA ASSUMIR AS RESPONSABILIDADES POR QUAISQUER DANOS OU PREJUÍZOS À POPULAÇÃO OU AO PATRIMÔNIO PÚBLICO OU PRIVADO QUE VENHAM A OCORRER POR IMPERÍCIA OU IMPRUDÊNCIA PRÓPRIA OU DE QUEM A SEU MANDO EXECUTAR A PODA OBJETO DESTE REQUERIMENTO.
+
+Para qualquer interdição parcial ou total de via pública para realização de serviços, deverá ser requerida autorização junto à Secretaria Municipal de Trânsito, Transportes e Segurança.
+A responsabilidade pela poda de árvore(s) e destinação dos resíduos gerados é do requerente. Pequenas quantidades de resíduos vegetais  (1m³) de podas podem ser levadas a Pontos de Apoio da Prefeitura, consultar:  https://www.riopreto.sp.gov.br/pontodeapoio/. Resíduos florestais, principalmente madeira nativa bruta, exigem destinação a locais cadastrados no Sinaflor, seguindo leis federais e estaduais. O transporte e armazenamento de madeira nativa precisam de controle documental (DOF/Sinaflor) e cadastro no CTF. Destinar madeira nativa sem origem comprovada é infração punível. Recomenda-se procurar locais licenciados para destinação. Dúvidas podem ser esclarecidas com a CETESB, Instituto Florestal ou secretarias municipais (Meio Ambiente: 17 3202-4010; Serviços Gerais: 17 3216-6310).
+        '''
+
             
             
         # DEFERIDO SUPRESSÃO PÚBLICA COM REPLANTIO
