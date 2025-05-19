@@ -7,6 +7,7 @@
 # def Despachar(query, relation_query, query_protoc_ref):
     
 #     query['data_do_laudo'] = query.get('data_do_laudo').strftime('%d/%m/%Y')
+
 #     if relation_query:
 #         relation_query['data_do_laudo'] = relation_query.get('data_do_laudo').strftime('%d/%m/%Y')
 
@@ -578,24 +579,3 @@
 #             texto = 'Não foi possível a geração do texto.'
 
 #     return texto
-
-def Despachar(query, relation_query, query_protoc_ref):
-    from template_processor import DespachoTemplateProcessor
-    
-    processor = DespachoTemplateProcessor(db)
-    
-    # Formata datas
-    query['data_do_laudo'] = query.get('data_do_laudo').strftime('%d/%m/%Y')
-    if relation_query:
-        relation_query['data_do_laudo'] = relation_query.get('data_do_laudo').strftime('%d/%m/%Y')
-
-    # Processa somas e números por extenso (mantido da versão original)
-    soma_poda = sum([x for x in [query.get('qtd_poda1'), query.get('qtd_poda2'), 
-                                query.get('qtd_poda3'), query.get('qtd_poda4')] if x])
-    # ... (mantém demais processamentos de dados)
-
-    # Obtém e processa o template
-    template = processor.get_template_by_conditions(query, relation_query)
-    texto = processor.process_template(template, query, relation_query, query_protoc_ref)
-    
-    return texto

@@ -1,5 +1,9 @@
 from datetime import datetime
 from my_validador import *  # type: ignore
+import num2words
+import locale
+locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
+
 
 if 0 == 1:
     from gluon import *  # type: ignore
@@ -222,11 +226,30 @@ db.Requerimentos.Endereco = Field.Virtual(
 )
 
 
+
 db.Requerimentos.total_podas = Field.Virtual(
     "total_podas",
         lambda row: sum([int(row.Requerimentos.qtd_poda1 or 0), int(row.Requerimentos.qtd_poda2 or 0),
         int(row.Requerimentos.qtd_poda3 or 0) , int(row.Requerimentos.qtd_poda4 or 0)]
         ))
+
+
+db.Requerimentos.total_supressoes = Field.Virtual(
+    "total_supressoes",
+        lambda row: sum([int(row.Requerimentos.qtd_ret1 or 0), int(row.Requerimentos.qtd_ret2 or 0),
+        int(row.Requerimentos.qtd_ret3 or 0) , int(row.Requerimentos.qtd_ret4 or 0)]
+        ))
+
+db.Requerimentos.num_extens_poda = Field.Virtual(
+    "num_extens_poda",
+    lambda row: num2words.num2words(row.Requerimentos.total_podas, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+)
+
+
+db.Requerimentos.num_extens_supressoes = Field.Virtual(
+    "num_extens_supressoes",
+    lambda row: num2words.num2words(row.Requerimentos.total_supressoes, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+)
 
 
 db.Requerimentos.Supressoes = Field.Virtual(
@@ -469,12 +492,40 @@ db.Laudos.Podas = Field.Virtual(
 )
 
 
-db.Laudos.total_remocoes = Field.Virtual(
-        "total_remocoes",
+
+db.Laudos.total_podas = Field.Virtual(
+    "total_podas",
+        lambda row: sum([int(row.Laudos.qtd_poda1 or 0), int(row.Laudos.qtd_poda2 or 0),
+        int(row.Laudos.qtd_poda3 or 0) , int(row.Laudos.qtd_poda4 or 0)]
+        ))
+
+
+db.Laudos.total_supressoes = Field.Virtual(
+    "total_supressoes",
             lambda row: sum([int(row.Laudos.qtd_ret1 or 0), int(row.Laudos.qtd_ret2 or 0),
             int(row.Laudos.qtd_ret3 or 0) , int(row.Laudos.qtd_ret4 or 0)]
             ))
 
+
+db.Laudos.num_extens_poda = Field.Virtual(
+    "num_extens_poda",
+    lambda row: num2words.num2words(row.Laudos.total_podas, lang='pt-br').upper()
+    .replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+)
+
+
+db.Laudos.num_extens_supressoes = Field.Virtual(
+    "num_extens_supressoes",
+    lambda row: num2words.num2words(row.Laudos.total_supressoes, lang='pt-br').upper()
+    .replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+)
+
+
+db.Laudos.num_extens_repor = Field.Virtual(
+    "num_extens_repor",
+    lambda row: num2words.num2words(row.Laudos.qtd_repor, lang='pt-br').upper()
+    .replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+)
 
 db.Laudos.motivos = Field.Virtual(
     "motivos",
