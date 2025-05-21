@@ -16,23 +16,40 @@ def Gerenciar_templates(): #Menu
     Controller para gerenciar templates de despacho
     """
     # Form para template
-    template_form = SQLFORM(db.despacho_template)
+    table = 'despacho_template'
+    tablename = f'{db[table]._tablename[:-1]}'
+    registro = request.args(0) or None
+    f = request.vars['f'] if request.vars['f']  else None
+
+    if f=='editar':
+        form = SQLFORM(db[table], registro, submit_button=f'Atualizar {tablename}' ) # type: ignore
+    elif f=='ver':
+        form = SQLFORM(db[table], registro, readonly=True, ) 
+    else:
+        db[table].id.requires = IS_NOT_IN_DB(db, f'{table}.id', error_message='Já está registrado.')
+        form = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
+        
+    if form.process().accepted:
+        session.flash = f'Dados atualizados' if registro else 'Registrado'
+        redirect(URL('default', table , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
+    elif form.errors:
+        response.flash = 'Corrija os Erros indicados'
+    else:
+        pass
     
-    if template_form.accepts(request.vars, session):
-        response.flash = 'Template salvo com sucesso'
-        redirect(URL('Gerenciar_templates'))
+    formbusca = buscador('despacho_template', 
+                        nome={'label': 'Nome'},
+                        texto={'label': 'Texto'},
+                        descricao={'label': 'Descrição'})
     
-    # Grid para visualizar/editar templates existentes
-    grid = SQLFORM.grid(db.despacho_template,
-                       fields=[db.despacho_template.nome,
-                              db.despacho_template.tipo,
-                              db.despacho_template.descricao],
-                       maxtextlength=50,
-                       create=False,
-                       searchable=True,
-                       details=True)
-    
-    return dict(form=template_form, grid=grid)
+    # Modified buttons with AJAX functionality
+    btns_vars = []
+    for field in db.Requerimentos.fields:
+        btn = BUTTON(field, 
+                    _onclick=f"jQuery('#despacho_template_condicoes').val(jQuery('#despacho_template_condicoes').val() + '\"{field}\" : \"valor\",'); return false;")
+        btns_vars.append(TD(btn))
+
+    return dict(form=form, formbusca=formbusca, btns_vars=TABLE(TR(btns_vars)))
 
 
 @auth.requires_login()

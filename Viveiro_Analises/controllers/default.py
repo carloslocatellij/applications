@@ -250,7 +250,7 @@ def Laudos():
 @auth.requires_login()
 def Despachar_Processos(): #Menu
     from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2 # type: ignore
-    from despachador import Despachar  # type: ignore
+      # type: ignore
 
     processo= request.vars.processo or ''  
     prime_query= ''
@@ -280,7 +280,7 @@ def Despachar_Processos(): #Menu
         else:
             relation_query = None
             
-        texto_despacho = Despachar(prime_query, relation_query, query_protoc_ref)
+        texto_despacho = Despachar(db, prime_query, relation_query, query_protoc_ref)
 
         markdowner = Markdown2(html4tags=True,  )
         
