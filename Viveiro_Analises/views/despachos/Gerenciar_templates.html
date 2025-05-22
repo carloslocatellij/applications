@@ -5,20 +5,56 @@ You should not modify this file.
 It is used as default when a view is not provided for your controllers
 
 """}}
-<h2>{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+<script type="text/javascript">
+    $(document).ready(function () {
+        try {
+            document.getElementById('despacho_template_nome').focus();
+        } catch { console.log('Modo de Edição'); }
+    });
+</script>
+
+<h2 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+
+{{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
+
+{{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'),
+**atributo),SPAN(_class="caret") }}
+{{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled") }}
 
 
-{{if 'registro' in request.vars:}}
-{{=A(SPAN('Editar', _class="glyphicon glyphicon-envelope"), _href=URL(c=request.controller ,f=tabela, args=[registro],
-vars={ 'f':'editar'}), _class='btn btn-primary') if registro else '' }}
-{{=A('Novo', _href=URL(c=request.controller, f=tabela, vars={}), _class='btn btn-primary',) if registro else ''}}
-{{pass}}
+<div class="container" class="card" style="border: 1px solid; padding: 5px; word-wrap: break-word; color: darkslategray">
+    {{if request.args(0):}}
+    {{=A(SPAN('Editar', _class="glyphicon glyphicon-envelope"), _href=URL(c=request.controller,f=request.function, args=[registro], vars={ 'f':'editar'}), _class='btn btn-primary') }}
+    {{=A('Novo', _href=URL(c=request.controller,f=request.function, vars={}), _class='btn btn-primary',)}}
+    {{pass}}
+</div>
 
+<div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
+    {{=form.custom.begin}}
+    <table width="100%">
+        <td width="33%" align='left' style="padding-inline: 10px">{{=B('Nome:')}}<div align='left' class="card">
+                {{=form.custom.widget['nome']}}</div>
+        <tr>
 
-{{if len(response._vars)==1:}}
-{{=BEAUTIFY(response._vars[next(iter(response._vars))])}}
-{{elif len(response._vars)>1:}}
-{{ for var in response._vars:}}
-{{response.write(BEAUTIFY(response._vars[var]))}}
-{{pass}}
-{{pass}}
+            
+        </td>
+        <td width="33%" align='left' style="padding-inline: 10px">{{=B('Descrição:')}}<div align='left' class="card">
+            {{=form.custom.widget['descricao']}}</div>
+        </td>
+        {{=btns_vars}}
+            <td width="33%" align='left' style="padding-inline: 10px">{{=B('Texto:')}}<div align='left' class="card">
+                    {{=form.custom.widget['texto']}}
+                </div>
+            </td>
+            <td width="33%" align='left' style="padding-inline: 10px">{{=B('Tipo:')}}<div align='left' class="card">
+                    {{=form.custom.widget['tipo']}}</div>
+            </td>
+            <td width="33%" align='left' style="padding-inline: 10px">{{=B('Condições:')}}<div align='left' class="card">
+                    {{=form.custom.widget['condicoes']}}
+                </div>
+            </td>
+        </tr>
+    </table>
+    {{=form.custom.submit}}
+    {{=form.custom.end}}
+</div>

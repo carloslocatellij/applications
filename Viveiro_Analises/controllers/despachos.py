@@ -31,7 +31,7 @@ def Gerenciar_templates(): #Menu
         
     if form.process().accepted:
         session.flash = f'Dados atualizados' if registro else 'Registrado'
-        redirect(URL('default', table , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
+        redirect(URL(request.controller, request.function , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
     elif form.errors:
         response.flash = 'Corrija os Erros indicados'
     else:
@@ -44,12 +44,13 @@ def Gerenciar_templates(): #Menu
     
     # Modified buttons with AJAX functionality
     btns_vars = []
-    for field in db.Requerimentos.fields:
-        btn = BUTTON(field, 
-                    _onclick=f"jQuery('#despacho_template_condicoes').val(jQuery('#despacho_template_condicoes').val() + '\"{field}\" : \"valor\",'); return false;")
-        btns_vars.append(TD(btn))
+    for field in list(db.Requerimentos.keys())[26:]:
+        if not field.startswith('_') and not 'qtd_' in field and not 'especie_' in field and not'ALL' in field:
+            btn = BUTTON(field, 
+                        _onclick=f'''jQuery('#despacho_template_texto').val(jQuery('#despacho_template_texto').val() + ' {{{field}}} '); return false;''')
+            btns_vars.append(TD(btn))
 
-    return dict(form=form, formbusca=formbusca, btns_vars=TABLE(TR(btns_vars)))
+    return dict(form=form, formbusca=formbusca, registro=registro, btns_vars=TABLE(TR(btns_vars[:11]), TR(btns_vars[11:22]), TR(btns_vars[22:])))
 
 
 @auth.requires_login()

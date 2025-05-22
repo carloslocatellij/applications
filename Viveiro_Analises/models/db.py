@@ -1,3 +1,4 @@
+from cProfile import label
 from datetime import datetime
 from my_validador import *  # type: ignore
 import num2words
@@ -119,8 +120,8 @@ Especies = db.define_table(
 
 Requerimentos = db.define_table(
     "Requerimentos",
-    Field("Protocolo", requires= [IS_INT_IN_RANGE("202000", "2030009999999") ]),
-    Field("Requerente", requires=[IS_UPPER(), Remove_Acentos()]),
+    Field("Protocolo", requires= [IS_INT_IN_RANGE("202000", "2030009999999")], label='Protocolo'),
+    Field("Requerente", requires=[IS_UPPER(), Remove_Acentos()], label='Requerente'),
     Field(
         "data_entrada",
         "date",
@@ -128,43 +129,46 @@ Requerimentos = db.define_table(
             IS_DATE(format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx")
         ),
         rname="`Data de Entrada`",
+        label='Data de Entrada'
     ),
     Field(
-        "Endereco1",
-        "string", requires=[IS_UPPER(), Remove_Acentos()]
+        "Endereco1", "string", requires=[IS_UPPER(), Remove_Acentos()],
+        label='Endereço'
     ),
-    # requires=IS_IN_DB(db, 'Ruas.Endereco1')),
-    Field("Numero1"),
+    Field("Numero1", label='Número'),
     Field("Bairro",requires=IS_IN_DB(db, "Bairros.Bairro", "%(Bairro)s", error_message='Bairro não registrado.'),
     widget=SQLFORM.widgets.autocomplete(
-     request, db.Bairros.Bairro,  limitby=(0, 7), min_length=3)),
-    Field("cpf_cnpj", rname="`cpf-cnpj`"),
-    Field("cep"),
-    Field("telefone1"),
-    Field("email", rname="`e-mail`"),
+     request, db.Bairros.Bairro,  limitby=(0, 7), min_length=3),
+     label='Bairro'),
+    Field("cpf_cnpj", rname="`cpf-cnpj`", label='CPF/CNPJ'),
+    Field("cep", label='CEP'),
+    Field("telefone1", label='Telefone'),
+    Field("email", rname="`e-mail`", label='E-mail'),
     Field("especie_ret1", widget=SQLFORM.widgets.autocomplete(
-     request, db.Especies.Nome, limitby=(0, 7), min_length=3),rname="`especie ret1`"),
-    Field("especie_ret2", rname="`especie ret2`"),
-    Field("especie_ret3", rname="`especie ret3`"),
-    Field("especie_ret4", 'list:string' ,rname="`especie ret4`"),
-    Field("qtd_ret1", rname="`qtd ret1`"),
-    Field("qtd_ret2", rname="`qtd ret2`"),
-    Field("qtd_ret3", rname="`qtd ret3`"),
-    Field("qtd_ret4", rname="`qtd ret4`"),
-    Field("especie_poda1", rname="`especie poda1`"),
-    Field("especie_poda2", rname="`especie poda2`"),
-    Field("especie_poda3", rname="`especie poda3`"),
-    Field("especie_poda4", 'list:string', rname="`especie poda4`"),
-    Field("qtd_poda1", rname="`qtd poda1`"),
-    Field("qtd_poda2", rname="`qtd poda2`"),
-    Field("qtd_poda3", rname="`qtd poda3`"),
-    Field("qtd_poda4", rname="`qtd poda4`"),
+     request, db.Especies.Nome, limitby=(0, 7), min_length=3),rname="`especie ret1`",
+          label='1ª Especie retirada'),
+    Field("especie_ret2", rname="`especie ret2`", label='2ª Especie retirada'),
+    Field("especie_ret3", rname="`especie ret3`", label='3ª Especie retirada'), 
+    Field("especie_ret4", 'list:string' ,rname="`especie ret4`", label='4ª Especie retirada'),
+    Field("qtd_ret1", rname="`qtd ret1`", label='Qtd 1ª retirada'),
+    Field("qtd_ret2", rname="`qtd ret2`", label='Qtd 2ª retirada'),
+    Field("qtd_ret3", rname="`qtd ret3`", label='Qtd 3ª retirada'),
+    Field("qtd_ret4", rname="`qtd ret4`", label='Qtd 4ª retirada'),
+    Field("especie_poda1", rname="`especie poda1`", label='1ª Especie poda'),
+    Field("especie_poda2", rname="`especie poda2`", label='2ª Especie poda'),
+    Field("especie_poda3", rname="`especie poda3`", label='3ª Especie poda'),
+    Field("especie_poda4", 'list:string', rname="`especie poda4`", label='4ª Especie poda'),
+    Field("qtd_poda1", rname="`qtd poda1`", label='Qtd 1ª poda'),
+    Field("qtd_poda2", rname="`qtd poda2`", label='Qtd 2ª poda'),
+    Field("qtd_poda3", rname="`qtd poda3`", label='Qtd 3ª poda'),
+    Field("qtd_poda4", rname="`qtd poda4`", label='Qtd 4ª poda'),
     Field(
         "podador_coleta",
         rname="`podador coleta`",
         requires=IS_IN_SET(["Sim", "Não", ""]),
+        label='Podador coleta'
     ),
-    Field("no_carteira", rname="`no. carteira`"),
+    Field("no_carteira", rname="`no. carteira`", label='Nº Carteira'),
     Field(
         "data_do_laudo",
         "date",
@@ -172,6 +176,7 @@ Requerimentos = db.define_table(
             format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx"
         ),
         rname="`data do laudo`",
+        label='Data do Laudo'
     ),
     Field(
         "Despacho",
@@ -753,4 +758,3 @@ if not configuration.get("app.production"):
                 ),
             )
             db.commit()
-

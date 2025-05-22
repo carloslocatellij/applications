@@ -18,14 +18,14 @@ if 0 == 1:
 db.define_table('despacho_template',
     Field('nome', 'string', required=True, label='Nome do Modelo'),
     Field('texto', 'text', required=True, label='Texto do Modelo'),
-    Field('descricao', 'text', label='Descrição'),
+    Field('descricao', 'string', label='Descrição'),
     Field('tipo', 'string', requires=IS_IN_SET([
         'particular_deferido', 'particular_indeferido', 
         'publico_deferido', 'publico_indeferido',
         'pendencia_anuencia', 'pendencia_alvara',
         'denuncia_poda', 'denuncia_supressao'
     ])),
-    Field('condicoes', 'json', 'list:string',
+    Field('condicoes', 'json', 
         label='Condições de Aplicação'),
     format='%(nome)s'
 )
