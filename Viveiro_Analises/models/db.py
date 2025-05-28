@@ -528,7 +528,7 @@ db.Laudos.num_extens_supressoes = Field.Virtual(
 
 db.Laudos.num_extens_repor = Field.Virtual(
     "num_extens_repor",
-    lambda row: num2words.num2words(row.Laudos.qtd_repor, lang='pt-br').upper()
+    lambda row: num2words.num2words(row.Laudos.qtd_repor or 0, lang='pt-br').upper()
     .replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
 )
 

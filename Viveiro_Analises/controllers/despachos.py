@@ -47,7 +47,17 @@ def Gerenciar_templates(): #Menu
     for field in list(db.Requerimentos.keys())[26:]:
         if not field.startswith('_') and not 'qtd_' in field and not 'especie_' in field and not'ALL' in field:
             btn = BUTTON(field, 
-                        _onclick=f'''jQuery('#despacho_template_texto').val(jQuery('#despacho_template_texto').val() + ' {{{field}}} '); return false;''')
+                        _onclick=f'''
+                            var textarea = jQuery('#despacho_template_texto')[0];
+                            var startPos = textarea.selectionStart;
+                            var endPos = textarea.selectionEnd;
+                            var text = textarea.value;
+                            textarea.value = text.substring(0, startPos) + ' {{{field}}} ' + text.substring(endPos);
+                            textarea.focus();
+                            textarea.selectionStart = startPos + {len(field) + 4};
+                            textarea.selectionEnd = startPos + {len(field) + 4};
+                            return false;
+                        ''')
             btns_vars.append(TD(btn))
 
     return dict(form=form, formbusca=formbusca, registro=registro, btns_vars=TABLE(TR(btns_vars[:11]), TR(btns_vars[11:22]), TR(btns_vars[22:])))
