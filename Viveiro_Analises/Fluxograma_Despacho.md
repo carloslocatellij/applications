@@ -22,18 +22,25 @@ N1 --> poda0[Apenas poda Poda?]
 
 poda0 --> S2{Sim}
 poda0 --> N2{Não}
-N2 --> Fazer_Laudo --> 0
+N1 --> Fazer_Laudo
+Fazer_Laudo --> 0
 
-S2 --> Deferido
-S2 --> Indeferido
+S2 --> def1[Deferido]
+S2 --> indef1[Indeferido]
 
-Deferido -->  Publico
-Deferido -->  Privado
+def1 -->  pub1[Publico]
+def1 -->  priv1[Privado]
 
-Indeferido --> Ind1(Não_Há_Motivos)
+indef1 --> Ind1(Não_Há_Motivos)
+pub1 --> n0n1s2pubDef(poda_publico_deferido_sem_laudo)
 
 
-Publico --> n0n1s2pubDef(poda_publico_deferido_sem_laudo)
+N2 --> Fazer_Laudo
+
+S1 --> Apenas_Supressão
+
+Apenas_Supressão --> S3[Sim]
+Apenas_Supressão --> N3[Não]
 
 
 
