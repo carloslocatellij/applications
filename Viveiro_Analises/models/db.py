@@ -274,6 +274,7 @@ Laudos = db.define_table(
                     "Em Análise",
                     "Aguardando",
                     "Com Pendência",
+                    "Pendente de Compesação",
                     "Vistoriado por outro protocolo",
                     "",
                 ]
