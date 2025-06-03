@@ -19,36 +19,10 @@ db.define_table('despacho_template',
     Field('nome', 'string', required=True, label='Nome do Modelo'),
     Field('texto', 'text', required=True, label='Texto do Modelo'),
     Field('descricao', 'string', label='Descrição'),
-    Field('tipo', 'string', requires=IS_IN_SET([
-        'particular_deferido', 'particular_indeferido', 
-        'publico_deferido', 'publico_indeferido',
-        'pendencia_anuencia', 'pendencia_alvara',
-        'denuncia_poda', 'denuncia_supressao'
-    ])),
-    Field('condicoes', 'json', 
+    Field('condicoes', 'text', 
         label='Condições de Aplicação'),
     format='%(nome)s'
 )
-
-db.define_table('despacho_variaveis',
-    Field('template_id', 'reference despacho_template'),
-    Field('nome_variavel', 'string', label='Nome da Variável'),
-    Field('descricao', 'text', label='Descrição'),
-    Field('fonte_dados', 'string', label='Fonte de Dados',
-          requires=IS_IN_SET(['query', 'relation_query', 'query_protoc_ref'])),
-    Field('campo_dados', 'string', label='Campo de Dados'),
-    Field('valor_padrao', 'string', label='Valor Padrão')
-)
-
-import num2words #type: ignore
-import locale
-from datetime import datetime # Certifique-se que datetime está importado
-
-# Configuração de locale (idealmente feita uma vez na inicialização do app)
-try:
-    locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
-except locale.Error:
-    locale.setlocale(locale.LC_ALL, '') # Fallback para o locale padrão do sistema
 
 
 
@@ -114,6 +88,9 @@ def determinar_tipo_despacho_key(db, query, relation_query=None, query_protoc_re
 
     # Fallback se nenhuma condição bater (deve ser raro se o mapeamento for completo)
     return 'despacho_nao_mapeado'
+
+
+
 
 
 def Despachar(db, query, relation_query=None, query_protoc_ref=None):

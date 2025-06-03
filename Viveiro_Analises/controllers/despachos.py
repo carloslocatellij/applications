@@ -1,8 +1,8 @@
 if 0 == 1:
     from gluon import (db, current, redirect, URL, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
-                       Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01,
+                       Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01, BUTTON, TD, TABLE, TR,
                        IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE,
-                       IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC) # type: ignore
+                       IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC, buscador) # type: ignore
     request = current.request # type: ignore
     response = current.response # type: ignore
     session = current.session # type: ignore
@@ -29,6 +29,25 @@ def Gerenciar_templates(): #Menu
         db[table].id.requires = IS_NOT_IN_DB(db, f'{table}.id', error_message='Já está registrado.')
         form = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
         
+     
+    # Modified buttons with AJAX functionality
+    btns_vars = []
+    for field in list(db.Requerimentos.keys())[26:]:
+        if not field.startswith('_') and not 'qtd_' in field and not 'especie_' in field and not'ALL' in field:
+            btn = BUTTON(field, type='button',
+                        _onclick=f'''
+                            var textarea = jQuery('#despacho_template_texto')[0];
+                            var startPos = textarea.selectionStart;
+                            var endPos = textarea.selectionEnd;
+                            var text = textarea.value;
+                            textarea.value = text.substring(0, startPos) + ' {{{field}}} ' + text.substring(endPos);
+                            textarea.focus();
+                            textarea.selectionStart = startPos + {len(field) + 4};
+                            textarea.selectionEnd = startPos + {len(field) + 4};
+                            return false;
+                        ''', _class='btn btn-info')
+            btns_vars.append(TD(btn))
+    
     if form.process().accepted:
         session.flash = f'Dados atualizados' if registro else 'Registrado'
         redirect(URL(request.controller, request.function , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
@@ -41,54 +60,28 @@ def Gerenciar_templates(): #Menu
                         nome={'label': 'Nome'},
                         texto={'label': 'Texto'},
                         descricao={'label': 'Descrição'})
-    
-    # Modified buttons with AJAX functionality
-    btns_vars = []
-    for field in list(db.Requerimentos.keys())[26:]:
-        if not field.startswith('_') and not 'qtd_' in field and not 'especie_' in field and not'ALL' in field:
-            btn = BUTTON(field, 
-                        _onclick=f'''
-                            var textarea = jQuery('#despacho_template_texto')[0];
-                            var startPos = textarea.selectionStart;
-                            var endPos = textarea.selectionEnd;
-                            var text = textarea.value;
-                            textarea.value = text.substring(0, startPos) + ' {{{field}}} ' + text.substring(endPos);
-                            textarea.focus();
-                            textarea.selectionStart = startPos + {len(field) + 4};
-                            textarea.selectionEnd = startPos + {len(field) + 4};
-                            return false;
-                        ''')
-            btns_vars.append(TD(btn))
 
     return dict(form=form, formbusca=formbusca, registro=registro, btns_vars=TABLE(TR(btns_vars[:11]), TR(btns_vars[11:22]), TR(btns_vars[22:])))
 
 
-@auth.requires_login()
-def Gerenciar_variaveis(): 
-    """
-    Controller para gerenciar variáveis dos templates
-    """
-    template_id = request.args(0)
-    
-    if not template_id:
-        redirect(URL('Gerenciar_templates'))
-    
-    # Form para variáveis
-    db.despacho_variaveis.template_id.default = template_id
-    var_form = SQLFORM(db.despacho_variaveis)
-    
-    if var_form.accepts(request.vars, session):
-        response.flash = 'Variável salva com sucesso'
-        redirect(URL(c='despachos',f='gerenciar_variaveis', args=[template_id]))
-    
-    # Grid para visualizar/editar variáveis do template
-    query = db.despacho_variaveis.template_id == template_id
-    grid = SQLFORM.grid(query,
-                       fields=[db.despacho_variaveis.nome_variavel,
-                              db.despacho_variaveis.descricao,
-                              db.despacho_variaveis.fonte_dados],
-                       maxtextlength=50,
-                       create=False,
-                       searchable=True)
-    
-    return dict(form=var_form, grid=grid)
+
+def form_condicoes():
+    form_condicoes = SQLFORM.factory(
+    Field('campo', requires=IS_IN_SET([campo for campo in db.Requerimentos.fields])),
+    Field('operador', requires=IS_IN_SET(["=", "!=", "<", ">", "<=", ">=", "contêm", "está entre", "não está entre", ])),
+    Field('valor'), buttons=[BUTTON('Inserir Condição', type='button', 
+                    _onclick=f'''
+                        var campo = jQuery('#no_table_campo').val();
+                        var operador = jQuery('#no_table_operador').val();
+                        var valor = jQuery('#no_table_valor').val();
+                        var textarea = jQuery('#despacho_template_condicoes')[0];
+                        var startPos = textarea.selectionStart;
+                        var endPos = textarea.selectionEnd;
+                        var text = textarea.value;
+                        var fstring =  "{{" + '"campo": ' + '"' + campo + '"' + ', ' + '"operador": ' + '"' + operador + '"' + ', ' + '"valor": ' + '"' + valor + '"' + "}}"
+                        textarea.value = text.substring(0, startPos) + fstring + "," + '\\n' + text.substring(endPos);
+                        textarea.focus();
+                        return false;
+                    ''', _class='btn btn-info' )], fromstyle= 'bootstrap3_stacked'
+                                )
+    return dict(form_condicoes=form_condicoes)

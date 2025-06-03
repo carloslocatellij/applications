@@ -49,12 +49,16 @@ It is used as default when a view is not provided for your controllers
             <td width="33%" align='left' style="padding-inline: 10px">{{=B('Tipo:')}}<div align='left' class="card">
                     {{=form.custom.widget['tipo']}}</div>
             </td>
+            {{=LOAD(c='despachos', f='form_condicoes.load')}}
             <td width="33%" align='left' style="padding-inline: 10px">{{=B('Condições:')}}<div align='left' class="card">
-                    {{=form.custom.widget['condicoes']}}
-                </div>
-            </td>
-        </tr>
-    </table>
+                {{=form.custom.widget['condicoes']}}
+            </div>
+        </td>
+    </tr>
+    
+</table>
+
     {{=form.custom.submit}}
     {{=form.custom.end}}
+
 </div>
