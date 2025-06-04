@@ -28,7 +28,7 @@ It is used as default when a view is not provided for your controllers
     {{=A('Novo', _href=URL(c=request.controller,f=request.function, vars={}), _class='btn btn-primary',)}}
     {{pass}}
 </div>
-
+{{=LOAD(c='despachos', f='form_condicoes.load')}}
 <div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
     {{=form.custom.begin}}
     <table width="100%">
@@ -41,19 +41,16 @@ It is used as default when a view is not provided for your controllers
         <td width="33%" align='left' style="padding-inline: 10px">{{=B('Descrição:')}}<div align='left' class="card">
             {{=form.custom.widget['descricao']}}</div>
         </td>
-        {{=btns_vars}}
+        <tr>
             <td width="33%" align='left' style="padding-inline: 10px">{{=B('Texto:')}}<div align='left' class="card">
                     {{=form.custom.widget['texto']}}
                 </div>
             </td>
-            <td width="33%" align='left' style="padding-inline: 10px">{{=B('Tipo:')}}<div align='left' class="card">
-                    {{=form.custom.widget['tipo']}}</div>
-            </td>
-            {{=LOAD(c='despachos', f='form_condicoes.load')}}
-            <td width="33%" align='left' style="padding-inline: 10px">{{=B('Condições:')}}<div align='left' class="card">
-                {{=form.custom.widget['condicoes']}}
-            </div>
-        </td>
+                <td width="33%" align='left' style="padding-inline: 10px">{{=B('Condições:')}}<div align='left' class="card">
+                    {{=form.custom.widget['condicoes']}}
+                </div>
+                </td>
+            </tr>
     </tr>
     
 </table>
