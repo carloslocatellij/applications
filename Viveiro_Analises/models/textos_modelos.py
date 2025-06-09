@@ -1,4 +1,5 @@
 from my_validador import *  # type: ignore
+import json
 
 if 0 == 1:
     from gluon import *  # type: ignore
@@ -19,13 +20,71 @@ db.define_table('despacho_template',
     Field('nome', 'string', required=True, label='Nome do Modelo'),
     Field('texto', 'text', required=True, label='Texto do Modelo'),
     Field('descricao', 'string', label='Descrição'),
-    Field('condicoes', 'text', 
+    Field('condicoes', 'json', 
         label='Condições de Aplicação'),
     format='%(nome)s'
 )
 
 
+def dict_condicoes_de_templates():
+    dict_condicoes = {}
+    templates_conds = db(db.despacho_template.id > 0).select('id', 'condicoes')
+    
+    for item in templates_conds.as_dict().items():
+              
+        conjunto_condicoes = json.loads(templates_conds.as_dict()[item[0]].get('_extra').get('condicoes') ) 
+        dict_condicoes[item[1]['_extra'].get('id')  ] = conjunto_condicoes
 
+    return dict_condicoes
+            
+    
+
+def determinar_despacho(id): #Test 406564785
+    possiveis_despachos = []
+    req = db(db.Requerimentos.Protocolo == id).select().first()
+    dict_req = {'Despacho': req.get('Despacho'),
+                'tipo_imovel': req.get('tipo_imovel'),
+                'protocolo_anterior': req.get('protocolo_anterior'),
+                'total_podas': req.get('total_podas'),
+                'total_supressoes': req.get('total_supressoes')}
+    
+    for id , condicionais in dict_condicoes_de_templates().items():
+        condicoes_verificadas = {}
+        for condicoes in condicionais:
+            condic_campo = condicoes.get("campo")
+            operador = condicoes.get('operador')
+            condic_valor = condicoes.get("valor")     
+            for campo, valor in dict_req.items():
+                if isinstance(condic_valor, str) and condic_valor.isnumeric():
+                    condic_valor = int(condic_valor)
+                if isinstance(valor, str) and valor.isnumeric():
+                    valor = int(valor)
+                if valor is None and operador not in ['=', '!=']:
+                    continue    
+                if campo == condic_campo:
+                    if operador == '=':
+                            condicoes_verificadas[condic_campo] =  True if valor == condic_valor else False
+                    elif operador == '!=':
+                            condicoes_verificadas[condic_campo] =  True if valor != condic_valor else False
+                    elif operador == '<':
+                            condicoes_verificadas[condic_campo] =  True if valor < condic_valor else False
+                    elif operador == '>':
+                            condicoes_verificadas[condic_campo] =  True if valor > condic_valor else False
+                    elif operador == '<=':
+                            condicoes_verificadas[condic_campo] =  True if valor <= condic_valor else False
+                    elif operador == '>=':
+                            condicoes_verificadas[condic_campo] =  True if valor >= condic_valor else False
+                    else:
+                        condicoes_verificadas[condic_campo] =  False
+                           
+        if len(condicoes_verificadas) > 0 and all(condicoes_verificadas.values()) and not id in possiveis_despachos:
+            possiveis_despachos.append(id)
+               
+    return possiveis_despachos
+                
+            
+                    
+                
 def determinar_tipo_despacho_key(db, query, relation_query=None, query_protoc_ref=None):
     """
     Determina uma chave única (string) baseada nas condições dos dados de entrada.
