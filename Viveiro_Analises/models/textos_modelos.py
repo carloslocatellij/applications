@@ -28,14 +28,16 @@ db.define_table('despacho_template',
 
 def dict_condicoes_de_templates():
     dict_condicoes = {}
-    templates_conds = db(db.despacho_template.id > 0).select('id', 'condicoes')
+    dict_textos = {}
+    templates_conds = db(db.despacho_template.id > 0).select('id', 'condicoes', 'texto')
     
     for item in templates_conds.as_dict().items():
-              
-        conjunto_condicoes = json.loads(templates_conds.as_dict()[item[0]].get('_extra').get('condicoes') ) 
-        dict_condicoes[item[1]['_extra'].get('id')  ] = conjunto_condicoes
-
-    return dict_condicoes
+        if templates_conds.as_dict()[item[0]].get('_extra').get('condicoes'):
+            conjunto_condicoes = json.loads(templates_conds.as_dict()[item[0]].get('_extra').get('condicoes'))
+            dict_condicoes[item[1]['_extra'].get('id')  ] = conjunto_condicoes
+            dict_textos[item[1]['_extra'].get('id')] = templates_conds.as_dict()[item[0]].get('_extra').get('texto')
+        
+    return dict_condicoes, dict_textos
             
     
 
@@ -47,8 +49,9 @@ def determinar_despacho(id): #Test 406564785
                 'protocolo_anterior': req.get('protocolo_anterior'),
                 'total_podas': req.get('total_podas'),
                 'total_supressoes': req.get('total_supressoes')}
+    condic_templates, condic_txt = dict_condicoes_de_templates()
     
-    for id , condicionais in dict_condicoes_de_templates().items():
+    for id , condicionais in condic_templates.items():
         condicoes_verificadas = {}
         for condicoes in condicionais:
             condic_campo = condicoes.get("campo")
@@ -78,109 +81,35 @@ def determinar_despacho(id): #Test 406564785
                         condicoes_verificadas[condic_campo] =  False
                            
         if len(condicoes_verificadas) > 0 and all(condicoes_verificadas.values()) and not id in possiveis_despachos:
-            possiveis_despachos.append(id)
-               
+            possiveis_despachos.append((id, condic_txt.get(id)))
+                   
     return possiveis_despachos
                 
-            
-                    
-                
-def determinar_tipo_despacho_key(db, query, relation_query=None, query_protoc_ref=None):
-    """
-    Determina uma chave única (string) baseada nas condições dos dados de entrada.
-    Esta chave corresponde ao campo 'tipo' na tabela 'despacho_template'.
-    """
-    
-    # Lógica dos if/elif do despachador.py original para retornar uma string chave
-    # Exemplo:
-    if not relation_query:
-          
-        if (query.get('Despacho') == 'Deferido'
-            and int(query.get('qtd_poda1') or 0) > 0
-            and not int(query.get('qtd_ret1') or 0) > 0
-            and not query.get('protocolo_anterior')
-            and query.get('tipo_imovel') in ['privado', 'particular', 'próprio',
-                                             'institucional', 'residencia', 'residência', 'comercio', 'terreno']):
-            return 'poda_particular_deferido_sem_laudo' # Esta chave DEVE existir em despacho_template.tipo
 
+def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
+    if not prime_query:
+        print('Deve ser passado ao menos uma query válida')
+        return None
+    # 1. Determinar o tipo de despacho    
+    chaves_de_despacho = determinar_despacho(prime_query.Protocolo)
 
-        elif (query.get('Despacho') == 'Deferido'
-            and not query.get('protocolo_anterior')
-            and query.get('tipo_imovel') in ['público']):
-            return 'poda_publico_deferido_sem_laudo'
-       
-        
-        elif (query.get('Despacho') == 'Com Pendência'):
-            # Se houver sub-tipos de pendência, crie chaves mais específicas
-            return 'pendencia_geral_sem_laudo'
-
-
-        elif (query.get('protocolo_anterior')):
-            return 'protocolo_anterior_referenciado'
-        # ... Mapear TODAS as condições originais para chaves únicas
-        
-            
-    else: # Com relation_query (TEM LAUDO)
-
-        qtd_repor = relation_query.get('qtd_repor') or 0
-
-        if (relation_query.get('Despacho') == 'Deferido' and qtd_repor > 0
-            and relation_query.get('proprietario')
-            and query.get('tipo_imovel') in ['privado', 'particular', 'próprio',
-                                             'institucional', 'residencia', 'residência', 'terreno']):
-            return 'supressao_particular_deferido_com_replantio'
-
-        elif (relation_query.get('Despacho') == 'Deferido'
-            and relation_query.get('proprietario')
-            and query.get('tipo_imovel') in ['privado', 'particular', 'próprio',
-                                             'institucional', 'residencia', 'residência', 'terreno']):
-            # Este é o caso sem replantio (qtd_repor == 0 implícito pela ordem)
-            return 'supressao_particular_deferido_sem_replantio'
-
-        # ... Mapear TODAS as condições da seção "TEM LAUDO"
-
-        elif (relation_query.get('Despacho') == 'Indeferido'
-            and relation_query.get('proprietario')
-            and query.get('tipo_imovel') in ['privado', 'particular', 'próprio',
-                                             'institucional', 'residencia', 'residência', 'terreno']):
-            return 'indeferido_particular_com_laudo' # Antigo "INDEFERIDO PARTICULAR - SEM PODA"
-
-    # Fallback se nenhuma condição bater (deve ser raro se o mapeamento for completo)
-    return 'despacho_nao_mapeado'
-
-
-
-
-
-def Despachar(db, query, relation_query=None, query_protoc_ref=None):
-    # 1. Determinar o tipo de despacho
-    tipo_chave = determinar_tipo_despacho_key(db, query, relation_query, query_protoc_ref)
-
-    if tipo_chave == 'despacho_nao_mapeado':
+    if not chaves_de_despacho:
         return 'Não foi possível determinar o modelo de despacho para este caso.'
-
-    # 2. Buscar o template no banco de dados
-    template_record = db(db.despacho_template.nome == tipo_chave).select().first()
-
-    if not template_record:
-        return f"Modelo de despacho para o tipo '{tipo_chave}' não encontrado no banco de dados."
-    
-    template_text = template_record.texto
 
     # 3. Preparar o contexto de dados (variáveis para o template)
     contexto = {}
 
     # Adicionar dados brutos e campos virtuais de 'query' (Requerimentos)
     # Os nomes das chaves no contexto DEVEM corresponder aos placeholders no template
-    if query:
-        contexto['Requerente'] = query.get('Requerente')
-        contexto['Endereco'] = query.get('Endereco') # Campo Virtual
-        contexto['Podas_solicitadas'] = query.get('total_podas') # Campo Virtual
-        contexto['Supressoes_solicitadas'] = query.get('Supressoes') # Campo Virtual
-        contexto['data_do_laudo'] = query.get('data_do_laudo').strftime('%d/%m/%Y') if query.get('data_do_laudo') else ''
-        contexto['Podas'] = query.get('Podas')
-        contexto['num_extens_poda'] = query.get('num_extens_poda')
-        contexto['num_extens_supressoes'] = query.get('num_extens_supressoes')
+    if prime_query:
+        contexto['Requerente'] = prime_query.get('Requerente')
+        contexto['Endereco'] = prime_query.get('Endereco') # Campo Virtual
+        contexto['total_podas'] = prime_query.get('total_podas') # Campo Virtual
+        contexto['Supressoes_solicitadas'] = prime_query.get('Supressoes') # Campo Virtual
+        contexto['data_do_laudo'] = prime_query.get('data_do_laudo').strftime('%d/%m/%Y') if prime_query.get('data_do_laudo') else ''
+        contexto['Podas'] = prime_query.get('Podas')
+        contexto['num_extens_poda'] = prime_query.get('num_extens_poda')
+        contexto['num_extens_supressoes'] = prime_query.get('num_extens_supressoes')
         
         # Adicione outros campos de 'query' que seus templates usam
 
@@ -215,8 +144,7 @@ def Despachar(db, query, relation_query=None, query_protoc_ref=None):
                  contexto['data_laudo_prot_ref'] = data_laudo_ref_obj.strftime('%d/%m/%Y')
             contexto['tecnico_prot_ref'] = 'XXXXXXXXXXXXXX' # Default se não houver laudo na ref
         
-        contexto['protocolo_anterior_num'] = query.get('protocolo_anterior')
-
+        contexto['protocolo_anterior_num'] = prime_query.get('protocolo_anterior')
 
 
     if relation_query:
@@ -231,16 +159,18 @@ def Despachar(db, query, relation_query=None, query_protoc_ref=None):
         contexto['num_extens_repor_calculada'] = relation_query.get('num_extens_repor')
 
 
-
-
-    try:
-        texto_final = template_text.format(**contexto)
-    except KeyError as e:
-        # Este erro é útil durante o desenvolvimento para achar placeholders não preenchidos
-        return str(f'''Erro ao popular o modelo {tipo_chave}: 
-                   A variável {str(e).strip("'")} não foi encontrada no contexto de dados. 
-                   Verifique os placeholders do template e a preparação do contexto na função Despachar.''')
-    except Exception as e:
-        return f"Erro inesperado ao popular o modelo '{tipo_chave}': {str(e)}"
+    Despachos = []
+    for template in chaves_de_despacho:
+        try:
+            texto_final = template[1].format(**contexto)
+            Despachos.append(texto_final)
         
-    return texto_final
+        except KeyError as e:
+            # Este erro é útil durante o desenvolvimento para achar placeholders não preenchidos
+            return str(f'''Erro ao popular o modelo {template}: 
+                    A variável {str(e).strip("'")} não foi encontrada no contexto de dados. 
+                    Verifique os placeholders do template e a preparação do contexto na função Despachar.''')
+        except Exception as e:
+            return f"Erro inesperado ao popular o modelo '{template}': {str(e)}"
+        
+    return Despachos

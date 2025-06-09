@@ -261,35 +261,25 @@ def Despachar_Processos(): #Menu
     newbtn = A('Novo', _href=URL('default', 'Requerimentos'), _class='btn btn-primary')# type: ignore
     
     if processo:
-        prime_query = db(db.Requerimentos.Protocolo == processo).select().render(0).as_dict()
-        relation_query = db(db.Laudos.Protocolo == processo)
-        query_protoc_ref = ''
-        
-        if  prime_query.get('protocolo_anterior'):
+        prime_query = db(db.Requerimentos.Protocolo == processo).select().first()
+        relation_query = db(db.Laudos.Protocolo == processo).select().first()
+        query_protoc_ref = None
+        if  prime_query:
+            query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.protocolo_anterior) &
+                                        (db.Laudos.Protocolo == db.Requerimentos.Protocolo)).select().first()
+
             
-            if db(db.Laudos.Protocolo == prime_query.get('protocolo_anterior')).count() > 0:
-                query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')) &
-                                      (db.Laudos.Protocolo == db.Requerimentos.Protocolo)).select().render(0).as_dict()
-                
-            elif db(db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')):
-                    query_protoc_ref = db(db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')).select().render(0).as_dict()
-                    
-            
-        if relation_query.count() > 0:
-            relation_query = relation_query.select().render(0).as_dict()
-        else:
-            relation_query = None
-            
-        texto_despacho = Despachar(db, prime_query, relation_query, query_protoc_ref)
+        textos_despacho = Despachar(prime_query, relation_query, query_protoc_ref) #type: ignore
 
         markdowner = Markdown2(html4tags=True,  )
+        conteudo= []
+        for texto_despacho in textos_despacho:
+            texto_md = markdowner.convert(texto_despacho) or None
+            texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"').replace('<p>', '').replace('</p>', '')
+            conteudo.append(XML(texto_md)) # type: ignore
         
-        texto_md = markdowner.convert(texto_despacho) or None
-        texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"').replace('<p>', '').replace('</p>', '')
         copybtn = TAG.button('<Copiar>', _class='btn btn-info', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
         
-   
-        conteudo = XML(texto_md) # type: ignore
     else:
         form = SQLFORM.factory(Field('Protocolo'))
         
