@@ -264,10 +264,11 @@ def Despachar_Processos(): #Menu
         prime_query = db(db.Requerimentos.Protocolo == processo).select().first()
         relation_query = db(db.Laudos.Protocolo == processo).select().first()
         query_protoc_ref = None
-        if  prime_query:
+        if  relation_query:
             query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.protocolo_anterior) &
                                         (db.Laudos.Protocolo == db.Requerimentos.Protocolo)).select().first()
-
+        else:
+            query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.protocolo_anterior)).select().first()
             
         textos_despacho = Despachar(prime_query, relation_query, query_protoc_ref) #type: ignore
 

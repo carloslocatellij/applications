@@ -1,3 +1,6 @@
+from ast import alias
+
+
 if 0 == 1:
     from gluon import (db, current, redirect, URL, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
                        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01, BUTTON, TD, TABLE, TR,
@@ -48,9 +51,21 @@ def Gerenciar_templates(): #Menu
 
 def form_condicoes():
     
+    list_campos = []
+    table1fields = list(db.Requerimentos.keys())[26:]
+    for field in table1fields:
+        if not field.startswith('_') and not field[-1].isdigit() and not 'especie_' in field and not'ALL' in field:
+            list_campos.append(field)
+            
+    table2fields = list(db.Laudos.keys())[26:]
+    for field in table2fields:
+        if (not field.startswith('_')  and not 'especie_' in field and not'ALL' in field 
+            and not field[-1].isdigit() and not field in list_campos):
+            list_campos.append(field)
+    
     
     form_condicoes = SQLFORM.factory(
-    Field('campo', requires=IS_IN_SET([campo  if not campo.startswith('_') else '' for campo in list(db.Requerimentos.keys())[26:]] )),
+    Field('campo', requires=IS_IN_SET( list_campos )),
     Field('operador', requires=IS_IN_SET(["=", "!=", "<", ">", "<=", ">=", "contêm", "está entre", "não está entre", ])),
     Field('valor'), buttons=[BUTTON('Inserir Condição', type='button', 
                     _onclick=f'''
@@ -69,9 +84,17 @@ def form_condicoes():
                                 )
     
         # Modified buttons with AJAX functionality
+    tables = [table  for table in db.tables() ]
+    
+    for_tabelas = SQLFORM.factory(
+        Field('tabelas', 'list:string', multiple=True, requires=IS_IN_SET(['Requerimentos', 'Laudos']))
+        
+    )
+    
     btns_vars = []
-    for field in list(db.Requerimentos.keys())[26:]:
-        if not field.startswith('_') and not 'qtd_' in field and not 'especie_' in field and not'ALL' in field:
+
+    
+    for field in list_campos:
             btn = BUTTON(field, type='button',
                         _onclick=f'''
                             var textarea = jQuery('#despacho_template_texto')[0];
@@ -86,4 +109,11 @@ def form_condicoes():
                         ''', _class='btn btn-info')
             btns_vars.append(TD(btn))
     
-    return dict(form_condicoes=form_condicoes, btns_vars=TABLE(TR(btns_vars[:8]), TR(btns_vars[8:16]), TR(btns_vars[16:])))
+    if for_tabelas.process().accepted:
+        redirect(URL(request.controller, request.function, extension='', vars={'tabs': for_tabelas.vars.tabelas}))
+    
+    table_buttons = TABLE()
+    for itens_linha in range(len(list_campos)//8):     
+        table_buttons.append(TR(btns_vars[itens_linha  * 8: (itens_linha + 1) * 8]))
+    
+    return dict(form_condicoes=form_condicoes, for_tabelas=for_tabelas, btns_vars=table_buttons)

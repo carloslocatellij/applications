@@ -1,8 +1,11 @@
 <table>
+
+<tr>
 <td>
 {{=btns_vars}}
 </td>
 <td>
 {{=form_condicoes}}
 </td>
+</tr>
 </table>

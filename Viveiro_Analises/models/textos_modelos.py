@@ -53,6 +53,7 @@ def determinar_despacho(id): #Test 406564785
     
     for id , condicionais in condic_templates.items():
         condicoes_verificadas = {}
+        condicionais = [condicionais] if not isinstance(condicionais, list) else condicionais
         for condicoes in condicionais:
             condic_campo = condicoes.get("campo")
             operador = condicoes.get('operador')
@@ -77,6 +78,7 @@ def determinar_despacho(id): #Test 406564785
                             condicoes_verificadas[condic_campo] =  True if valor <= condic_valor else False
                     elif operador == '>=':
                             condicoes_verificadas[condic_campo] =  True if valor >= condic_valor else False
+                    
                     else:
                         condicoes_verificadas[condic_campo] =  False
                            
@@ -94,69 +96,72 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
     chaves_de_despacho = determinar_despacho(prime_query.Protocolo)
 
     if not chaves_de_despacho:
-        return 'Não foi possível determinar o modelo de despacho para este caso.'
+        return ['Não foi possível determinar o modelo de despacho para este caso.']
 
     # 3. Preparar o contexto de dados (variáveis para o template)
     contexto = {}
 
-    # Adicionar dados brutos e campos virtuais de 'query' (Requerimentos)
-    # Os nomes das chaves no contexto DEVEM corresponder aos placeholders no template
+# Adicionar dados brutos e campos virtuais de 'query' (Requerimentos)
+# Os nomes das chaves no contexto DEVEM corresponder aos placeholders no template
     if prime_query:
+        contexto['Protocolo'] = prime_query.get('Protocolo')
         contexto['Requerente'] = prime_query.get('Requerente')
         contexto['Endereco'] = prime_query.get('Endereco') # Campo Virtual
-        contexto['total_podas'] = prime_query.get('total_podas') # Campo Virtual
-        contexto['Supressoes_solicitadas'] = prime_query.get('Supressoes') # Campo Virtual
         contexto['data_do_laudo'] = prime_query.get('data_do_laudo').strftime('%d/%m/%Y') if prime_query.get('data_do_laudo') else ''
+        contexto['total_podas'] = prime_query.get('total_podas') # Campo Virtual
+        contexto['total_supressoes'] = prime_query.get('total_supressoes')
         contexto['Podas'] = prime_query.get('Podas')
+        contexto['Supressoes'] = prime_query.get('Supressoes') # Campo Virtual
         contexto['num_extens_poda'] = prime_query.get('num_extens_poda')
         contexto['num_extens_supressoes'] = prime_query.get('num_extens_supressoes')
         
-        # Adicione outros campos de 'query' que seus templates usam
-
-    # Adicionar dados brutos e campos virtuais de 'relation_query' (Laudos)
     if relation_query:
-        contexto['tecnico'] = (relation_query.get('tecnico').upper() if relation_query.get('tecnico') else 'XXXXXXXXXXXXXX')
-        contexto['data_do_laudo_laudo'] = relation_query.get('data_do_laudo').strftime('%d/%m/%Y') if relation_query.get('data_do_laudo') else ''
-        contexto['proprietario_laudo'] = relation_query.get('proprietario')
-        contexto['Supressoes_autorizadas'] = relation_query.get('Supressoes') # Campo Virtual de Laudos
-        contexto['Podas_autorizadas'] = relation_query.get('Podas') # Campo Virtual de Laudos
-        contexto['Obs_laudo'] = relation_query.get('Obs')
+        contexto['tecnico'] = relation_query.get('tecnico').upper() or 'XXXXXXXXXXXXXX'
+        contexto['data_do_laudo'] = relation_query.get('data_do_laudo').strftime('%d/%m/%Y') if relation_query.get('data_do_laudo') else ''
+        contexto['proprietario'] = relation_query.get('proprietario')
+        contexto['morador'] = relation_query.get('morador')
+        contexto['total_podas'] = relation_query.get('total_podas') # Campo Virtual
+        contexto['total_supressoes'] = relation_query.get('total_supressoes')
+        contexto['num_extens_poda'] = relation_query.get('num_extens_poda')
+        contexto['num_extens_supressoes'] = relation_query.get('num_extens_supressoes')
+        contexto['Supressoes'] = relation_query.get('Supressoes') # Campo Virtual de Laudos
+        contexto['Podas'] = relation_query.get('Podas') # Campo Virtual de Laudos
+        contexto['Obs'] = relation_query.get('Obs')
+        contexto['qtd_repor'] = relation_query.get('qtd_repor')
         contexto['porte_repor'] = relation_query.get('porte_repor')
-        # Adicione outros campos de 'relation_query'
-
-    # Adicionar dados de 'query_protoc_ref' (se aplicável ao template)
+        contexto['num_extens_repor'] = relation_query.get('num_extens_repor')
+        
     if query_protoc_ref:
-        # Exemplo de como acessar dados de protocolo referenciado
         if query_protoc_ref.get('Laudos'): # Se a referência tem dados de Laudos
-            contexto['tecnico_prot_ref'] = query_protoc_ref.get('Laudos').get('tecnico','').upper() or 'XXXXXXXXXXXXXX'
-            contexto['podas_prot_ref'] = query_protoc_ref.get('Laudos').get('Podas','')
-            contexto['supressoes_prot_ref'] = query_protoc_ref.get('Laudos').get('Supressoes','')
-            # A data do laudo da referência pode vir de Requerimentos ou Laudos dentro da referência
+            contexto['Protocolo'] = query_protoc_ref.get('Laudos').get('Protocolo')
+            contexto['Requerente'] = query_protoc_ref.get('Requerente')
+            contexto['Endereco'] = query_protoc_ref.get('Endereco') # Campo Virtual
+            contexto['total_podas'] = query_protoc_ref.get('Laudos').get('total_podas') # Campo Virtual
+            contexto['total_supressoes'] = query_protoc_ref.get('Laudos').get('total_supressoes')
+            contexto['Podas'] = query_protoc_ref.get('Laudos').get('Podas')
+            contexto['Supressoes'] = query_protoc_ref.get('Laudos').get('Supressoes') # Campo Virtual
+            contexto['num_extens_poda'] = query_protoc_ref.get('Laudos').get('num_extens_poda')
+            contexto['num_extens_supressoes'] = query_protoc_ref.get('Laudos').get('num_extens_supressoes')
+            contexto['tecnico'] = query_protoc_ref.get('Laudos').get('tecnico','').upper() or 'XXXXXXXXXXXXXX'
             data_laudo_ref_obj = query_protoc_ref.get('Requerimentos', {}).get('data_do_laudo')
             if data_laudo_ref_obj:
-                 contexto['data_laudo_prot_ref'] = data_laudo_ref_obj.strftime('%d/%m/%Y')
+                    contexto['data_do_laudo'] = data_laudo_ref_obj.strftime('%d/%m/%Y')
 
-        elif query_protoc_ref.get('Requerimentos'): # Se a referência tem dados de Requerimentos
-            contexto['podas_prot_ref'] = query_protoc_ref.get('Requerimentos').get('Podas','')
-            contexto['supressoes_prot_ref'] = query_protoc_ref.get('Requerimentos').get('Supressoes','')
-            data_laudo_ref_obj = query_protoc_ref.get('Requerimentos').get('data_do_laudo')
+        else: # Se a referência tem dados de Requerimentos
+            contexto['Protocolo'] = query_protoc_ref.get('Protocolo')
+            contexto['Requerente'] = query_protoc_ref.get('Requerente')
+            contexto['Endereco'] = query_protoc_ref.get('Endereco') # Campo Virtual
+            contexto['total_podas'] = query_protoc_ref.get('total_podas') # Campo Virtual
+            contexto['total_supressoes'] = query_protoc_ref.get('total_supressoes') # Campo Virtual
+            contexto['Podas'] = query_protoc_ref.get('Podas','')
+            contexto['Supressoes'] = query_protoc_ref.get('Supressoes','')
+            contexto['num_extens_poda'] = query_protoc_ref.get('num_extens_poda')
+            contexto['num_extens_supressoes'] = query_protoc_ref.get('num_extens_supressoes')
+            data_laudo_ref_obj = query_protoc_ref.get('data_do_laudo')
             if data_laudo_ref_obj:
-                 contexto['data_laudo_prot_ref'] = data_laudo_ref_obj.strftime('%d/%m/%Y')
-            contexto['tecnico_prot_ref'] = 'XXXXXXXXXXXXXX' # Default se não houver laudo na ref
-        
-        contexto['protocolo_anterior_num'] = prime_query.get('protocolo_anterior')
-
-
-    if relation_query:
-        soma_poda_aut = relation_query.get('total_podas')
-        contexto['soma_poda_autorizada'] = soma_poda_aut
-        soma_supress_aut = relation_query.get('total_supressoes')
-        contexto['soma_supressao_autorizada'] = soma_supress_aut
-        contexto['num_extens_supressao_autorizada'] = relation_query.get('num_extens_supressoes')
-        
-        qtd_repor_val = relation_query.get('qtd_repor') or 0
-        contexto['qtd_repor_calculada'] = qtd_repor_val
-        contexto['num_extens_repor_calculada'] = relation_query.get('num_extens_repor')
+                    contexto['data_do_laudo'] = data_laudo_ref_obj.strftime('%d/%m/%Y')
+            contexto['tecnico'] = 'XXXXXXXXXXXXXX' # Default se não houver laudo na ref
+        contexto['protocolo_anterior'] = prime_query.get('protocolo_anterior')
 
 
     Despachos = []
@@ -167,10 +172,10 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
         
         except KeyError as e:
             # Este erro é útil durante o desenvolvimento para achar placeholders não preenchidos
-            return str(f'''Erro ao popular o modelo {template}: 
+            return [str(f'''Erro ao popular o modelo {template}: 
                     A variável {str(e).strip("'")} não foi encontrada no contexto de dados. 
-                    Verifique os placeholders do template e a preparação do contexto na função Despachar.''')
+                    Verifique os placeholders do template e a preparação do contexto na função Despachar.''')]
         except Exception as e:
-            return f"Erro inesperado ao popular o modelo '{template}': {str(e)}"
+            return [f"Erro inesperado ao popular o modelo '{template}': {str(e)}"]
         
     return Despachos
