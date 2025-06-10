@@ -169,6 +169,7 @@ O NÃO CUMPRIMENTO DO PRAZO, ACARRETA A APLICAÇÃO DAS PENALIDADES DA LEI.
 
 Técnico responsável: {tecnico} ''' 
 
+        #DEFERIDO APENAS PODA PARTICULAR SEM REPLANTIO
         elif (relation_query.get('Despacho') == 'Deferido'
             and not relation_query.get('qtd_ret1')
             and relation_query.get('proprietario')
@@ -222,6 +223,8 @@ PARAGRAFO 2°. A REALIZAÇÃO DA PODA DE ÁRVORES, ARBUSTOS E OUTRAS PLANTAS LEN
 
 DECRETO 18.301/2019
 ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PERMITIDA PODA NA QUAL A COPA DA ÁRVORE FIQUE COM FORMA GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
+
+Para qualquer interdição parcial ou total de via pública para realização de serviços, deverá ser requerida autorização junto à Secretaria Municipal de Trânsito, Transportes e Segurança.
         '''
             
             # DEFERIDO SUPRESSÃO PÚBLICA COM REPLANTIO - SEM PODA
@@ -231,7 +234,7 @@ NO ENDEREÇO: {query.get('Endereco')}.
 
 SEGUIR NORMA ABNT NBR 16246-1:2013.
 
-A PODA REALIZADA EM VOLUME MAIOR QUE 25% (VINTE E CINCO POR CENTO) DA COPA ORIGINAL DA ÁRVORE É CONSIDERADA DRÁSTICA E PODE CAUSAR SÉRIOS DANOS À SAÚDE DA ÁRVORE.
+Para qualquer interdição parcial ou total de via pública para realização de serviços, deverá ser requerida autorização junto à Secretaria Municipal de Trânsito, Transportes e Segurança.
 
 LEI 13.031/2018
 ART. 66.
@@ -266,6 +269,8 @@ PARAGRAFO 2°. A REALIZAÇÃO DA PODA DE ÁRVORES, ARBUSTOS E OUTRAS PLANTAS LEN
 
 DECRETO 18.301/2019
 ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PERMITIDA PODA NA QUAL A COPA DA ÁRVORE FIQUE COM FORMA GEOMÉTRICA ARTIFICIAL, OU QUE ALTERE A FORMA E ARQUITETURA NATURAL DE CADA ESPÉCIE.
+
+Para qualquer interdição parcial ou total de via pública para realização de serviços, deverá ser requerida autorização junto à Secretaria Municipal de Trânsito, Transportes e Segurança.
         '''
     
     
@@ -279,6 +284,8 @@ ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PE
 NO ENDEREÇO: {query.get('Endereco')}.
 
 SEGUIR NORMA ABNT NBR 16246-1:2013.
+
+Para qualquer interdição parcial ou total de via pública para realização de serviços, deverá ser requerida autorização junto à Secretaria Municipal de Trânsito, Transportes e Segurança.
 
 A PODA REALIZADA EM VOLUME MAIOR QUE 25% (VINTE E CINCO POR CENTO) DA COPA ORIGINAL DA ÁRVORE É CONSIDERADA DRÁSTICA E PODE CAUSAR SÉRIOS DANOS À SAÚDE DA ÁRVORE.
 
@@ -396,154 +403,164 @@ DE FORMA DISTRIBUÍDA E EQUILIBRADA.
             
             
             # indeferido
-        # INDEFERIDO PARTICULAR - SEM PODA
-        elif (relation_query.get('Despacho') == 'Indeferido'
-            and relation_query.get('proprietario')
-            and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
+        # INDEFERIDO E FEZ PODA DRÁSTICA
+        elif relation_query.get('Despacho') == 'Indeferido':
+            if relation_query.get('Obs'):
+                if 'PODA DRÁSTICA' in relation_query.get('Obs') or 'PODAS DRÁSTICAS' in relation_query.get('Obs'):
+                    texto= f''' DENÚNCIA DE PODA DRÁSTICA CONSTATADA NO ENDEREÇO: R/AV. {query.get('Endereco')}. FOTO E LAUDO ANEXOS.
+            CONFORME DESPACHO DO TÉC.  {relation_query.get('tecnico')}:
+            FOI CONSTATADA PODA(S) DRÁSTICA(S) DE ÁRVORE(S) DA(S) ESPÉCIE(S): {relation_query.get('Podas')}. NO ENDEREÇO: R/AV. {query.get('Endereco')}.
+            SEGUEM LAUDO E FOTO.'''
             
             
-            texto = f'''Ilmo.(a) Sr.(a) {relation_query.get('proprietario')},
+            # INDEFERIDO PARTICULAR - SEM PODA
+            if (relation_query.get('Despacho') == 'Indeferido'
+                and relation_query.get('proprietario')
+                and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
+                
+                
+                texto = f'''Ilmo.(a) Sr.(a) {relation_query.get('proprietario')},
 
-Após análise do protocolo acima mencionado, informamos que foi solicitada a autorização para supressão do(s) seguinte(s) exemplar(es) arbóreo(s): {relation_query.get('Supressoes')}.
+    Após análise do protocolo acima mencionado, informamos que foi solicitada a autorização para supressão do(s) seguinte(s) exemplar(es) arbóreo(s): {relation_query.get('Supressoes')}.
 
-Com base na vistoria técnica realizada por esta Secretaria Municipal do Meio Ambiente e Urbanismo, constatou-se que a(s) árvore(s) encontra(m)-se em ótimo estado fitossanitário (saudáveis).
+    Com base na vistoria técnica realizada por esta Secretaria Municipal do Meio Ambiente e Urbanismo, constatou-se que a(s) árvore(s) encontra(m)-se em ótimo estado fitossanitário (saudáveis).
 
-Recomendamos, nos casos de danos ao calçamento, o alargamento do canteiro ao redor da(s) árvore(s) como solução para minimizar os problemas. O uso de canteiros maiores, com material permeável (como grade, grama ou pedriscos), pode reduzir os danos à calçada e proporcionar melhores condições para o desenvolvimento da(s) árvore(s).
+    Recomendamos, nos casos de danos ao calçamento, o alargamento do canteiro ao redor da(s) árvore(s) como solução para minimizar os problemas. O uso de canteiros maiores, com material permeável (como grade, grama ou pedriscos), pode reduzir os danos à calçada e proporcionar melhores condições para o desenvolvimento da(s) árvore(s).
 
-Considerando a importância das árvores para o meio ambiente e o bem-estar urbano, bem como as disposições do Plano Diretor de Arborização Urbana de São José do Rio Preto (Lei Nº 13.031/2018 - Art. 55 e Art. 59), o pedido de supressão foi **indeferido**.
+    Considerando a importância das árvores para o meio ambiente e o bem-estar urbano, bem como as disposições do Plano Diretor de Arborização Urbana de São José do Rio Preto (Lei Nº 13.031/2018 - Art. 55 e Art. 59), o pedido de supressão foi **indeferido**.
 
-Informamos ainda que a realização de poda drástica (acima de 25% do volume da copa) é proibida, conforme o Decreto nº 18.301/2019.
+    Informamos ainda que a realização de poda drástica (acima de 25% do volume da copa) é proibida, conforme o Decreto nº 18.301/2019.
 
-Caso deseje solicitar reconsideração deste despacho, será necessário abrir um novo requerimento com justificativas e/ou documentação complementar para nova análise.
+    Caso deseje solicitar reconsideração deste despacho, será necessário abrir um novo requerimento com justificativas e/ou documentação complementar para nova análise.
 
-**Técnico responsável:** {tecnico}
+    **Técnico responsável:** {tecnico}
 
-Atenciosamente,
-            '''
-            #TEXTO NORMAL:
-            '''
-Ilmo.(a) Sr.(a)
+    Atenciosamente,
+                '''
+                #TEXTO NORMAL:
+                '''
+    Ilmo.(a) Sr.(a)
 
-Considerando que, através do protocolo acima mencionado, foi solicitada autorização para supressão do(s) seguinte(s) exemplar(es) arbóreo(s): {relation_query.get('Supressoes')}, e que, neste sentido, foi realizada a vistoria técnica por esta Secretaria Municipal do Meio Ambiente e Urbanismo.
+    Considerando que, através do protocolo acima mencionado, foi solicitada autorização para supressão do(s) seguinte(s) exemplar(es) arbóreo(s): {relation_query.get('Supressoes')}, e que, neste sentido, foi realizada a vistoria técnica por esta Secretaria Municipal do Meio Ambiente e Urbanismo.
 
-Considerando que o Plano Diretor de Arborização Urbana de São José do Rio Preto - PDAU (Lei Nº 13.031 de 26 setembro de 2018 - Art. 55 e Art. 59), tecnicamente define quais as condições em que a supressão poderá ser autorizada.
+    Considerando que o Plano Diretor de Arborização Urbana de São José do Rio Preto - PDAU (Lei Nº 13.031 de 26 setembro de 2018 - Art. 55 e Art. 59), tecnicamente define quais as condições em que a supressão poderá ser autorizada.
 
-Considerando que a árvore, como parte integrante do meio ambiente, deve ser protegida, pois além do fato de ser um ser vivo e da sua importância para o bem-estar dos cidadãos, exerce muitas funções ecológicas, como a regulação térmica, manutenção da qualidade do ar e abrigo à fauna. Desta forma, faz-se necessário considerá-la um equipamento urbano essencial, e como tal necessita de uma estrutura digna para seu pleno desenvolvimento. 
+    Considerando que a árvore, como parte integrante do meio ambiente, deve ser protegida, pois além do fato de ser um ser vivo e da sua importância para o bem-estar dos cidadãos, exerce muitas funções ecológicas, como a regulação térmica, manutenção da qualidade do ar e abrigo à fauna. Desta forma, faz-se necessário considerá-la um equipamento urbano essencial, e como tal necessita de uma estrutura digna para seu pleno desenvolvimento. 
 
-Considerando que a(s) árvore(s) avaliada(s) encontra(m)-se ótimo estado fitossanitário (saudáveis), nos casos em que o motivo da solicitação tratar de danos da calçada, recomenda-se o alargamento do canteiro ao redor da(s) árvore(s) para contornar o problema de danos no calçamento, a utilização de canteiros maiores pode minimizar a quantidade de danos na calçada, portanto, é necessário reservar uma área livre de canteiro com material permeável (grade, grama, pedriscos e outros). 
+    Considerando que a(s) árvore(s) avaliada(s) encontra(m)-se ótimo estado fitossanitário (saudáveis), nos casos em que o motivo da solicitação tratar de danos da calçada, recomenda-se o alargamento do canteiro ao redor da(s) árvore(s) para contornar o problema de danos no calçamento, a utilização de canteiros maiores pode minimizar a quantidade de danos na calçada, portanto, é necessário reservar uma área livre de canteiro com material permeável (grade, grama, pedriscos e outros). 
 
-Sendo assim, a Secretaria Municipal do Meio Ambiente e Urbanismo, após a avaliação dos critérios e parâmetros para a concessão de autorização, pelo Município, INDEFERE o pedido para a supressão da(s) árvore(s) que se encontram sadias e localizadas em área de domínio público. Informamos ainda, que de acordo com a Lei, a realização de poda drástica (acima de 25% do volume da copa) é proibida (Decreto nº 18.301/2019). 
+    Sendo assim, a Secretaria Municipal do Meio Ambiente e Urbanismo, após a avaliação dos critérios e parâmetros para a concessão de autorização, pelo Município, INDEFERE o pedido para a supressão da(s) árvore(s) que se encontram sadias e localizadas em área de domínio público. Informamos ainda, que de acordo com a Lei, a realização de poda drástica (acima de 25% do volume da copa) é proibida (Decreto nº 18.301/2019). 
 
-Em caso de solicitação de reconsideração de despacho, faz-se necessário abrir novo requerimento por protocolo, com justificativas e/ou documentação complementar para nova vistoria.
+    Em caso de solicitação de reconsideração de despacho, faz-se necessário abrir novo requerimento por protocolo, com justificativas e/ou documentação complementar para nova vistoria.
 
-Técnico responsável: {tecnico}
+    Técnico responsável: {tecnico}
 
-Atenciosamente,'''
-            '''Ilmo.(a) Sr.(a) {relation_query.get('proprietario')},
+    Atenciosamente,'''
+                '''Ilmo.(a) Sr.(a) {relation_query.get('proprietario')},
 
-Após análise do protocolo, informamos que o pedido de supressão do(s) exemplar(es) arbóreo(s): {relation_query.get('Supressoes')} foi **indeferido**. A(s) árvore(s) encontra(m)-se saudável(is). Recomendamos o alargamento do canteiro para minimizar danos ao calçamento. Poda drástica é proibida (Decreto nº 18.301/2019). Para reconsideração, abra novo requerimento.
+    Após análise do protocolo, informamos que o pedido de supressão do(s) exemplar(es) arbóreo(s): {relation_query.get('Supressoes')} foi **indeferido**. A(s) árvore(s) encontra(m)-se saudável(is). Recomendamos o alargamento do canteiro para minimizar danos ao calçamento. Poda drástica é proibida (Decreto nº 18.301/2019). Para reconsideração, abra novo requerimento.
 
-**Técnico responsável:** {tecnico}'''
-           
-           
-        # INDEFERIDO PRIVADO - ÁREA INTERNA - VIZINHO
-        elif (relation_query.get('Despacho') == 'Indeferido'
-            and query.get('local_arvore') == 'área interna'
-            and not relation_query.get('proprietario')
-            and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
+    **Técnico responsável:** {tecnico}'''
             
-            texto = f'''
-Por se tratar de árvore localizada em área interna de propriedade particular, não existe meio legal para notificar o proprietário para realizar o manejo da árvore em questão no momento.
-
-Sendo assim, orientamos para que sejam tomadas as providências convenientes, seguindo os preceitos legais, diretamente com o proprietário do imóvel que detém a árvore.
-
-Orientamos também, que diante a possibilidade de ocorrências severas, pode ser consultado a Defesa Civil.
-
-Informamos também que, de acordo com o Código Civil, Lei nº 10.406/2002,
-
-Seção II – Das Árvores Limítrofes, Art. 1.283. As raízes e os ramos de árvore, que ultrapassarem a estrema do prédio, poderão ser cortados, até o plano vertical divisório, pelo proprietário do terreno invadido.
-
-Para vistoria de árvores localizadas no próprio imóvel ou em calçadas, o meio de solicitar vistorias técnicas é pelo Poupatempo ou Prefeitura Regional Norte ou pelo link: https://cidadao.riopreto.sp.gov.br/?apl=PODA_SUPRESSAO
-
-Não possuímos equipe de manejo de árvores para áreas particulares.
-
-Atenciosamente,
-
-           '''
-        elif (relation_query.get('Despacho') == 'Indeferido'
-            and not relation_query.get('proprietario')
-            and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
             
-            texto = f'''
-Por se tratar de árvore localizada no passeio de fronte a área de propriedade particular, não existe meio legal para notificar o proprietário para realizar o manejo da árvore em questão.
+            # INDEFERIDO PRIVADO - ÁREA INTERNA - VIZINHO
+            elif (relation_query.get('Despacho') == 'Indeferido'
+                and query.get('local_arvore') == 'área interna'
+                and not relation_query.get('proprietario')
+                and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
+                
+                texto = f'''
+    Por se tratar de árvore localizada em área interna de propriedade particular, não existe meio legal para notificar o proprietário para realizar o manejo da árvore em questão no momento.
 
-Sendo assim, orientamos para que sejam tomadas as providências convenientes, seguindo os preceitos legais, diretamente com o proprietário do imóvel que detém a árvore.
+    Sendo assim, orientamos para que sejam tomadas as providências convenientes, seguindo os preceitos legais, diretamente com o proprietário do imóvel que detém a árvore.
 
-Orientamos também, que diante a possibilidade de ocorrências severas, pode ser consultado a Defesa Civil.
+    Orientamos também, que diante a possibilidade de ocorrências severas, pode ser consultado a Defesa Civil.
 
-Para vistoria de árvores localizadas no próprio imóvel ou em calçadas, o meio de solicitar vistorias técnicas é pelo Poupatempo ou Prefeitura Regional Norte ou pelo link: https://cidadao.riopreto.sp.gov.br/?apl=PODA_SUPRESSAO
+    Informamos também que, de acordo com o Código Civil, Lei nº 10.406/2002,
 
-           '''
-           
-           # INDEFERIDO PÚBLICO
+    Seção II – Das Árvores Limítrofes, Art. 1.283. As raízes e os ramos de árvore, que ultrapassarem a estrema do prédio, poderão ser cortados, até o plano vertical divisório, pelo proprietário do terreno invadido.
+
+    Para vistoria de árvores localizadas no próprio imóvel ou em calçadas, o meio de solicitar vistorias técnicas é pelo Poupatempo ou Prefeitura Regional Norte ou pelo link: https://cidadao.riopreto.sp.gov.br/?apl=PODA_SUPRESSAO
+
+    Não possuímos equipe de manejo de árvores para áreas particulares.
+
+    Atenciosamente,
+
             '''
-Em vistoria realizada no dia {relation_query.get('data_do_laudo')} pelo Técnico {tecnico}, na {query.get('Endereco')}, constatou-se o que segue:
-As árvore(s) estão(s) bem desenvolvida e com galhos com boa conformação, com uma distância segura das fiações elétricas
-e outras infraestruturas.
-Como não foi constatada a presença de galhos secos, a árvore está equilibrada, sem galhos frágeis e conflito com as instalações
-não há a necessidade de manejo.
-Considerando que, a arborização desempenha um papel crucial na manutenção da temperatura em ambientes urbanos. Árvores,
-especialmente aquelas com copas frondosas, contribuem significativamente para a estabilização térmica das áreas urbanas
-por meio de sombreamento e evapotranspiração.
-Além de regular a temperatura, as árvores melhoram a qualidade do ar ao absorver poluentes e liberar oxigênio.
-Um ambiente mais fresco e limpo contribui para o bem-estar dos residentes e reduz o consumo de energia para resfriamento.
-Não havendo necessidade para a supressão ou poda, fica indeferido o pedido.
+            elif (relation_query.get('Despacho') == 'Indeferido'
+                and not relation_query.get('proprietario')
+                and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
+                
+                texto = f'''
+    Por se tratar de árvore localizada no passeio de fronte a área de propriedade particular, não existe meio legal para notificar o proprietário para realizar o manejo da árvore em questão.
 
+    Sendo assim, orientamos para que sejam tomadas as providências convenientes, seguindo os preceitos legais, diretamente com o proprietário do imóvel que detém a árvore.
 
-LEI Nº 13.031 DE 26 DE SETEMBRO DE 2018
-Seção II
-Das Infrações
-Art. 76. Constitui infração toda ação ou omissão contrária às disposições da presente Lei, respondendo solidariamente e sem prejuízo da responsabilidade penal e civil:
-a) o proprietário do imóvel e/ou mandante;
-b) o autor da ação;
-c) quem, de qualquer modo, concorrer para a prática da infração. (...)
-V. efetuar poda que comprometa o potencial de altura máxima da espécie;
-VI. efetuar poda que comprometa o potencial de área máxima de sombreamento da espécie;
-(...)
-            '''
-            #TEXTO ALTERNATIVO:
-            '''
-Em vistoria realizada no dia {relation_query.get('data_do_laudo')} pelo Técnico {tecnico}, na {query.get('Endereco')}, constatou-se que:
+    Orientamos também, que diante a possibilidade de ocorrências severas, pode ser consultado a Defesa Civil.
 
-- As árvores estão bem desenvolvidas, com galhos em boa conformação e a uma distância segura das fiações elétricas e outras infraestruturas.
-- Não foram identificados galhos secos, frágeis ou em conflito com instalações, e as árvores apresentam equilíbrio estrutural.
-- Não há necessidade de manejo, pois as árvores contribuem para a regulação térmica e a qualidade do ar, desempenhando um papel essencial no ambiente urbano.
+    Para vistoria de árvores localizadas no próprio imóvel ou em calçadas, o meio de solicitar vistorias técnicas é pelo Poupatempo ou Prefeitura Regional Norte ou pelo link: https://cidadao.riopreto.sp.gov.br/?apl=PODA_SUPRESSAO
 
-Dessa forma, considerando que não há justificativa técnica para a supressão ou poda, o pedido foi **indeferido**.
-
-**Base Legal:**
-- **Lei nº 13.031 de 26 de setembro de 2018**
-  - Art. 76: Constitui infração toda ação ou omissão contrária às disposições da presente Lei, respondendo solidariamente:
-    - O proprietário do imóvel e/ou mandante;
-    - O autor da ação;
-    - Quem concorrer para a prática da infração.
-  - V: Efetuar poda que comprometa o potencial de altura máxima da espécie;
-  - VI: Efetuar poda que comprometa o potencial de área máxima de sombreamento da espécie.
-
-Atenciosamente,
             '''
             
-        elif (relation_query.get('Despacho') == 'Indeferido'
-            and relation_query.get('proprietario')
-            and query.get('tipo_imovel') in ['rural']):
-            texto = f'''
-EM RESPOSTA AO REQUERIMENTO REFERENTE À AUTORIZAÇÃO DE SUPRESSÃO DE APROXIMADAMENTE {soma_supress} {num_extens_supress} LOCALIZADA(S)
-NA RUA/AV. {query.get('Endereco')} QUE, POR SE TRATAR DE IMÓVEL LOCALIZADO EM ÁREA RUARAL, SOLICITAMOS AO PROPRIETÁRIO DO IMÓVEL QUE
-CONSULTE A COMPANHIA AMBIENTAL DO ESTADO DE SÃO PAULO (CETESB), AGÊNCIA DE SÃO JOSÉ DO RIO PRETO, LOCALIZADA NA 
-AV. FLORIANO ANDRÉ CABRERA, S/N, BAIRRO JARDIM SÃO MARCOS, OU O 4º BATALHÃO DE POLÍCIA MILITAR AMBIENTAL, LOCALIZADA NA
-AV. GOV. ADHEMAR PEREIRA DE BARROS Nº 2100 - VILA DINIZ, PARA OBTER INFORMAÇÃO SOBRE DEVIDAS EXIGÊNCIAS LEGAIS NECESSÁRIAS PARA
-EFETUAR A SUPRESSÃO DO(S) EXEMPLAR(ES) ARBÓREO(S). 
-'''            
+            # INDEFERIDO PÚBLICO
+                '''
+    Em vistoria realizada no dia {relation_query.get('data_do_laudo')} pelo Técnico {tecnico}, na {query.get('Endereco')}, constatou-se o que segue:
+    As árvore(s) estão(s) bem desenvolvida e com galhos com boa conformação, com uma distância segura das fiações elétricas
+    e outras infraestruturas.
+    Como não foi constatada a presença de galhos secos, a árvore está equilibrada, sem galhos frágeis e conflito com as instalações
+    não há a necessidade de manejo.
+    Considerando que, a arborização desempenha um papel crucial na manutenção da temperatura em ambientes urbanos. Árvores,
+    especialmente aquelas com copas frondosas, contribuem significativamente para a estabilização térmica das áreas urbanas
+    por meio de sombreamento e evapotranspiração.
+    Além de regular a temperatura, as árvores melhoram a qualidade do ar ao absorver poluentes e liberar oxigênio.
+    Um ambiente mais fresco e limpo contribui para o bem-estar dos residentes e reduz o consumo de energia para resfriamento.
+    Não havendo necessidade para a supressão ou poda, fica indeferido o pedido.
+
+
+    LEI Nº 13.031 DE 26 DE SETEMBRO DE 2018
+    Seção II
+    Das Infrações
+    Art. 76. Constitui infração toda ação ou omissão contrária às disposições da presente Lei, respondendo solidariamente e sem prejuízo da responsabilidade penal e civil:
+    a) o proprietário do imóvel e/ou mandante;
+    b) o autor da ação;
+    c) quem, de qualquer modo, concorrer para a prática da infração. (...)
+    V. efetuar poda que comprometa o potencial de altura máxima da espécie;
+    VI. efetuar poda que comprometa o potencial de área máxima de sombreamento da espécie;
+    (...)
+                '''
+                #TEXTO ALTERNATIVO:
+                '''
+    Em vistoria realizada no dia {relation_query.get('data_do_laudo')} pelo Técnico {tecnico}, na {query.get('Endereco')}, constatou-se que:
+
+    - As árvores estão bem desenvolvidas, com galhos em boa conformação e a uma distância segura das fiações elétricas e outras infraestruturas.
+    - Não foram identificados galhos secos, frágeis ou em conflito com instalações, e as árvores apresentam equilíbrio estrutural.
+    - Não há necessidade de manejo, pois as árvores contribuem para a regulação térmica e a qualidade do ar, desempenhando um papel essencial no ambiente urbano.
+
+    Dessa forma, considerando que não há justificativa técnica para a supressão ou poda, o pedido foi **indeferido**.
+
+    **Base Legal:**
+    - **Lei nº 13.031 de 26 de setembro de 2018**
+    - Art. 76: Constitui infração toda ação ou omissão contrária às disposições da presente Lei, respondendo solidariamente:
+        - O proprietário do imóvel e/ou mandante;
+        - O autor da ação;
+        - Quem concorrer para a prática da infração.
+    - V: Efetuar poda que comprometa o potencial de altura máxima da espécie;
+    - VI: Efetuar poda que comprometa o potencial de área máxima de sombreamento da espécie.
+
+    Atenciosamente,
+                '''
+                
+            elif (relation_query.get('Despacho') == 'Indeferido'
+                and relation_query.get('proprietario')
+                and query.get('tipo_imovel') in ['rural']):
+                texto = f'''
+    EM RESPOSTA AO REQUERIMENTO REFERENTE À AUTORIZAÇÃO DE SUPRESSÃO DE APROXIMADAMENTE {soma_supress} {num_extens_supress} LOCALIZADA(S)
+    NA RUA/AV. {query.get('Endereco')} QUE, POR SE TRATAR DE IMÓVEL LOCALIZADO EM ÁREA RURAL, SOLICITAMOS AO PROPRIETÁRIO DO IMÓVEL QUE
+    CONSULTE A COMPANHIA AMBIENTAL DO ESTADO DE SÃO PAULO (CETESB), AGÊNCIA DE SÃO JOSÉ DO RIO PRETO, LOCALIZADA NA 
+    AV. FLORIANO ANDRÉ CABRERA, S/N, BAIRRO JARDIM SÃO MARCOS, OU O 4º BATALHÃO DE POLÍCIA MILITAR AMBIENTAL, LOCALIZADA NA
+    AV. GOV. ADHEMAR PEREIRA DE BARROS Nº 2100 - VILA DINIZ, PARA OBTER INFORMAÇÃO SOBRE DEVIDAS EXIGÊNCIAS LEGAIS NECESSÁRIAS PARA
+    EFETUAR A SUPRESSÃO DO(S) EXEMPLAR(ES) ARBÓREO(S). 
+    '''            
             
 
         # PARCIALMENTE DEFERIDO
@@ -604,6 +621,9 @@ O requerente compromete-se a plantar {relation_query.get('qtd_repor')} ({num_ext
 
 **Técnico responsável:** {relation_query.get('tecnico')}
             '''
+            
+
+        
         else:
             texto = 'Não foi possível a geração do texto.'
 
