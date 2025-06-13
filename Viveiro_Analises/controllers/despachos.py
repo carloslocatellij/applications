@@ -44,8 +44,17 @@ def Gerenciar_templates(): #Menu
                         nome={'label': 'Nome'},
                         texto={'label': 'Texto'},
                         descricao={'label': 'Descrição'})
+    links = [
+    dict(header='Ver', body=lambda row: A('Ver', _href=URL(c=request.controller , f= request.function, # type: ignore
+     args=row.id, vars={'f': 'ver'}))),
+    dict(header='Editar', body=lambda row: A('Editar', _href=URL(c=request.controller , f= request.function, # type: ignore
+     args=row.id, vars={'f': 'editar'})))
+     ]
+    
+    grid_despachos = SQLFORM.grid(db.despacho_template, links=links,user_signature=False, editable=False, searchable=True, details=False,
+    deletable=False, create=False,csv=False, maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left')
 
-    return dict(form=form, formbusca=formbusca, registro=registro)
+    return dict(form=form, formbusca=grid_despachos, registro=registro)
 
 
 
@@ -115,5 +124,7 @@ def form_condicoes():
     table_buttons = TABLE()
     for itens_linha in range(len(list_campos)//8):     
         table_buttons.append(TR(btns_vars[itens_linha  * 8: (itens_linha + 1) * 8]))
+    
+    
     
     return dict(form_condicoes=form_condicoes, for_tabelas=for_tabelas, btns_vars=table_buttons)

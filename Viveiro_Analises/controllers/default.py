@@ -262,7 +262,7 @@ def Despachar_Processos(): #Menu
     
     if processo:
         prime_query = db(db.Requerimentos.Protocolo == processo).select().first()
-        relation_query = db(db.Laudos.Protocolo == processo).select().first()
+        relation_query = db((db.Requerimentos.Protocolo == processo) & (db.Laudos.Protocolo == processo)).select().first()
         query_protoc_ref = None
         if  relation_query:
             query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.protocolo_anterior) &
@@ -277,7 +277,8 @@ def Despachar_Processos(): #Menu
         for texto_despacho in textos_despacho:
             texto_md = markdowner.convert(texto_despacho) or None
             texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"').replace('<p>', '').replace('</p>', '')
-            conteudo.append(XML(texto_md)) # type: ignore
+            conteudo.append(DIV(XML(texto_md), _class='card', _style="background-color: silver")) # type: ignore
+            conteudo.append(XML(markdowner.convert('-----')))
         
         copybtn = TAG.button('<Copiar>', _class='btn btn-info', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
         

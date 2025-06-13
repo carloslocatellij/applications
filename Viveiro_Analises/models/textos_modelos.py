@@ -41,14 +41,30 @@ def dict_condicoes_de_templates():
             
     
 
-def determinar_despacho(id): #Test 406564785
+def determinar_despacho(req):
     possiveis_despachos = []
-    req = db(db.Requerimentos.Protocolo == id).select().first()
-    dict_req = {'Despacho': req.get('Despacho'),
-                'tipo_imovel': req.get('tipo_imovel'),
-                'protocolo_anterior': req.get('protocolo_anterior'),
-                'total_podas': req.get('total_podas'),
-                'total_supressoes': req.get('total_supressoes')}
+    
+    if req.get('Laudos'):
+        dict_req = {'Despacho': req.get('Laudos').get('Despacho'),
+                    'tipo_imovel': req.get('Requerimentos').get('tipo_imovel'),
+                    'protocolo_anterior': req.get('Requerimentos').get('protocolo_anterior'),
+                    'total_podas': req.get('Laudos').get('total_podas'),
+                    'total_supressoes': req.get('Laudos').get('total_supressoes'),
+                    'qtd_repor': req.get('Laudos').get('qtd_repor'),
+                    'local_arvore': req.get('Requerimentos').get('local_arvore'),
+                    'proprietario': req.get('Laudos').get('proprietario'),
+                    'tecnico': req.get('Laudos').get('tecnico'),
+                    'motivos': req.get('Laudos').get('motivos')
+                    }
+    else:
+        dict_req = {'Despacho': req.get('Despacho'),
+                    'tipo_imovel': req.get('tipo_imovel'),
+                    'protocolo_anterior': req.get('protocolo_anterior'),
+                    'total_podas': req.get('total_podas'),
+                    'total_supressoes': req.get('total_supressoes'),
+                    'local_arvore': req.get('local_arvore'),
+                    }
+    
     condic_templates, condic_txt = dict_condicoes_de_templates()
     
     for id , condicionais in condic_templates.items():
@@ -92,8 +108,9 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
     if not prime_query:
         print('Deve ser passado ao menos uma query válida')
         return None
-    # 1. Determinar o tipo de despacho    
-    chaves_de_despacho = determinar_despacho(prime_query.Protocolo)
+    # 1. Determinar o tipo de despacho
+    
+    chaves_de_despacho = determinar_despacho(prime_query if not relation_query else relation_query)
 
     if not chaves_de_despacho:
         return ['Não foi possível determinar o modelo de despacho para este caso.']
@@ -116,20 +133,20 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
         contexto['num_extens_supressoes'] = prime_query.get('num_extens_supressoes')
         
     if relation_query:
-        contexto['tecnico'] = relation_query.get('tecnico').upper() or 'XXXXXXXXXXXXXX'
-        contexto['data_do_laudo'] = relation_query.get('data_do_laudo').strftime('%d/%m/%Y') if relation_query.get('data_do_laudo') else ''
-        contexto['proprietario'] = relation_query.get('proprietario')
-        contexto['morador'] = relation_query.get('morador')
-        contexto['total_podas'] = relation_query.get('total_podas') # Campo Virtual
-        contexto['total_supressoes'] = relation_query.get('total_supressoes')
-        contexto['num_extens_poda'] = relation_query.get('num_extens_poda')
-        contexto['num_extens_supressoes'] = relation_query.get('num_extens_supressoes')
-        contexto['Supressoes'] = relation_query.get('Supressoes') # Campo Virtual de Laudos
-        contexto['Podas'] = relation_query.get('Podas') # Campo Virtual de Laudos
-        contexto['Obs'] = relation_query.get('Obs')
-        contexto['qtd_repor'] = relation_query.get('qtd_repor')
-        contexto['porte_repor'] = relation_query.get('porte_repor')
-        contexto['num_extens_repor'] = relation_query.get('num_extens_repor')
+        contexto['tecnico'] = relation_query.get('Laudos').get('tecnico').upper() or 'XXXXXXXXXXXXXX'
+        contexto['data_do_laudo'] = relation_query.get('Laudos').get('data_do_laudo').strftime('%d/%m/%Y') if relation_query.get('data_do_laudo') else ''
+        contexto['proprietario'] = relation_query.get('Laudos').get('proprietario')
+        contexto['morador'] = relation_query.get('Laudos').get('morador')
+        contexto['total_podas'] = relation_query.get('Laudos').get('total_podas') # Campo Virtual
+        contexto['total_supressoes'] = relation_query.get('Laudos').get('total_supressoes')
+        contexto['num_extens_poda'] = relation_query.get('Laudos').get('num_extens_poda')
+        contexto['num_extens_supressoes'] = relation_query.get('Laudos').get('num_extens_supressoes')
+        contexto['Supressoes'] = relation_query.get('Laudos').get('Supressoes') # Campo Virtual de Laudos
+        contexto['Podas'] = relation_query.get('Laudos').get('Podas') # Campo Virtual de Laudos
+        contexto['Obs'] = relation_query.get('Laudos').get('Obs')
+        contexto['qtd_repor'] = relation_query.get('Laudos').get('qtd_repor')
+        contexto['porte_repor'] = relation_query.get('Laudos').get('porte_repor')
+        contexto['num_extens_repor'] = relation_query.get('Laudos').get('num_extens_repor')
         
     if query_protoc_ref:
         if query_protoc_ref.get('Laudos'): # Se a referência tem dados de Laudos

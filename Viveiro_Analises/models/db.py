@@ -577,19 +577,19 @@ if not configuration.get("app.production"):
     fake = Faker("pt_BR")
     if not db(db.Bairros).count():
         db.Bairros.insert(
-            Bairro="Jardim Paulista", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
+            Bairro="ALTO RIO PRETO (JARDIM)", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
         )
         db.Bairros.insert(
-            Bairro="Vila Mariana", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
+            Bairro="ALVORADA (ESTANCIA)", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
         )
         db.Bairros.insert(
-            Bairro="Moema", Perimetro="URBANO",  Regiao=fake.random_int(min=1, max=10)
+            Bairro="AMERICA (JARDIM)", Perimetro="URBANO",  Regiao=fake.random_int(min=1, max=10)
         )
         db.Bairros.insert(
-            Bairro="Vila Madalena", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
+            Bairro="ALICE (JARDIM)", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
         )
         db.Bairros.insert(
-            Bairro="Vila Tuníca", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
+            Bairro="ANCHIETA (VILA)", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
         )
 
     if not db(db.Ruas).count():
@@ -600,9 +600,9 @@ if not configuration.get("app.production"):
             Endereco1="Rua Teodoro Sampaio", Denominacao="Teodoro Sampaio"
         )
     if not db(db.Requerimentos).count():
-        for _ in range(1000):
+        for i in range(1000):
             db.Requerimentos.insert(
-                Protocolo=fake.random_int(min=20190001, max=2025009999),
+                Protocolo=i,  #fake.random_int(min=20190001, max=2025009999),
                 Requerente=fake.name(),
                 data_entrada=fake.date(),
                 Endereco1=fake.street_name(),
@@ -736,17 +736,17 @@ if not configuration.get("app.production"):
                 tipo=fake.random_element(
                     elements=["Supressão", "Poda", "Reposição", ""]
                 ),
-                p1=fake.random_element(elements=['F','T']),
-                p2=fake.random_element(elements=['F','T']),
-                p3=fake.random_element(elements=['F','T']),
-                p4=fake.random_element(elements=['F','T']),
-                p5=fake.random_element(elements=['F','T']),
-                p6=fake.random_element(elements=['F','T']),
-                p7=fake.random_element(elements=['F','T']),
-                p8=fake.random_element(elements=['F','T']),
-                p9=fake.random_element(elements=['F','T']),
-                p10=fake.random_element(elements=['F','T']),
-                p11=fake.random_element(elements=['F','T']),
+                p1=fake.random_element(elements=[0,1]),
+                p2=fake.random_element(elements=[0,1]),
+                p3=fake.random_element(elements=[0,1]),
+                p4=fake.random_element(elements=[0,1]),
+                p5=fake.random_element(elements=[0,1]),
+                p6=fake.random_element(elements=[0,1]),
+                p7=fake.random_element(elements=[0,1]),
+                p8=fake.random_element(elements=[0,1]),
+                p9=fake.random_element(elements=[0,1]),
+                p10=fake.random_element(elements=[0,1]),
+                p11=fake.random_element(elements=[0,1]),
                 Obs=fake.text(),
                 tecnico=fake.random_element(
                     elements=[
