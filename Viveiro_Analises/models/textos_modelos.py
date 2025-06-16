@@ -73,30 +73,32 @@ def determinar_despacho(req):
         for condicoes in condicionais:
             condic_campo = condicoes.get("campo")
             operador = condicoes.get('operador')
-            condic_valor = condicoes.get("valor")     
-            for campo, valor in dict_req.items():
-                if isinstance(condic_valor, str) and condic_valor.isnumeric():
-                    condic_valor = int(condic_valor)
-                if isinstance(valor, str) and valor.isnumeric():
-                    valor = int(valor)
-                if valor is None and operador not in ['=', '!=']:
-                    continue    
-                if campo == condic_campo:
-                    if operador == '=':
-                            condicoes_verificadas[condic_campo] =  True if valor == condic_valor else False
-                    elif operador == '!=':
-                            condicoes_verificadas[condic_campo] =  True if valor != condic_valor else False
-                    elif operador == '<':
-                            condicoes_verificadas[condic_campo] =  True if valor < condic_valor else False
-                    elif operador == '>':
-                            condicoes_verificadas[condic_campo] =  True if valor > condic_valor else False
-                    elif operador == '<=':
-                            condicoes_verificadas[condic_campo] =  True if valor <= condic_valor else False
-                    elif operador == '>=':
-                            condicoes_verificadas[condic_campo] =  True if valor >= condic_valor else False
-                    
-                    else:
-                        condicoes_verificadas[condic_campo] =  False
+            condic_valor = condicoes.get("valor")
+            if condic_campo not in dict_req.keys():
+                condicoes_verificadas[condic_campo] =  False
+            else:
+                for campo, valor in dict_req.items():
+                    if isinstance(condic_valor, str) and condic_valor.isnumeric():
+                        condic_valor = int(condic_valor)
+                    if isinstance(valor, str) and valor.isnumeric():
+                        valor = int(valor)
+                    if valor is None and operador not in ['=', '!=']:
+                        continue    
+                    if campo == condic_campo:
+                        if operador == '=':
+                                condicoes_verificadas[condic_campo] =  True if valor == condic_valor else False
+                        elif operador == '!=':
+                                condicoes_verificadas[condic_campo] =  True if valor != condic_valor else False
+                        elif operador == '<':
+                                condicoes_verificadas[condic_campo] =  True if valor < condic_valor else False
+                        elif operador == '>':
+                                condicoes_verificadas[condic_campo] =  True if valor > condic_valor else False
+                        elif operador == '<=':
+                                condicoes_verificadas[condic_campo] =  True if valor <= condic_valor else False
+                        elif operador == '>=':
+                                condicoes_verificadas[condic_campo] =  True if valor >= condic_valor else False 
+                        else:
+                            condicoes_verificadas[condic_campo] =  False
                            
         if len(condicoes_verificadas) > 0 and all(condicoes_verificadas.values()) and not id in possiveis_despachos:
             possiveis_despachos.append((id, condic_txt.get(id)))
@@ -133,7 +135,8 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
         contexto['num_extens_supressoes'] = prime_query.get('num_extens_supressoes')
         
     if relation_query:
-        contexto['tecnico'] = relation_query.get('Laudos').get('tecnico').upper() or 'XXXXXXXXXXXXXX'
+        contexto['tecnico'] = relation_query.get('Laudos').get('tecnico') or 'XXXXXXXXXXXXXX'
+        contexto['tecnico'] = contexto['tecnico'].upper()
         contexto['data_do_laudo'] = relation_query.get('Laudos').get('data_do_laudo').strftime('%d/%m/%Y') if relation_query.get('data_do_laudo') else ''
         contexto['proprietario'] = relation_query.get('Laudos').get('proprietario')
         contexto['morador'] = relation_query.get('Laudos').get('morador')

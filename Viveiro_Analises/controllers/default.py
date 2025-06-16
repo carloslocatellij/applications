@@ -264,21 +264,22 @@ def Despachar_Processos(): #Menu
         prime_query = db(db.Requerimentos.Protocolo == processo).select().first()
         relation_query = db((db.Requerimentos.Protocolo == processo) & (db.Laudos.Protocolo == processo)).select().first()
         query_protoc_ref = None
-        if  relation_query:
-            query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.protocolo_anterior) &
+        if prime_query.protocolo_anterior:
+            if  relation_query:
+                query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.protocolo_anterior) &
                                         (db.Laudos.Protocolo == db.Requerimentos.Protocolo)).select().first()
-        else:
-            query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.protocolo_anterior)).select().first()
+            else:
+                query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.protocolo_anterior)).select().first()
             
         textos_despacho = Despachar(prime_query, relation_query, query_protoc_ref) #type: ignore
-
         markdowner = Markdown2(html4tags=True,  )
+        
         conteudo= []
         for texto_despacho in textos_despacho:
             texto_md = markdowner.convert(texto_despacho) or None
             texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"').replace('<p>', '').replace('</p>', '')
             conteudo.append(DIV(XML(texto_md), _class='card', _style="background-color: silver")) # type: ignore
-            conteudo.append(XML(markdowner.convert('-----')))
+            conteudo.append(XML(markdowner.convert('-----'))) #type: ignore
         
         copybtn = TAG.button('<Copiar>', _class='btn btn-info', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
         
