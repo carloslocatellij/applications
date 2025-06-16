@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 def Despachar(query, relation_query, query_protoc_ref):
-    
+    texto = 'Não foi possível a geração do texto.'
     query['data_do_laudo'] = query.get('data_do_laudo').strftime('%d/%m/%Y')
     if relation_query:
         relation_query['data_do_laudo'] = relation_query.get('data_do_laudo').strftime('%d/%m/%Y')
@@ -621,9 +621,7 @@ O requerente compromete-se a plantar {relation_query.get('qtd_repor')} ({num_ext
 
 **Técnico responsável:** {relation_query.get('tecnico')}
             '''
-            
-
-        
+                           
         else:
             texto = 'Não foi possível a geração do texto.'
 
