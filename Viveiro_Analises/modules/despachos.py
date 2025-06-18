@@ -419,7 +419,8 @@ DE FORMA DISTRIBUÍDA E EQUILIBRADA.
                 and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
                 
                 
-                texto = f'''Ilmo.(a) Sr.(a) {relation_query.get('proprietario')},
+                texto = f'''
+    Ilmo.(a) Sr.(a) {relation_query.get('proprietario')},
 
     Após análise do protocolo acima mencionado, informamos que foi solicitada a autorização para supressão do(s) seguinte(s) exemplar(es) arbóreo(s): {relation_query.get('Supressoes')}.
 
