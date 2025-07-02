@@ -323,7 +323,7 @@ ART.15. NÃO É PERMITIDA A PODA DE TOPIARISMO DAS ÁRVORES, OU SEJA, NÃO É PE
 - Após a entrega das mudas e apresentação do alvará e projeto de construções aprovadas pela Secretaria Municipal de Obras, a autorização de supressão será liberada. 
 
 ### Informações adicionais:
-#### A lista de espécies aceitas para compensação ambiental está disponível na Portaria SMAURB nº 01/2023, acessível em: https://www.riopreto.sp.gov.br/wp-content/uploads/arquivosPortalGOV/meio-ambiente/smaurb-PORTARIA_SMAURB_01_2023.pdf
+#### A lista de espécies aceitas para compensação ambiental está disponível na Portaria SMAURB nº 01/2023, acessível em: https://www.riopreto.sp.gov.br/wp-content/uploads/arquivosPortalGOV/meio-ambiente/smaurb-PORTARIA\_SMAURB\_01_2023.pdf
 Após a confirmação da efetiva entrega das respectivas mudas ao Viveiro Municipal, e apresentação do alvará e projeto de construção aprovado pela Secretaria Municipal de Obras, o requerente poderá retirar a autorização para a supressão de {soma_supress} ({num_extens_supress}) árvore(s) referenciada(s). 
             
             '''
