@@ -4,6 +4,7 @@
 # AppConfig configuration made easy. Look inside private/appconfig.ini
 # Auth is for authenticaiton and access control
 # -------------------------------------------------------------------------
+from email.policy import default
 from gluon.contrib.appconfig import AppConfig
 from gluon.tools import Auth
 
@@ -153,3 +154,31 @@ if configuration.get('scheduler.enabled'):
 # after defining tables, uncomment below to enable auditing
 # -------------------------------------------------------------------------
 # auth.enable_record_versioning(db)
+
+
+db.define_table('disparos_de_email',
+    Field('status', default='pending', requires=IS_IN_SET(['pending', 'sent', 'failed', 'retry'])),
+    Field('destinatario', 'string', requires=IS_EMAIL()),
+    Field('assunto', 'string', length=255),
+    Field('mensagem', 'text'),
+    Field('mensagem_html', 'text'),  # Para e-mails HTML
+    Field('record_id', 'integer'),  # ID do registro que gerou o e-mail
+    Field('record_table', 'string'), # Nome da tabela do registro
+    Field('anexos', 'string'),
+    Field('tentativas', 'integer', default=0),
+    Field('max_tentativas', 'integer', default=3),
+    Field('created_on', 'datetime', default=request.now),
+    Field('sent_on', 'datetime'),
+    Field('error_message', 'text'),
+    Field('prioridade', 'integer', default=1),  # 1=alta, 2=média, 3=baixa
+    format='%(subject)s (%(status)s)'
+)
+
+db.define_table('email_templates',
+    Field('nome', 'string', unique=True),
+    Field('assunto', 'string'),
+    Field('corpo', 'text'),
+    Field('html_corpo', 'text'),
+    Field('descricao', 'text'),
+    format='%(name)s'
+)
