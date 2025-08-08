@@ -39,7 +39,30 @@ def padronizaprotoc(protoc):
         print('Não é protocolo')
         return protoc
         
-    
+        
+class ProtocPattern():
+        
+        def __init__(self, error_message='Erro!'):
+            self.err = error_message
+            
+        def __call__(self, value):
+            self.value = value
+            REGEX = re.compile(r'^(\d\d\d\d)(0*)(\d+)$')
+            match = REGEX.match(str(value))
+            
+            try:
+                value = int(match.group(1) + match.group(3))
+                return (value, None)
+            except:
+                return (value, self.err)
+            
+        def formatter(self, value):
+            self.value = value
+            REGEX = re.compile(r'^(\d\d\d\d)(0*)(\d+)$')
+            match = REGEX.match(str(value))
+            return int(match.group(1) + match.group(3))
+
+
 
 def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
     campos = [Field(k, **v)  for k, v in fields.items()] 

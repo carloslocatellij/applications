@@ -108,7 +108,7 @@ Especies = db.define_table(
 
 Requerimentos = db.define_table(
     "Requerimentos",
-    Field("Protocolo", requires= [IS_INT_IN_RANGE("202000", "2030009999999") ]),
+    Field("Protocolo", 'string' , requires= [IS_NOT_EMPTY(), ProtocPattern()]),
     Field("Requerente", requires=[IS_UPPER(), Remove_Acentos()]),
     Field(
         "data_entrada",
@@ -402,6 +402,7 @@ Laudos = db.define_table(
                     "Guilherme Cavenaghi",
                     "Renan Fabrizzio Viche",
                     "Otton Garcia Arruda",
+                    "Larissa Tiago Volpi"
                     "",
                 ]
             )
