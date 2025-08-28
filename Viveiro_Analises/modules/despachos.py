@@ -396,7 +396,7 @@ DE FORMA DISTRIBUÍDA E EQUILIBRADA.
             
             
             # indeferido
-        # INDEFERIDO PARTICULAR - SEM PODA
+        # INDEFERIDO PRIVADO - SUPRESSÃO - SEM PODA
         elif (relation_query.get('Despacho') == 'Indeferido'
             and relation_query.get('proprietario')
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):
@@ -446,7 +446,7 @@ Após análise do protocolo, informamos que o pedido de supressão do(s) exempla
 **Técnico responsável:** {tecnico}'''
            
            
-        # INDEFERIDO PRIVADO - ÁREA INTERNA - VIZINHO
+        # INDEFERIDO PRIVADO  - NÃO É O PROPRIETÁRIO - ÁREA INTERNA
         elif (relation_query.get('Despacho') == 'Indeferido'
             and query.get('local_arvore') == 'área interna'
             and not relation_query.get('proprietario')
@@ -470,6 +470,7 @@ Não possuímos equipe de manejo de árvores para áreas particulares.
 Atenciosamente,
 
            '''
+           # INDEFERIDO - PRIVADO - NÃO É O PROPRIETÁRIO - ÁREA EXTERNA
         elif (relation_query.get('Despacho') == 'Indeferido'
             and not relation_query.get('proprietario')
             and query.get('tipo_imovel') in ['privado', 'particular', 'próprio', 'institucional', 'residencia', 'residência', 'terreno']):

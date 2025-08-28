@@ -44,7 +44,7 @@ def index():
         aviso.update_record(recebido_por=recebidos)
     db.commit()
     
-    return dict(message=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),
+    return dict(mensagem=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),
                 avisos=avisos
                 )
 0
@@ -163,7 +163,7 @@ def Requerimentos(): #Menu
     
     list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente,
                   db.Requerimentos.Endereco, db.Requerimentos.data_do_laudo, db.Requerimentos.telefone1,
-                  db.Requerimentos.Supressoes, db.Requerimentos.Podas, db.Requerimentos.Despacho,
+                  db.Requerimentos.Supressoes_requeridas, db.Requerimentos.Podas_requeridas, db.Requerimentos.Despacho,
                   db.Requerimentos.local_arvore, db.Requerimentos.tipo_imovel
                   ]
     

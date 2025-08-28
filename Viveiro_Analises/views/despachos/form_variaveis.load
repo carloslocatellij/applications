@@ -1,0 +1,14 @@
+<table>
+
+<tr>
+<td>
+
+<div class="card"  title='Posicione o cursor no texto onde a variável deve ser inserida'>
+ <strong> Variáveis que podem ser inseridas dinâmicamente para o texto. </strong>
+ 
+{{=btns_vars}}
+
+</div>
+</td>
+</tr>
+</table>

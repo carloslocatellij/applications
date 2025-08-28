@@ -110,7 +110,7 @@ Especies = db.define_table(
     Field("Calcada", "integer", requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " "),
-    Field("foto", "text"),
+    Field("foto", "upload"),
     Field("obs", "text"),
     format = (lambda row : especie_represent(row)),
     migrate=True if not configuration.get('app.production') else False,
@@ -257,8 +257,8 @@ db.Requerimentos.num_extens_supressoes = Field.Virtual(
 )
 
 
-db.Requerimentos.Supressoes = Field.Virtual(
-    "Supressoes",
+db.Requerimentos.Supressoes_requeridas = Field.Virtual(
+    "Supressoes_requeridas",
     lambda row: " ".join(
         [
             f"({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1}"
@@ -278,8 +278,8 @@ db.Requerimentos.Supressoes = Field.Virtual(
 )
 
 
-db.Requerimentos.Podas = Field.Virtual(
-    "Podas",
+db.Requerimentos.Podas_requeridas = Field.Virtual(
+    "Podas_requeridas",
     lambda row: " ".join(
         [
             f"({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1}"
@@ -314,6 +314,7 @@ Laudos = db.define_table(
                     "Em Análise",
                     "Aguardando",
                     "Com Pendência",
+                    "Pendente de Compesação",
                     "Vistoriado por outro protocolo",
                     "",
                 ]
@@ -570,9 +571,9 @@ def relat_podas_periodo(data_inicial, data_final):
 
 
 # DADOS DE TESTE INSERIDOS AUTOMÁTICAMENTE EM AMBIENTE DE TESTE.
-from faker import Faker  # type: ignore
 if not configuration.get("app.production"):
 
+    from faker import Faker  # type: ignore
 
     fake = Faker("pt_BR")
     if not db(db.Bairros).count():

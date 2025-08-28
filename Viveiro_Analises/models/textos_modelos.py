@@ -96,7 +96,11 @@ def determinar_despacho(req):
                         elif operador == '<=':
                                 condicoes_verificadas[condic_campo] =  True if valor <= condic_valor else False
                         elif operador == '>=':
-                                condicoes_verificadas[condic_campo] =  True if valor >= condic_valor else False 
+                                condicoes_verificadas[condic_campo] =  True if valor >= condic_valor else False
+                        elif operador == 'contêm':
+                                condicoes_verificadas[condic_campo] =  True if isinstance(valor, str) and isinstance(condic_valor, str) and condic_valor.lower() in valor.lower() else False
+                        elif operador == 'não contem':
+                                condicoes_verificadas[condic_campo] =  True if isinstance(valor, str) and isinstance(condic_valor, str) and condic_valor.lower() not in valor.lower() else False
                         else:
                             condicoes_verificadas[condic_campo] =  False
                            
@@ -126,18 +130,19 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
         contexto['Protocolo'] = prime_query.get('Protocolo')
         contexto['Requerente'] = prime_query.get('Requerente')
         contexto['Endereco'] = prime_query.get('Endereco') # Campo Virtual
-        contexto['data_do_laudo'] = prime_query.get('data_do_laudo').strftime('%d/%m/%Y') if prime_query.get('data_do_laudo') else ''
+        contexto['data_entrada'] = prime_query.get('data_entrada').strftime('%d/%m/%Y') if prime_query.get('data_entrada') else ''
         contexto['total_podas'] = prime_query.get('total_podas') # Campo Virtual
         contexto['total_supressoes'] = prime_query.get('total_supressoes')
-        contexto['Podas'] = prime_query.get('Podas')
-        contexto['Supressoes'] = prime_query.get('Supressoes') # Campo Virtual
+        contexto['Podas'] = prime_query.get('Podas_requeridas')
+        contexto['Supressoes'] = prime_query.get('Supressoes_requeridas') # Campo Virtual
         contexto['num_extens_poda'] = prime_query.get('num_extens_poda')
         contexto['num_extens_supressoes'] = prime_query.get('num_extens_supressoes')
+        contexto['tecnico'] = 'XXXXXXXXXXXXXX'
         
     if relation_query:
         contexto['tecnico'] = relation_query.get('Laudos').get('tecnico') or 'XXXXXXXXXXXXXX'
         contexto['tecnico'] = contexto['tecnico'].upper()
-        contexto['data_do_laudo'] = relation_query.get('Laudos').get('data_do_laudo').strftime('%d/%m/%Y') if relation_query.get('data_do_laudo') else ''
+        contexto['data_do_laudo'] = relation_query.get('Laudos').get('data_do_laudo').strftime('%d/%m/%Y') if relation_query.get('Laudos').get('data_do_laudo') else ''
         contexto['proprietario'] = relation_query.get('Laudos').get('proprietario')
         contexto['morador'] = relation_query.get('Laudos').get('morador')
         contexto['total_podas'] = relation_query.get('Laudos').get('total_podas') # Campo Virtual
@@ -150,6 +155,7 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
         contexto['qtd_repor'] = relation_query.get('Laudos').get('qtd_repor')
         contexto['porte_repor'] = relation_query.get('Laudos').get('porte_repor')
         contexto['num_extens_repor'] = relation_query.get('Laudos').get('num_extens_repor')
+        contexto['motivos'] = relation_query.get('Laudos').get('motivos')
         
     if query_protoc_ref:
         if query_protoc_ref.get('Laudos'): # Se a referência tem dados de Laudos
@@ -163,9 +169,11 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
             contexto['num_extens_poda'] = query_protoc_ref.get('Laudos').get('num_extens_poda')
             contexto['num_extens_supressoes'] = query_protoc_ref.get('Laudos').get('num_extens_supressoes')
             contexto['tecnico'] = query_protoc_ref.get('Laudos').get('tecnico','').upper() or 'XXXXXXXXXXXXXX'
-            data_laudo_ref_obj = query_protoc_ref.get('Requerimentos', {}).get('data_do_laudo')
+            data_laudo_ref_obj = query_protoc_ref.get('Requerimentos', {}).get('data_entrada')
             if data_laudo_ref_obj:
                     contexto['data_do_laudo'] = data_laudo_ref_obj.strftime('%d/%m/%Y')
+            contexto['proprietario'] = query_protoc_ref.get('Laudos').get('proprietario')
+            contexto['motivos'] = query_protoc_ref.get('Laudos').get('motivos')
 
         else: # Se a referência tem dados de Requerimentos
             contexto['Protocolo'] = query_protoc_ref.get('Protocolo')
@@ -173,8 +181,8 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
             contexto['Endereco'] = query_protoc_ref.get('Endereco') # Campo Virtual
             contexto['total_podas'] = query_protoc_ref.get('total_podas') # Campo Virtual
             contexto['total_supressoes'] = query_protoc_ref.get('total_supressoes') # Campo Virtual
-            contexto['Podas'] = query_protoc_ref.get('Podas','')
-            contexto['Supressoes'] = query_protoc_ref.get('Supressoes','')
+            contexto['Podas'] = query_protoc_ref.get('Podas') or query_protoc_ref.get('Podas_requeridas')
+            contexto['Supressoes'] = query_protoc_ref.get('Supressoes')  or query_protoc_ref.get('Supressoes_requeridas')
             contexto['num_extens_poda'] = query_protoc_ref.get('num_extens_poda')
             contexto['num_extens_supressoes'] = query_protoc_ref.get('num_extens_supressoes')
             data_laudo_ref_obj = query_protoc_ref.get('data_do_laudo')
@@ -187,14 +195,23 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
     Despachos = []
     for template in chaves_de_despacho:
         try:
+            if 'data_do_laudo' not in contexto and 'data_do_laudo' in template[1]:
+                #template[1].replace('{data_do_laudo}', '{data_entrada}')
+                contexto['data_do_laudo'] = contexto['data_entrada']
+                del contexto['data_entrada']
+                
             texto_final = template[1].format(**contexto)
+            
             Despachos.append(texto_final)
         
         except KeyError as e:
             # Este erro é útil durante o desenvolvimento para achar placeholders não preenchidos
-            return [str(f'''Erro ao popular o modelo {template}: 
+            return [str(f'''Erro ao popular o modelo:
+                        {template}: 
+                        
                     A variável {str(e).strip("'")} não foi encontrada no contexto de dados. 
-                    Verifique os placeholders do template e a preparação do contexto na função Despachar.''')]
+                    
+                    Verifique os `preenchedores` do modelo e a preparação do contexto na função Despachar.''')]
         except Exception as e:
             return [f"Erro inesperado ao popular o modelo '{template}': {str(e)}"]
         

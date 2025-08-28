@@ -13,11 +13,11 @@ It is used as default when a view is not provided for your controllers
     });
 </script>
 
-<h2 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
+<h2 class="container center">{{='Gerenciar Modelos de Despacho'}}</h2>
 
 {{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
 
-{{=A('Busca', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'),
+{{=A('Modelos Registrados', _class="btn btn-primary dropdown-toggle", _type="button", _href='#{}'.format('Busca'),
 **atributo),SPAN(_class="caret") }}
 {{=DIV(BEAUTIFY(formbusca), _id='Busca', _class="collapse list-unstyled") }}
 
@@ -28,25 +28,34 @@ It is used as default when a view is not provided for your controllers
     {{=A('Novo', _href=URL(c=request.controller,f=request.function, vars={}), _class='btn btn-primary',)}}
     {{pass}}
 </div>
-{{=LOAD(c='despachos', f='form_condicoes.load')}}
+
 <div class="jumbotron" style="border: 1px solid; padding:10px;word-wrap:break-word;">
     {{=form.custom.begin}}
     <table width="100%">
-        <td width="33%" align='left' style="padding-inline: 10px">{{=B('Nome:')}}<div align='left' class="card">
+        <td width="33%" align='left' style="padding-inline: 10px">{{=B('Nome do Modelo:')}}<div align='left' class="card">
                 {{=form.custom.widget['nome']}}</div>
         <tr>
 
             
         </td>
-        <td width="33%" align='left' style="padding-inline: 10px">{{=B('Descrição:')}}<div align='left' class="card">
+        <td width="33%" align='left' style="padding-inline: 10px">{{=B('Descrição do Modelo:')}}<div align='left' class="card">
             {{=form.custom.widget['descricao']}}</div>
         </td>
         <tr>
-            <td width="33%" align='left' style="padding-inline: 10px">{{=B('Texto:')}}<div align='left' class="card">
-                    {{=form.custom.widget['texto']}}
+            <br>
+            <td width="33%" align='left' style="padding-inline: 10px">{{=B('Editor de Modelo Dinâmico:')}}<div align='left' class="card">
+                {{=LOAD(c='despachos', f='form_variaveis.load')}}
+                    <p><strong>Exemplo:</strong> Bom dia Sr(a). {Requerente} !</p>
+                    {{=B('Texto do Modelo Dinâmico:')}}
+                    <div title='Posicione o cursor no texto onde a variável deve ser inserida'>
+                        {{=form.custom.widget['texto']}}
+                    </div>
                 </div>
             </td>
-                <td width="33%" align='left' style="padding-inline: 10px">{{=B('Condições:')}}<div align='left' class="card">
+                <td width="33%" align='left' style="padding-inline: 10px">{{=B('Condições Dinâmicas para seleção:')}}<div align='left' class="card">
+                    {{=LOAD(c='despachos', f='form_condicoes.load')}}
+                    <p><strong>Exemplo:</strong> {"campo": "protocolo_anterior", "operador": "!=", "valor": null}</p>
+                    {{=B('Condições a serem avaliadas:')}}
                     {{=form.custom.widget['condicoes']}}
                 </div>
                 </td>
