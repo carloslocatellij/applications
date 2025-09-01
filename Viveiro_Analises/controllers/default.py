@@ -1,13 +1,11 @@
+# -*- coding: utf-8 -*-
 
 
-from dataclasses import fields
-from gluon.http import redirect
-from gluon.sqlhtml import represent
-
+from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
 
 if 0 == 1:
     from gluon import (db, current, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
-                       Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01,
+                       Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01, BEAUTIFY, BUTTON, SPAN,
                        IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE,
                        IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC) # type: ignore
     request = current.request # type: ignore
@@ -24,10 +22,34 @@ def api_get_user_email():
 
 
 
-def index():
-    response.flash = ("Seja Bem Vindo")
 
-    return dict(menssagem=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),)
+
+def avisos():
+    registros_de_avisos = db(
+    (db.Avisos.id > 0) & (~db.Avisos.recebido_por.belongs([auth.user_id]))).select()
+    avisos = [aviso.corpo for aviso in registros_de_avisos] 
+    
+    for aviso in registros_de_avisos:
+        recebidos = aviso.recebido_por or []
+        if auth.user_id not in aviso.recebido_por:
+            recebidos.append(auth.user_id)
+            aviso.update_record(recebido_por=recebidos)
+        
+    db.commit()
+    markdowner = Markdown2(html4tags=True, tab_width=4, )
+    
+    
+    return dict(avisos=XML(markdowner.convert(*avisos)))
+
+
+def index():
+    registros_de_avisos = db(
+    (db.Avisos.id > 0) & (~db.Avisos.recebido_por.belongs([auth.user_id]))).select()
+    avisos = [aviso for aviso in registros_de_avisos] 
+
+    return dict(mensagem=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'), avisos=avisos)
+
+
 
 
 # ---- Smart Grid (example) -----
@@ -43,16 +65,33 @@ def grid():
 # ---- Embedded wiki (example) ----
 @auth.requires_login()
 def wiki(): #Menu
-    from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
-    from gluon.contrib.markdown import WIKI as markdown
-    from gluon.contrib.markmin import markmin2html
     auth.wikimenu() # add the wiki to the menu
 #     """ ##
 #       [see](web2py.com/examples/static/sphinx/gluon/gluon.contrib.markdown.html)
 #       [Markdown see](https://groups.google.com/g/web2py/c/om9aXi3xg3Y/m/jE4t-KwpBQAJ)
 #     """
-    response.view = 'test_wiki.html'
-    content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body # type: ignore   
+    response.view = 'test_wiki.htmSCRIPT   response.flash = T("Welcome!")'
+#     my_md = '''## Welcome to the cov19cty App!
+# ### To generate County Comparison Charts:
+# 1. Click Menu >> Gen Chart >> Multi-County Input Form
+#   1. Add Your Counties to compare (state, county, typeOfData)
+#   2. Define Your Time Series
+# 2. Click Menu >> Gen Chart >> Show Multi-County Chart
+#     '''
+#     my_html = markdown(my_md)
+#     # return dict( message=my_html )
+#     return my_html mark = XML(meu_mark)
+
+    meu_mark ='''
+# Meu Titulo
+
+## Outro Titulo
+
+* <input type="checkbox" checked="checked" /> 1
+* <input type="checkbox" checked="checked" /> 2
+* <input type="checkbox" /> 3 '''
+
+    content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body # type: ignore
     markdowner = Markdown2(html4tags=True, tab_width=4, )
     meu_mark = markdowner.convert(content)
 
@@ -119,7 +158,7 @@ def Requerimentos(): #Menu
     
     list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente,
                   db.Requerimentos.Endereco, db.Requerimentos.data_do_laudo, db.Requerimentos.telefone1,
-                  db.Requerimentos.Supressoes, db.Requerimentos.Podas, db.Requerimentos.Despacho,
+                  db.Requerimentos.Supressoes_requeridas, db.Requerimentos.Podas_requeridas, db.Requerimentos.Despacho,
                   db.Requerimentos.local_arvore, db.Requerimentos.tipo_imovel
                   ]
     
@@ -152,11 +191,8 @@ def Registrar_Laudo():
     # if not any([processo.qtd_ret1, processo.qtd_ret2, processo.qtd_ret3, processo.qtd_ret4]):
     #     my_extra_element = TR(LABEL('Registrar Laudo mesmo sem supressões no Requerimento.'), INPUT(_name='agree', value=True, _type='checkbox')) # type: ignore
     #     form[0].insert(-1, my_extra_element) # type: ignore
-    
     # print(processo.Protocolo)
-    
     # response.render(BEAUTIFY(Modal('Atenção', form, id='atencao')))
-    
     # if form.process().accepted:
     #     if form.vars.agree:  
     
@@ -208,7 +244,7 @@ def Laudos():
 @auth.requires_login()
 def Despachar_Processos(): #Menu
     from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2 # type: ignore
-    from despachos import Despachar  # type: ignore
+      # type: ignore
 
     processo= request.vars.processo or ''  
     prime_query= ''
@@ -217,36 +253,31 @@ def Despachar_Processos(): #Menu
     form=''
     returnbtn = A('Voltar', _href=URL('default', 'Requerimentos', args=[processo], vars={'f':'ver'}), _class='btn btn-primary')# type: ignore
     newbtn = A('Novo', _href=URL('default', 'Requerimentos'), _class='btn btn-primary')# type: ignore
+    
     if processo:
-        prime_query = db(db.Requerimentos.Protocolo == processo).select().render(0).as_dict()
-        relation_query = db(db.Laudos.Protocolo == processo)
-        query_protoc_ref = ''
-        
-        if  prime_query.get('protocolo_anterior'):
+        prime_query = db(db.Requerimentos.Protocolo == processo).select().first()
+        relation_query = db((db.Requerimentos.Protocolo == processo) & (db.Laudos.Protocolo == processo)).select().first()
+        query_protoc_ref = None
+        if prime_query.protocolo_anterior:
+            if  relation_query:
+                query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.protocolo_anterior) &
+                                        (db.Laudos.Protocolo == db.Requerimentos.Protocolo)).select().first()
+            else:
+                query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.protocolo_anterior)).select().first()
             
-            if db(db.Laudos.Protocolo == prime_query.get('protocolo_anterior')).count() > 0:
-                query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')) &
-                                      (db.Laudos.Protocolo == db.Requerimentos.Protocolo)).select().render(0).as_dict()
-                
-            elif db(db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')):
-                    query_protoc_ref = db(db.Requerimentos.Protocolo == prime_query.get('protocolo_anterior')).select().render(0).as_dict()
-                    
-            
-        if relation_query.count() > 0:
-            relation_query = relation_query.select().render(0).as_dict()
-        else:
-            relation_query = None
-            
-        texto_despacho = Despachar(prime_query, relation_query, query_protoc_ref)
-
+        textos_despacho = Despachar(prime_query, relation_query, query_protoc_ref) #type: ignore
         markdowner = Markdown2(html4tags=True,  )
         
-        texto_md = markdowner.convert(texto_despacho) or None
-        texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"').replace('<p>', '').replace('</p>', '')
-        copybtn = TAG.button('<Copiar>', _class='btn btn-info', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
+        conteudo= []
+        for texto_despacho in textos_despacho:
+            texto_md = markdowner.convert(texto_despacho) or None
+            texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"').replace('<p>', '').replace('</p>', '')
+            conteudo.append(DIV(XML(texto_md), _class='card', _style="border-color : silver")) # type: ignore
+            copybtn = TAG.button('<Copiar>', _class='btn btn-info', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
+            conteudo.append(copybtn)
+            conteudo.append(XML(markdowner.convert('-----'))) #type: ignore
         
-   
-        conteudo = XML(texto_md) # type: ignore
+        
     else:
         form = SQLFORM.factory(Field('Protocolo'))
         
@@ -281,7 +312,6 @@ def Especies(): #Menu
         response.flash = 'Corrija os Erros indicados'
     else:
         pass
-    
    
     formbusca = buscador('Especies',  # type: ignore
                          Nome={'label': 'Nome Popular'},
@@ -313,7 +343,7 @@ def Bairros(): #Menu
         form = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
         
     if form.process().accepted:
-        session.flash = f'Dados atualizados' if registro else 'Registrado'
+        session.flash = f'Dados do {tablename} atualizados' if registro else '{tablename} Registrado'
         redirect(URL('default', table , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
     elif form.errors:
         response.flash = 'Corrija os Erros indicados'
@@ -324,7 +354,7 @@ def Bairros(): #Menu
                          Bairro ={'label': table[:-1]},
                          )
 
-    return response.render(dict(form=form, formbusca=formbusca, registro=registro))
+    return response.render(dict(form=form, formbusca=formbusca, registro=registro, tabela=table))
 
 
 

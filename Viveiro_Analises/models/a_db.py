@@ -36,7 +36,7 @@ if 0==1:
 # once in production, remove reload=True to gain full speed
 # -------------------------------------------------------------------------
 
-configuration = AppConfig(reload=False)
+configuration = AppConfig(reload=True)
 
 # session.connect(request, response, cookie_key=configuration.take("db")['password'],)
 # session.secure()
@@ -74,7 +74,7 @@ else:
                 migrate_enabled=True,
                 migrate=True, 
                 fake_migrate_all=True, 
-                lazy_tables=False,
+                lazy_tables=True,
                 check_reserved=[configuration.take("db")['engine']],
                 adapter_args={'safe': True},
             )

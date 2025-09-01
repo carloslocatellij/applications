@@ -1,0 +1,9 @@
+<table>
+<tr>
+<td>
+<div class="card"> Blocos de Condições de Variáveis para Seleção
+{{=form_condicoes}}
+</div>
+</td>
+</tr>
+</table>

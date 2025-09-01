@@ -1,5 +1,10 @@
+from cProfile import label
 from datetime import datetime
 from my_validador import *  # type: ignore
+import num2words
+import locale
+locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
+
 
 if 0 == 1:
     from gluon import *  # type: ignore
@@ -25,6 +30,13 @@ else:
     tab_ruas = """Ruas"""
 
 
+db.define_table('Avisos',
+                Field('titulo','string'),
+                Field('corpo', 'text'),
+                Field('recebido_por', 'list:integer', requires=IS_IN_DB(authdb, 'auth_user.id', multiple=True)),
+                )
+
+
 regiao_nome ={1:'CENTRAL', 2:'BOSQUE', 3:'TALHADO', 4:'REPRESA',
             5:'VILA TONINHO', 6:'SCHIMITT',7:'HB', 8:'CIDADE DAS CRIANÇAS',
             9:'PINHEIRINHO' , 10:'CÉU'}
@@ -41,7 +53,6 @@ Bairros = db.define_table(
     migrate=True if not configuration.get('app.production') else False,
     fake_migrate=True if not configuration.get('app.production') else False
 )
-
 
 Ruas = db.define_table(
     "Ruas",
@@ -98,7 +109,7 @@ Especies = db.define_table(
     Field("Calcada", "integer", requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " "),
-    Field("foto", "text"),
+    Field("foto", "upload"),
     Field("obs", "text"),
     format = (lambda row : especie_represent(row)),
     migrate=True if not configuration.get('app.production') else False,
@@ -117,20 +128,21 @@ Requerimentos = db.define_table(
             IS_DATE(format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx")
         ),
         rname="`Data de Entrada`",
+        label='Data de Entrada'
     ),
     Field(
-        "Endereco1",
-        "string", requires=[IS_UPPER(), Remove_Acentos()]
+        "Endereco1", "string", requires=[IS_UPPER(), Remove_Acentos()],
+        label='Endereço'
     ),
-    # requires=IS_IN_DB(db, 'Ruas.Endereco1')),
-    Field("Numero1"),
+    Field("Numero1", label='Número'),
     Field("Bairro",requires=IS_IN_DB(db, "Bairros.Bairro", "%(Bairro)s", error_message='Bairro não registrado.'),
     widget=SQLFORM.widgets.autocomplete(
-     request, db.Bairros.Bairro,  limitby=(0, 7), min_length=3)),
-    Field("cpf_cnpj", rname="`cpf-cnpj`"),
-    Field("cep"),
-    Field("telefone1"),
-    Field("email", rname="`e-mail`"),
+     request, db.Bairros.Bairro,  limitby=(0, 7), min_length=3),
+     label='Bairro'),
+    Field("cpf_cnpj", rname="`cpf-cnpj`", label='CPF/CNPJ'),
+    Field("cep", label='CEP'),
+    Field("telefone1", label='Telefone'),
+    Field("email", rname="`e-mail`", label='E-mail'),
     Field("especie_ret1", widget=SQLFORM.widgets.autocomplete(
      request, db.Especies.Nome, limitby=(0, 7), min_length=3),rname="`especie ret1`"),
     Field("especie_ret2", rname="`especie ret2`"),
@@ -149,6 +161,24 @@ Requerimentos = db.define_table(
     Field("qtd_poda3", rname="`qtd poda3`"),
     Field("qtd_poda4", rname="`qtd poda4`"),
     Field("no_carteira", rname="`no. carteira`"),
+     request, db.Especies.Nome, limitby=(0, 7), min_length=3),rname="`especie ret1`",
+          label='1ª Especie retirada'),
+    Field("especie_ret2", rname="`especie ret2`", label='2ª Especie retirada'),
+    Field("especie_ret3", rname="`especie ret3`", label='3ª Especie retirada'), 
+    Field("especie_ret4", 'list:string' ,rname="`especie ret4`", label='4ª Especie retirada'),
+    Field("qtd_ret1", rname="`qtd ret1`", label='Qtd 1ª retirada'),
+    Field("qtd_ret2", rname="`qtd ret2`", label='Qtd 2ª retirada'),
+    Field("qtd_ret3", rname="`qtd ret3`", label='Qtd 3ª retirada'),
+    Field("qtd_ret4", rname="`qtd ret4`", label='Qtd 4ª retirada'),
+    Field("especie_poda1", rname="`especie poda1`", label='1ª Especie poda'),
+    Field("especie_poda2", rname="`especie poda2`", label='2ª Especie poda'),
+    Field("especie_poda3", rname="`especie poda3`", label='3ª Especie poda'),
+    Field("especie_poda4", 'list:string', rname="`especie poda4`", label='4ª Especie poda'),
+    Field("qtd_poda1", rname="`qtd poda1`", label='Qtd 1ª poda'),
+    Field("qtd_poda2", rname="`qtd poda2`", label='Qtd 2ª poda'),
+    Field("qtd_poda3", rname="`qtd poda3`", label='Qtd 3ª poda'),
+    Field("qtd_poda4", rname="`qtd poda4`", label='Qtd 4ª poda'),
+    Field("no_carteira", rname="`no. carteira`", label='Nº Carteira'),
     Field(
         "data_do_laudo",
         "date",
@@ -156,6 +186,7 @@ Requerimentos = db.define_table(
             format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx"
         ),
         rname="`data do laudo`",
+        label='Data do Laudo'
     ),
     Field(
         "Despacho",
@@ -210,15 +241,34 @@ db.Requerimentos.Endereco = Field.Virtual(
 )
 
 
-db.Requerimentos.total_podas = Field.Virtual(
-    "total_podas",
+
+db.Requerimentos.total_podas_requeridas = Field.Virtual(
+    "total_podas_requeridas",
         lambda row: sum([int(row.Requerimentos.qtd_poda1 or 0), int(row.Requerimentos.qtd_poda2 or 0),
         int(row.Requerimentos.qtd_poda3 or 0) , int(row.Requerimentos.qtd_poda4 or 0)]
         ))
 
 
-db.Requerimentos.Supressoes = Field.Virtual(
-    "Supressoes",
+db.Requerimentos.total_supressoes_requeridas = Field.Virtual(
+    "total_supressoes_requeridas",
+        lambda row: sum([int(row.Requerimentos.qtd_ret1 or 0), int(row.Requerimentos.qtd_ret2 or 0),
+        int(row.Requerimentos.qtd_ret3 or 0) , int(row.Requerimentos.qtd_ret4 or 0)]
+        ))
+
+db.Requerimentos.num_extens_poda_requeridas = Field.Virtual(
+    "num_extens_poda_requeridas",
+    lambda row: num2words.num2words(row.Requerimentos.total_podas_requeridas, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+)
+
+
+db.Requerimentos.num_extens_supressoes_requeridas = Field.Virtual(
+    "num_extens_supressoes_requeridas",
+    lambda row: num2words.num2words(row.Requerimentos.total_supressoes_requeridas, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+)
+
+
+db.Requerimentos.Supressoes_requeridas = Field.Virtual(
+    "Supressoes_requeridas",
     lambda row: " ".join(
         [
             f"({row.Requerimentos.qtd_ret1}) {row.Requerimentos.especie_ret1}"
@@ -238,8 +288,8 @@ db.Requerimentos.Supressoes = Field.Virtual(
 )
 
 
-db.Requerimentos.Podas = Field.Virtual(
-    "Podas",
+db.Requerimentos.Podas_requeridas = Field.Virtual(
+    "Podas_requeridas",
     lambda row: " ".join(
         [
             f"({row.Requerimentos.qtd_poda1}) {row.Requerimentos.especie_poda1}"
@@ -274,6 +324,7 @@ Laudos = db.define_table(
                     "Em Análise",
                     "Aguardando",
                     "Com Pendência",
+                    "Pendente de Compesação",
                     "Pendente de Compesação",
                     "Vistoriado por outro protocolo",
                     "",
@@ -415,8 +466,8 @@ Laudos = db.define_table(
 )
 
 
-db.Laudos.Supressoes = Field.Virtual(
-    "Supressoes",
+db.Laudos.Supressoes_laudadas = Field.Virtual(
+    "Supressoes_laudadas",
     lambda row: " ".join(
         [
             f"({row.Laudos.qtd_ret1}) {row.Laudos.especie_ret1}"
@@ -437,8 +488,8 @@ db.Laudos.Supressoes = Field.Virtual(
 )
 
 
-db.Laudos.Podas = Field.Virtual(
-    "Podas",
+db.Laudos.Podas_laudadas = Field.Virtual(
+    "Podas_laudadas",
     lambda row: " ".join(
         [
             f"({row.Laudos.qtd_poda1}) {row.Laudos.especie_poda1}"
@@ -459,12 +510,40 @@ db.Laudos.Podas = Field.Virtual(
 )
 
 
-db.Laudos.total_remocoes = Field.Virtual(
-        "total_remocoes",
+
+db.Laudos.total_podas_laudadas = Field.Virtual(
+    "total_podas_laudadas",
+        lambda row: sum([int(row.Laudos.qtd_poda1 or 0), int(row.Laudos.qtd_poda2 or 0),
+        int(row.Laudos.qtd_poda3 or 0) , int(row.Laudos.qtd_poda4 or 0)]
+        ))
+
+
+db.Laudos.total_supressoes_laudadas = Field.Virtual(
+    "total_supressoes_laudadas",
             lambda row: sum([int(row.Laudos.qtd_ret1 or 0), int(row.Laudos.qtd_ret2 or 0),
             int(row.Laudos.qtd_ret3 or 0) , int(row.Laudos.qtd_ret4 or 0)]
             ))
 
+
+db.Laudos.num_extens_poda_laudadas = Field.Virtual(
+    "num_extens_poda_laudadas",
+    lambda row: num2words.num2words(row.Laudos.total_podas_laudadas, lang='pt-br').upper()
+    .replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+)
+
+
+db.Laudos.num_extens_supressoes_laudadas = Field.Virtual(
+    "num_extens_supressoes_laudadas",
+    lambda row: num2words.num2words(row.Laudos.total_supressoes_laudadas, lang='pt-br').upper()
+    .replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+)
+
+
+db.Laudos.num_extens_repor = Field.Virtual(
+    "num_extens_repor",
+    lambda row: num2words.num2words(row.Laudos.qtd_repor or 0, lang='pt-br').upper()
+    .replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+)
 
 db.Laudos.motivos = Field.Virtual(
     "motivos",
@@ -505,25 +584,25 @@ def relat_podas_periodo(data_inicial, data_final):
 
 # DADOS DE TESTE INSERIDOS AUTOMÁTICAMENTE EM AMBIENTE DE TESTE.
 if not configuration.get("app.production"):
-    from faker import Faker  # type: ignore
 
+    from faker import Faker  # type: ignore
 
     fake = Faker("pt_BR")
     if not db(db.Bairros).count():
         db.Bairros.insert(
-            Bairro="Jardim Paulista", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
+            Bairro="ALTO RIO PRETO (JARDIM)", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
         )
         db.Bairros.insert(
-            Bairro="Vila Mariana", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
+            Bairro="ALVORADA (ESTANCIA)", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
         )
         db.Bairros.insert(
-            Bairro="Moema", Perimetro="URBANO",  Regiao=fake.random_int(min=1, max=10)
+            Bairro="AMERICA (JARDIM)", Perimetro="URBANO",  Regiao=fake.random_int(min=1, max=10)
         )
         db.Bairros.insert(
-            Bairro="Vila Madalena", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
+            Bairro="ALICE (JARDIM)", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
         )
         db.Bairros.insert(
-            Bairro="Vila Tuníca", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
+            Bairro="ANCHIETA (VILA)", Perimetro="URBANO", Regiao=fake.random_int(min=1, max=10)
         )
 
     if not db(db.Ruas).count():
@@ -534,9 +613,9 @@ if not configuration.get("app.production"):
             Endereco1="Rua Teodoro Sampaio", Denominacao="Teodoro Sampaio"
         )
     if not db(db.Requerimentos).count():
-        for _ in range(1000):
+        for i in range(1000):
             db.Requerimentos.insert(
-                Protocolo=fake.random_int(min=20190001, max=2025009999),
+                Protocolo=i,  #fake.random_int(min=20190001, max=2025009999),
                 Requerente=fake.name(),
                 data_entrada=fake.date(),
                 Endereco1=fake.street_name(),
@@ -670,17 +749,17 @@ if not configuration.get("app.production"):
                 tipo=fake.random_element(
                     elements=["Supressão", "Poda", "Reposição", ""]
                 ),
-                p1=fake.random_element(elements=['F','T']),
-                p2=fake.random_element(elements=['F','T']),
-                p3=fake.random_element(elements=['F','T']),
-                p4=fake.random_element(elements=['F','T']),
-                p5=fake.random_element(elements=['F','T']),
-                p6=fake.random_element(elements=['F','T']),
-                p7=fake.random_element(elements=['F','T']),
-                p8=fake.random_element(elements=['F','T']),
-                p9=fake.random_element(elements=['F','T']),
-                p10=fake.random_element(elements=['F','T']),
-                p11=fake.random_element(elements=['F','T']),
+                p1=fake.random_element(elements=[0,1]),
+                p2=fake.random_element(elements=[0,1]),
+                p3=fake.random_element(elements=[0,1]),
+                p4=fake.random_element(elements=[0,1]),
+                p5=fake.random_element(elements=[0,1]),
+                p6=fake.random_element(elements=[0,1]),
+                p7=fake.random_element(elements=[0,1]),
+                p8=fake.random_element(elements=[0,1]),
+                p9=fake.random_element(elements=[0,1]),
+                p10=fake.random_element(elements=[0,1]),
+                p11=fake.random_element(elements=[0,1]),
                 Obs=fake.text(),
                 tecnico=fake.random_element(
                     elements=[
@@ -692,4 +771,3 @@ if not configuration.get("app.production"):
                 ),
             )
             db.commit()
-

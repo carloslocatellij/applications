@@ -1,13 +1,27 @@
 {{extend 'layout.html'}}
-{{"""
 
-You should not modify this file.
-It is used as default when a view is not provided for your controllers
 
-"""}}
-<h2>{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h2>
-{{if len(response._vars)==1:}}
-{{=BEAUTIFY(response._vars[next(iter(response._vars))])}}
-{{elif len(response._vars)>1:}}
-{{=BEAUTIFY(response._vars)}}
+
+<h2>{{=('Sistema do Departamento de Análises e Laudos'.capitalize())}}</h2>
+
+<br>
+{{=mensagem}}
+
+<div id="avisos"></div>
+
+
+{{if len(list(avisos)) > 0:}}
+<div style="align-self: center"><button id="open_modal" class="btn btn-primary",  >Avisos {{=SPAN(len(list(avisos)), _class='badge bg-danger')}} </button></div>
 {{pass}}
+
+<script>
+    $(document).ready(function () {
+        $('#open_modal').click(function () {
+            // Carrega o conteúdo do modal via AJAX para o container
+            $('#avisos').load('{{=URL("default", "avisos")}}', function () {
+                // Após carregar, abre o modal
+                $('#myModal').modal('show');
+            });
+        });
+    });
+</script>

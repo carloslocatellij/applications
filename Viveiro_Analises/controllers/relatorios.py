@@ -30,7 +30,7 @@ def Supressões_por_periodo(): #Menu
         pass
         
     fields = [db.Requerimentos.Endereco1, db.Requerimentos.Numero1,     
-        db.Requerimentos.Bairro, db.Laudos.Despacho, db.Laudos.total_remocoes,
+        db.Requerimentos.Bairro, db.Laudos.Despacho, db.Laudos.total_supressoes,
         db.Requerimentos.tipo_imovel, db.Requerimentos.local_arvore, 
         db.Bairros.Regiao, db.Laudos.qtd_repor, db.Laudos.motivos, db.Laudos.Obs]
     

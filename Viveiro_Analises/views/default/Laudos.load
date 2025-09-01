@@ -178,12 +178,13 @@ input[type="checkbox"]:focus + label {
     </td>  
 
     {{=form.custom.submit}} 
-
+        <br>
         {{atributo={'_data-toggle':"collapse", 'aria-expanded':"false"} }}
         {{if session.edit_laudo:}}
         {{=A('DELETAR REGISTRO?', _class="btn btn-warning dropdown-toggle", _type="button", _href='#{}'.format('DELET'), **atributo),SPAN(_class="caret")  }}
         {{=DIV(B('MARQUE A CAIXA DE SELEÇÃO A BAIXO E ATUALIZE PARA DELETAR O REGISTRO!  '),  TD(DIV(form.custom.delete, _style="border: 1px solid; padding-inline: 20px; color: darkgred"), _class="card", _width="15%", ), _id='DELET', _class="collapse list-danger")}}
         {{pass}}
 
-    {{=form.custom.end}}
-        <br>
+        {{=A('DELETAR REGISTRO?', _class="btn btn-warning dropdown-toggle", _type="button", _href='#{}'.format('DELET'), **atributo),SPAN(_class="caret") if session.edit_laudo else '' }}
+        {{=DIV(TD(B('MARQUE A CAIXA DE SELEÇÃO A BAIXO E ATUALIZE PARA DELETAR O REGISTRO!  '),  DIV(form.custom.delete, _style="border: 1px solid; padding-inline: 20px; color: darkgred"), _class="card", _width="15%", ), _id='DELET', _class="collapse list-danger")}}
+    {{=form.custom.end}},
