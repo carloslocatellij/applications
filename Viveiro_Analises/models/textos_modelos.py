@@ -48,8 +48,8 @@ def determinar_despacho(req):
         dict_req = {'Despacho': req.get('Laudos').get('Despacho'),
                     'tipo_imovel': req.get('Requerimentos').get('tipo_imovel'),
                     'protocolo_anterior': req.get('Requerimentos').get('protocolo_anterior'),
-                    'total_podas': req.get('Laudos').get('total_podas'),
-                    'total_supressoes': req.get('Laudos').get('total_supressoes'),
+                    'total_podas_laudadas': req.get('Laudos').get('total_podas_laudadas'),
+                    'total_supressoes_laudadas': req.get('Laudos').get('total_supressoes_laudadas'),
                     'qtd_repor': req.get('Laudos').get('qtd_repor'),
                     'local_arvore': req.get('Requerimentos').get('local_arvore'),
                     'proprietario': req.get('Laudos').get('proprietario'),
@@ -60,8 +60,9 @@ def determinar_despacho(req):
         dict_req = {'Despacho': req.get('Despacho'),
                     'tipo_imovel': req.get('tipo_imovel'),
                     'protocolo_anterior': req.get('protocolo_anterior'),
-                    'total_podas': req.get('total_podas'),
-                    'total_supressoes': req.get('total_supressoes'),
+                    'total_podas_requeridas': req.get('total_podas_requeridas'),
+                    'total_supressoes_requeridas': req.get('total_supressoes_requeridas'),
+                    ''
                     'local_arvore': req.get('local_arvore'),
                     }
     
@@ -131,12 +132,12 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
         contexto['Requerente'] = prime_query.get('Requerente')
         contexto['Endereco'] = prime_query.get('Endereco') # Campo Virtual
         contexto['data_entrada'] = prime_query.get('data_entrada').strftime('%d/%m/%Y') if prime_query.get('data_entrada') else ''
-        contexto['total_podas'] = prime_query.get('total_podas') # Campo Virtual
-        contexto['total_supressoes'] = prime_query.get('total_supressoes')
-        contexto['Podas'] = prime_query.get('Podas_requeridas')
-        contexto['Supressoes'] = prime_query.get('Supressoes_requeridas') # Campo Virtual
-        contexto['num_extens_poda'] = prime_query.get('num_extens_poda')
-        contexto['num_extens_supressoes'] = prime_query.get('num_extens_supressoes')
+        contexto['total_podas_requeridas'] = prime_query.get('total_podas_requeridas') # Campo Virtual
+        contexto['total_supressoes_requeridas'] = prime_query.get('total_supressoes_requeridas')
+        contexto['Podas_requeridas'] = prime_query.get('Podas_requeridas')
+        contexto['Supressoes_requeridas'] = prime_query.get('Supressoes_requeridas') # Campo Virtual
+        contexto['num_extens_poda_requeridas'] = prime_query.get('num_extens_poda_requeridas')
+        contexto['num_extens_supressoes_requeridas'] = prime_query.get('num_extens_supressoes_requeridas')
         contexto['tecnico'] = 'XXXXXXXXXXXXXX'
         
     if relation_query:
@@ -145,12 +146,12 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
         contexto['data_do_laudo'] = relation_query.get('Laudos').get('data_do_laudo').strftime('%d/%m/%Y') if relation_query.get('Laudos').get('data_do_laudo') else ''
         contexto['proprietario'] = relation_query.get('Laudos').get('proprietario')
         contexto['morador'] = relation_query.get('Laudos').get('morador')
-        contexto['total_podas'] = relation_query.get('Laudos').get('total_podas') # Campo Virtual
-        contexto['total_supressoes'] = relation_query.get('Laudos').get('total_supressoes')
-        contexto['num_extens_poda'] = relation_query.get('Laudos').get('num_extens_poda')
-        contexto['num_extens_supressoes'] = relation_query.get('Laudos').get('num_extens_supressoes')
-        contexto['Supressoes'] = relation_query.get('Laudos').get('Supressoes') # Campo Virtual de Laudos
-        contexto['Podas'] = relation_query.get('Laudos').get('Podas') # Campo Virtual de Laudos
+        contexto['total_podas_laudadas'] = relation_query.get('Laudos').get('total_podas_laudadas') # Campo Virtual
+        contexto['total_supressoes_laudadas'] = relation_query.get('Laudos').get('total_supressoes_laudadas')
+        contexto['num_extens_poda_laudadas'] = relation_query.get('Laudos').get('num_extens_poda_laudadas')
+        contexto['num_extens_supressoes_laudadas'] = relation_query.get('Laudos').get('num_extens_supressoes_laudadas')
+        contexto['Supressoes_laudadas'] = relation_query.get('Laudos').get('Supressoes_laudadas') # Campo Virtual de Laudos
+        contexto['Podas_laudadas'] = relation_query.get('Laudos').get('Podas_laudadas') # Campo Virtual de Laudos
         contexto['Obs'] = relation_query.get('Laudos').get('Obs')
         contexto['qtd_repor'] = relation_query.get('Laudos').get('qtd_repor')
         contexto['porte_repor'] = relation_query.get('Laudos').get('porte_repor')
@@ -162,12 +163,12 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
             contexto['Protocolo'] = query_protoc_ref.get('Laudos').get('Protocolo')
             contexto['Requerente'] = query_protoc_ref.get('Requerente')
             contexto['Endereco'] = query_protoc_ref.get('Endereco') # Campo Virtual
-            contexto['total_podas'] = query_protoc_ref.get('Laudos').get('total_podas') # Campo Virtual
-            contexto['total_supressoes'] = query_protoc_ref.get('Laudos').get('total_supressoes')
-            contexto['Podas'] = query_protoc_ref.get('Laudos').get('Podas')
-            contexto['Supressoes'] = query_protoc_ref.get('Laudos').get('Supressoes') # Campo Virtual
-            contexto['num_extens_poda'] = query_protoc_ref.get('Laudos').get('num_extens_poda')
-            contexto['num_extens_supressoes'] = query_protoc_ref.get('Laudos').get('num_extens_supressoes')
+            contexto['total_podas_laudadas'] = query_protoc_ref.get('Laudos').get('total_podas_laudadas') # Campo Virtual
+            contexto['total_supressoes_laudadas'] = query_protoc_ref.get('Laudos').get('total_supressoes_laudadas')
+            contexto['Podas_laudadas'] = query_protoc_ref.get('Laudos').get('Podas_laudadas')
+            contexto['Supressoes_laudadas'] = query_protoc_ref.get('Laudos').get('Supressoes_laudadas') # Campo Virtual
+            contexto['num_extens_poda_laudadas'] = query_protoc_ref.get('Laudos').get('num_extens_poda_laudadas')
+            contexto['num_extens_supressoes_laudadas'] = query_protoc_ref.get('Laudos').get('num_extens_supressoes_laudadas')
             contexto['tecnico'] = query_protoc_ref.get('Laudos').get('tecnico','').upper() or 'XXXXXXXXXXXXXX'
             data_laudo_ref_obj = query_protoc_ref.get('Requerimentos', {}).get('data_entrada')
             if data_laudo_ref_obj:
@@ -179,12 +180,18 @@ def Despachar(prime_query, relation_query=None, query_protoc_ref=None):
             contexto['Protocolo'] = query_protoc_ref.get('Protocolo')
             contexto['Requerente'] = query_protoc_ref.get('Requerente')
             contexto['Endereco'] = query_protoc_ref.get('Endereco') # Campo Virtual
-            contexto['total_podas'] = query_protoc_ref.get('total_podas') # Campo Virtual
-            contexto['total_supressoes'] = query_protoc_ref.get('total_supressoes') # Campo Virtual
-            contexto['Podas'] = query_protoc_ref.get('Podas') or query_protoc_ref.get('Podas_requeridas')
+            contexto['total_podas_requeridas'] = query_protoc_ref.get('total_podas_requeridas') # Campo Virtual
+            contexto['total_supressoes_requeridas'] = query_protoc_ref.get('total_supressoes_requeridas') # Campo Virtual
+            contexto['Podas_requeridas'] = query_protoc_ref.get('Podas') or query_protoc_ref.get('Podas_requeridas')
             contexto['Supressoes'] = query_protoc_ref.get('Supressoes')  or query_protoc_ref.get('Supressoes_requeridas')
-            contexto['num_extens_poda'] = query_protoc_ref.get('num_extens_poda')
-            contexto['num_extens_supressoes'] = query_protoc_ref.get('num_extens_supressoes')
+            contexto['num_extens_poda_requeridas'] = query_protoc_ref.get('num_extens_poda_requeridas')
+            contexto['num_extens_supressoes_requeridas'] = query_protoc_ref.get('num_extens_supressoes_requeridas')
+            contexto['total_podas_laudadas'] = query_protoc_ref.get('Laudos').get('total_podas_laudadas') # Campo Virtual
+            contexto['total_supressoes_laudadas'] = query_protoc_ref.get('Laudos').get('total_supressoes_laudadas')
+            contexto['Podas_laudadas'] = query_protoc_ref.get('Laudos').get('Podas_laudadas')
+            contexto['Supressoes_laudadas'] = query_protoc_ref.get('Laudos').get('Supressoes_laudadas') # Campo Virtual
+            contexto['num_extens_poda_laudadas'] = query_protoc_ref.get('Laudos').get('num_extens_poda_laudadas')
+            contexto['num_extens_supressoes_laudadas'] = query_protoc_ref.get('Laudos').get('num_extens_supressoes_laudadas')            
             data_laudo_ref_obj = query_protoc_ref.get('data_do_laudo')
             if data_laudo_ref_obj:
                     contexto['data_do_laudo'] = data_laudo_ref_obj.strftime('%d/%m/%Y')

@@ -1,13 +1,11 @@
+# -*- coding: utf-8 -*-
 
 
-from dataclasses import fields
-from gluon.http import redirect
-from gluon.sqlhtml import represent
-
+from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
 
 if 0 == 1:
     from gluon import (db, current, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
-                       Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01,
+                       Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01, BEAUTIFY, BUTTON, SPAN,
                        IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE,
                        IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC) # type: ignore
     request = current.request # type: ignore
@@ -24,30 +22,35 @@ def api_get_user_email():
 
 
 
-def index():
-    # endereco = SQLFORM.factory(
-    #     Field('CEP', requires=Busca_CEP())
-    # )
-    
-    registros_de_avisos = db(
-        (db.Avisos.id > 0) & (~db.Avisos.recebido_por.belongs([auth.user_id]))).select()
 
+
+def avisos():
+    registros_de_avisos = db(
+    (db.Avisos.id > 0) & (~db.Avisos.recebido_por.belongs([auth.user_id]))).select()
     avisos = [aviso.corpo for aviso in registros_de_avisos] 
- 
-    if avisos:
-        session.flash = '\n'.join(avisos)
     
     for aviso in registros_de_avisos:
-        
         recebidos = aviso.recebido_por or []
-        recebidos.append(auth.user_id)
-        aviso.update_record(recebido_por=recebidos)
+        if auth.user_id not in aviso.recebido_por:
+            recebidos.append(auth.user_id)
+            aviso.update_record(recebido_por=recebidos)
+        
     db.commit()
+    markdowner = Markdown2(html4tags=True, tab_width=4, )
     
-    return dict(mensagem=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'),
-                avisos=avisos
-                )
-0
+    
+    return dict(avisos=XML(markdowner.convert(*avisos)))
+
+
+def index():
+    registros_de_avisos = db(
+    (db.Avisos.id > 0) & (~db.Avisos.recebido_por.belongs([auth.user_id]))).select()
+    avisos = [aviso for aviso in registros_de_avisos] 
+
+    return dict(mensagem=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'), avisos=avisos)
+
+
+
 
 # ---- Smart Grid (example) -----
 @auth.requires_membership('admin') # can only be accessed by members of admin groupd
@@ -62,16 +65,12 @@ def grid():
 # ---- Embedded wiki (example) ----
 @auth.requires_login()
 def wiki(): #Menu
-    from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
-    from gluon.contrib.markdown import WIKI as markdown
-    from gluon.contrib.markmin import markmin2html
     auth.wikimenu() # add the wiki to the menu
 #     """ ##
 #       [see](web2py.com/examples/static/sphinx/gluon/gluon.contrib.markdown.html)
 #       [Markdown see](https://groups.google.com/g/web2py/c/om9aXi3xg3Y/m/jE4t-KwpBQAJ)
 #     """
-    response.view = 'test_wiki.html'
-#     response.flash = T("Welcome!")
+    response.view = 'test_wiki.htmSCRIPT   response.flash = T("Welcome!")'
 #     my_md = '''## Welcome to the cov19cty App!
 # ### To generate County Comparison Charts:
 # 1. Click Menu >> Gen Chart >> Multi-County Input Form
@@ -90,12 +89,9 @@ def wiki(): #Menu
 
 * <input type="checkbox" checked="checked" /> 1
 * <input type="checkbox" checked="checked" /> 2
-* <input type="checkbox" /> 3
+* <input type="checkbox" /> 3 '''
 
-
-    '''
     content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body # type: ignore
-    
     markdowner = Markdown2(html4tags=True, tab_width=4, )
     meu_mark = markdowner.convert(content)
 
@@ -278,10 +274,11 @@ def Despachar_Processos(): #Menu
         for texto_despacho in textos_despacho:
             texto_md = markdowner.convert(texto_despacho) or None
             texto_md_escaped = texto_md.replace('\n', '\\n').replace('"', r'\\\\"').replace('<p>', '').replace('</p>', '')
-            conteudo.append(DIV(XML(texto_md), _class='card', _style="background-color: silver")) # type: ignore
+            conteudo.append(DIV(XML(texto_md), _class='card', _style="border-color : silver")) # type: ignore
+            copybtn = TAG.button('<Copiar>', _class='btn btn-info', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
+            conteudo.append(copybtn)
             conteudo.append(XML(markdowner.convert('-----'))) #type: ignore
         
-        copybtn = TAG.button('<Copiar>', _class='btn btn-info', _onclick='navigator.clipboard.writeText("{}").then(function(){{alert("Texto copiado!");}})'.format(texto_md_escaped))  # type: ignore
         
     else:
         form = SQLFORM.factory(Field('Protocolo'))

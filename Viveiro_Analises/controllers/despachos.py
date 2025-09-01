@@ -114,12 +114,12 @@ def form_variaveis():
     for_tabelas = SQLFORM.factory(
         Field('tabelas', 'list:string', multiple=True, requires=IS_IN_SET(['Requerimentos', 'Laudos'])) )
     list_campos = []
-    table1fields = list(db.Requerimentos.keys())[26:]
+    table1fields = list(db.Requerimentos.keys())[28:]
     for field in table1fields:
         if not field.startswith('_') and not field[-1].isdigit() and not 'especie_' in field and not'ALL' in field:
             list_campos.append(field)
             
-    table2fields = list(db.Laudos.keys())[26:]
+    table2fields = list(db.Laudos.keys())[28:]
     for field in table2fields:
         if (not field.startswith('_')  and not 'especie_' in field and not'ALL' in field 
             and not field[-1].isdigit() and not field in list_campos):

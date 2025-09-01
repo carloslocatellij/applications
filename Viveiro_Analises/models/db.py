@@ -33,8 +33,7 @@ else:
 db.define_table('Avisos',
                 Field('titulo','string'),
                 Field('corpo', 'text'),
-                Field('recebido_por', 'list:integer', requires=IS_IN_DB(db, 'auth_user.id', multiple=True)),
-                auth.signature
+                Field('recebido_por', 'list:integer', requires=IS_IN_DB(authdb, 'auth_user.id', multiple=True)),
                 )
 
 
@@ -232,28 +231,28 @@ db.Requerimentos.Endereco = Field.Virtual(
 
 
 
-db.Requerimentos.total_podas = Field.Virtual(
-    "total_podas",
+db.Requerimentos.total_podas_requeridas = Field.Virtual(
+    "total_podas_requeridas",
         lambda row: sum([int(row.Requerimentos.qtd_poda1 or 0), int(row.Requerimentos.qtd_poda2 or 0),
         int(row.Requerimentos.qtd_poda3 or 0) , int(row.Requerimentos.qtd_poda4 or 0)]
         ))
 
 
-db.Requerimentos.total_supressoes = Field.Virtual(
-    "total_supressoes",
+db.Requerimentos.total_supressoes_requeridas = Field.Virtual(
+    "total_supressoes_requeridas",
         lambda row: sum([int(row.Requerimentos.qtd_ret1 or 0), int(row.Requerimentos.qtd_ret2 or 0),
         int(row.Requerimentos.qtd_ret3 or 0) , int(row.Requerimentos.qtd_ret4 or 0)]
         ))
 
-db.Requerimentos.num_extens_poda = Field.Virtual(
-    "num_extens_poda",
-    lambda row: num2words.num2words(row.Requerimentos.total_podas, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+db.Requerimentos.num_extens_poda_requeridas = Field.Virtual(
+    "num_extens_poda_requeridas",
+    lambda row: num2words.num2words(row.Requerimentos.total_podas_requeridas, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
 )
 
 
-db.Requerimentos.num_extens_supressoes = Field.Virtual(
-    "num_extens_supressoes",
-    lambda row: num2words.num2words(row.Requerimentos.total_supressoes, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
+db.Requerimentos.num_extens_supressoes_requeridas = Field.Virtual(
+    "num_extens_supressoes_requeridas",
+    lambda row: num2words.num2words(row.Requerimentos.total_supressoes_requeridas, lang='pt-br').upper().replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
 )
 
 
@@ -454,8 +453,8 @@ Laudos = db.define_table(
 )
 
 
-db.Laudos.Supressoes = Field.Virtual(
-    "Supressoes",
+db.Laudos.Supressoes_laudadas = Field.Virtual(
+    "Supressoes_laudadas",
     lambda row: " ".join(
         [
             f"({row.Laudos.qtd_ret1}) {row.Laudos.especie_ret1}"
@@ -476,8 +475,8 @@ db.Laudos.Supressoes = Field.Virtual(
 )
 
 
-db.Laudos.Podas = Field.Virtual(
-    "Podas",
+db.Laudos.Podas_laudadas = Field.Virtual(
+    "Podas_laudadas",
     lambda row: " ".join(
         [
             f"({row.Laudos.qtd_poda1}) {row.Laudos.especie_poda1}"
@@ -499,30 +498,30 @@ db.Laudos.Podas = Field.Virtual(
 
 
 
-db.Laudos.total_podas = Field.Virtual(
-    "total_podas",
+db.Laudos.total_podas_laudadas = Field.Virtual(
+    "total_podas_laudadas",
         lambda row: sum([int(row.Laudos.qtd_poda1 or 0), int(row.Laudos.qtd_poda2 or 0),
         int(row.Laudos.qtd_poda3 or 0) , int(row.Laudos.qtd_poda4 or 0)]
         ))
 
 
-db.Laudos.total_supressoes = Field.Virtual(
-    "total_supressoes",
+db.Laudos.total_supressoes_laudadas = Field.Virtual(
+    "total_supressoes_laudadas",
             lambda row: sum([int(row.Laudos.qtd_ret1 or 0), int(row.Laudos.qtd_ret2 or 0),
             int(row.Laudos.qtd_ret3 or 0) , int(row.Laudos.qtd_ret4 or 0)]
             ))
 
 
-db.Laudos.num_extens_poda = Field.Virtual(
-    "num_extens_poda",
-    lambda row: num2words.num2words(row.Laudos.total_podas, lang='pt-br').upper()
+db.Laudos.num_extens_poda_laudadas = Field.Virtual(
+    "num_extens_poda_laudadas",
+    lambda row: num2words.num2words(row.Laudos.total_podas_laudadas, lang='pt-br').upper()
     .replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
 )
 
 
-db.Laudos.num_extens_supressoes = Field.Virtual(
-    "num_extens_supressoes",
-    lambda row: num2words.num2words(row.Laudos.total_supressoes, lang='pt-br').upper()
+db.Laudos.num_extens_supressoes_laudadas = Field.Virtual(
+    "num_extens_supressoes_laudadas",
+    lambda row: num2words.num2words(row.Laudos.total_supressoes_laudadas, lang='pt-br').upper()
     .replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
 )
 
