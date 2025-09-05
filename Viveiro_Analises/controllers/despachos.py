@@ -1,5 +1,3 @@
-from ast import alias
-
 
 if 0 == 1:
     from gluon import (db, current, redirect, URL, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
@@ -14,7 +12,7 @@ if 0 == 1:
     
     
 @auth.requires_login()
-def Gerenciar_templates(): #Menu
+def Gerenciar_Modelos(): #Menu
     """
     Controller para gerenciar templates de despacho
     """
@@ -25,11 +23,11 @@ def Gerenciar_templates(): #Menu
     f = request.vars['f'] if request.vars['f']  else None
 
     if f=='editar':
-        form = SQLFORM(db[table], registro, submit_button=f'Atualizar {tablename}' ) # type: ignore
+        form = SQLFORM(db[table], registro, submit_button=f'Atualizar Modelo' ) # type: ignore
     elif f=='ver':
         form = SQLFORM(db[table], registro, readonly=True, ) 
     else:
-        form = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
+        form = SQLFORM(db[table], submit_button=f'Registrar Modelo')
         
     
     if form.process().accepted:
@@ -89,11 +87,13 @@ def form_condicoes():
                         var endPos = textarea.selectionEnd;
                         var text = textarea.value;
                         var fstring =  "{{" + '"campo": ' + '"' + campo + '"' + ', ' + '"operador": ' + '"' + operador + '"' + ', ' + '"valor": ' + '"' + valor + '"' + "}}"
+                        
                         if (textarea.value.length > 0 && textarea.value[0] == '[' && textarea.value[textarea.value.length - 1] == ']') {{{{
                             textarea.value = text.substring(0, startPos) + fstring + "," + '\\n' + text.substring(endPos);
                         }}}} else {{{{
                             textarea.value = '[' + text.substring(0, startPos) + fstring + "," + '\\n' + text.substring(endPos) + ']';
                         }}}}
+                        
                         textarea.focus();
                         textarea.selectionEnd = endPos - 2;
                         return false;

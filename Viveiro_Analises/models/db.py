@@ -1,5 +1,4 @@
-from cProfile import label
-from datetime import datetime
+# -*- coding: utf-8 -*-
 from my_validador import *  # type: ignore
 import num2words
 import locale
@@ -144,7 +143,7 @@ Requerimentos = db.define_table(
     Field("telefone1", label='Telefone'),
     Field("email", rname="`e-mail`", label='E-mail'),
     Field("especie_ret1", widget=SQLFORM.widgets.autocomplete(
-     request, db.Especies.Nome, limitby=(0, 7), min_length=3),rname="`especie ret1`"),
+     request, db.Especies.Nome, limitby=(0, 7), min_length=3),rname="`especie ret1`", label='1ª Especie retirada'),
     Field("especie_ret2", rname="`especie ret2`"),
     Field("especie_ret3", rname="`especie ret3`"),
     Field("especie_ret4", 'list:string' ,rname="`especie ret4`"),
@@ -160,9 +159,6 @@ Requerimentos = db.define_table(
     Field("qtd_poda2", rname="`qtd poda2`"),
     Field("qtd_poda3", rname="`qtd poda3`"),
     Field("qtd_poda4", rname="`qtd poda4`"),
-    Field("no_carteira", rname="`no. carteira`"),
-     request, db.Especies.Nome, limitby=(0, 7), min_length=3),rname="`especie ret1`",
-          label='1ª Especie retirada'),
     Field("especie_ret2", rname="`especie ret2`", label='2ª Especie retirada'),
     Field("especie_ret3", rname="`especie ret3`", label='3ª Especie retirada'), 
     Field("especie_ret4", 'list:string' ,rname="`especie ret4`", label='4ª Especie retirada'),

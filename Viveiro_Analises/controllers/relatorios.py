@@ -30,7 +30,7 @@ def Supressões_por_periodo(): #Menu
         pass
         
     fields = [db.Requerimentos.Endereco1, db.Requerimentos.Numero1,     
-        db.Requerimentos.Bairro, db.Laudos.Despacho, db.Laudos.total_supressoes,
+        db.Requerimentos.Bairro, db.Laudos.Despacho, db.Laudos.total_supressoes_laudadas,
         db.Requerimentos.tipo_imovel, db.Requerimentos.local_arvore, 
         db.Bairros.Regiao, db.Laudos.qtd_repor, db.Laudos.motivos, db.Laudos.Obs]
     
@@ -71,7 +71,7 @@ def Podas_por_periodo(): #Menu
         
     fields = [db.Requerimentos.Endereco1, db.Requerimentos.Numero1,     
         db.Requerimentos.Bairro, db.Bairros.Regiao, db.Requerimentos.tipo_imovel,
-        db.Requerimentos.local_arvore, db.Requerimentos.total_podas]
+        db.Requerimentos.local_arvore, db.Requerimentos.total_podas_requeridas]
 
     links = [dict(header= 'Ver', body= lambda row: A('Ver', _href=URL(c='default', f='Requerimentos', args=[row.Requerimentos.Protocolo], vars={'f':'ver'} ) ) )]
                   

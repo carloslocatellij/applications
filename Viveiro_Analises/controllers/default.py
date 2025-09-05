@@ -259,7 +259,7 @@ def Despachar_Processos(): #Menu
         relation_query = db((db.Requerimentos.Protocolo == processo) & (db.Laudos.Protocolo == processo)).select().first()
         query_protoc_ref = None
         if prime_query.protocolo_anterior:
-            if  relation_query:
+            if  db(db.Laudos.Protocolo == prime_query.protocolo_anterior).count() > 0:
                 query_protoc_ref = db((db.Requerimentos.Protocolo == prime_query.protocolo_anterior) &
                                         (db.Laudos.Protocolo == db.Requerimentos.Protocolo)).select().first()
             else:
