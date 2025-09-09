@@ -3,7 +3,7 @@ from my_validador import *  # type: ignore
 import num2words
 import locale
 locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
-
+from configs import pasta_viveiro, pasta_viveiro_fotos
 
 if 0 == 1:
     from gluon import *  # type: ignore
@@ -32,7 +32,7 @@ else:
 db.define_table('Avisos',
                 Field('titulo','string'),
                 Field('corpo', 'text'),
-                Field('recebido_por', 'list:integer', requires=IS_IN_DB(authdb, 'auth_user.id', multiple=True)),
+                Field('recebido_por', 'list:integer', requires=IS_IN_DB(auth, 'auth_user.id', multiple=True)),
                 )
 
 
@@ -70,7 +70,11 @@ def especie_represent(row):
     esp_repr = db(db.Especies.id == int(row.id)).select().first()
     
     if esp_repr.Especie:
-        nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie.split(' ')[1])}"
+        if len(esp_repr.Especie.split(' ')) > 0:
+            nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie.split(' ')[-1]) }"
+        else:
+            nome_cientifico = f"{str(esp_repr.Especie[0])}"
+            
     else:
         nome_cientifico = ''
     nome = esp_repr.Nome.replace('-', ' ')
@@ -108,7 +112,6 @@ Especies = db.define_table(
     Field("Calcada", "integer", requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " "),
-    Field("foto", "upload"),
     Field("obs", "text"),
     format = (lambda row : especie_represent(row)),
     migrate=True if not configuration.get('app.production') else False,
@@ -118,7 +121,7 @@ Especies = db.define_table(
 
 Requerimentos = db.define_table(
     "Requerimentos",
-    Field("Protocolo", 'string' , requires= [IS_NOT_EMPTY(), ProtocPattern()]),
+    Field("Protocolo", 'integer' , requires= [IS_NOT_EMPTY(), ProtocPattern()]),
     Field("Requerente", requires=[IS_UPPER(), Remove_Acentos()]),
     Field(
         "data_entrada",
@@ -455,7 +458,7 @@ Laudos = db.define_table(
             )
         ),
     ),
-    primarykey=["Protocolo"],
+    format="%(Protocolo)s",
     rname="`{}`".format(tabela_laudos),
     migrate=True if not configuration.get('app.production') else False,
     fake_migrate=True if not configuration.get('app.production') else False,
@@ -576,6 +579,19 @@ def relat_podas_periodo(data_inicial, data_final):
 
     rows = db(query, )
     return rows
+
+
+Fotos = db.define_table('fotos',
+        Field('nomeFoto'),
+        Field('foto', 'upload', uploadfolder = pasta_viveiro_fotos),
+        Field('idEspecie', 'reference Especies'),
+        Field('idLaudo', requires=IS_IN_DB(db, 'Laudos.id', "%(Protocolo)s"), ),
+        Field('fonte', 'string'),
+        Field('url', 'string'),
+        auth.signature,
+        migrate= True if not configuration.get('app.production') else False,
+        fake_migrate= True if not configuration.get('app.production') else False,
+                        )
 
 
 # DADOS DE TESTE INSERIDOS AUTOMÁTICAMENTE EM AMBIENTE DE TESTE.
@@ -767,3 +783,5 @@ if not configuration.get("app.production"):
                 ),
             )
             db.commit()
+
+
