@@ -296,6 +296,7 @@ def Especies(): #Menu
     table = 'Especies'
     tablename = f'{db[table]._tablename[:-1]}'
     registro = request.args(0) or None
+    
     f = request.vars['f'] if request.vars['f']  else None
     session.registro_especie = registro
 
@@ -333,21 +334,29 @@ def fotos():
     table = 'fotos'
     tablename = f'{db[table]._tablename[:-1]}'
     registro = request.args(0) or None
+    
     item_em_questao = session.registro_especie or None
     fotos_do_item_em_questao = db(db.fotos.idEspecie == item_em_questao)
 
-    fields = ['titulo', 'foto', 'fonte', 'url']
+    fields = ['titulo', 'foto', 'fonte', 'tipo']
     f = request.vars['f'] if request.vars['f']  else None
-        
+    
+    db.fotos.tipo.requires = IS_IN_SET(['árvore', 'copa', 'galho', 'folha', 'flor', 'fruto', 'muda', 'parte doente', 'raiz', 'semente', 'tronco', 'outro' ])
         
     listagem_fotos = []
     for foto in fotos_do_item_em_questao.select().as_list():
-        listagem_fotos.append((foto.get('id'), foto.get('foto'), foto.get('titulo')))
+        listagem_fotos.append((foto.get('id'), foto.get('foto'), foto.get('titulo'), foto.get('tipo')))
         
         
     db.fotos.idEspecie.default = item_em_questao 
-
-    form = SQLFORM(db.fotos, submit_button=f'Registrar {tablename}', fields=fields, formname= table)
+    
+    if f=='editar':
+        form = SQLFORM(db.fotos, registro, submit_button=f'Registrar {tablename}', fields=fields, formname= table)
+    elif f=='ver':
+        form = SQLFORM(db.fotos, registro, readonly=True, fields=fields, formname= table)
+    else:
+        form = SQLFORM(db.fotos, submit_button=f'Registrar {tablename}', fields=fields, formname= table)
+    
     
     if form.process().accepted:
         session.flash = f'Registrado'
@@ -356,30 +365,31 @@ def fotos():
     elif form.errors:
         response.flash = 'Corrija os Erros indicados'
         
-    table_fotos = TABLE(  ) # type: ignore
+    table_fotos = TABLE(  _align='center') # type: ignore
     
 
-    linha_cards_fotos = TR() # type: ignore
+    linha_cards_fotos = TR( ) # type: ignore
     num_col = 5
         
-    for item, elemento in enumerate(listagem_fotos): 
-        card_foto = TD( B(f'Foto: {elemento[2]}'),  # type: ignore
-                        DIV(  IMG( _src=URL(r=request, f='download', args=elemento[1]), # type: ignore
-                                    _alt=f'foto não encontrada', _width='150', _height='150') , _width='20%', _align='center', _class="card"))
-        
-        linha_cards_fotos.append(card_foto)
-        
+    if not f:
+        for item, elemento in enumerate(listagem_fotos): 
+            card_foto = TD( B(A(f'Foto: {elemento[2]}', _href=URL(c=request.controller, f='fotos', extension='', args=[elemento[0]], vars={'f':'ver'} ))),  # type: ignore
+                            DIV(  IMG( _src=URL(r=request, f='download', args=elemento[1]), # type: ignore
+                                        _alt=f'foto não encontrada', _width='250', _height='300') ,  _align='center', _class="card", _style='padding:25px' ), f'parte: {elemento[3]}', )
             
-        if len(listagem_fotos) <= num_col and len(linha_cards_fotos) == len(listagem_fotos):
-            table_fotos.append(linha_cards_fotos)
-            linha_cards_fotos = TR()
-        
-        elif  len(listagem_fotos) > num_col and (item ) % num_col == 0:
-            table_fotos.append(linha_cards_fotos)
-            linha_cards_fotos = TR()
+            linha_cards_fotos.append(card_foto)
+            
+                
+            if len(listagem_fotos) <= num_col and len(linha_cards_fotos) == len(listagem_fotos):
+                table_fotos.append(linha_cards_fotos)
+                linha_cards_fotos = TR()
+            
+            elif  len(listagem_fotos) > num_col and (item ) % num_col == 0:
+                table_fotos.append(linha_cards_fotos)
+                linha_cards_fotos = TR()
             
 
-    return dict(listagem_fotos=listagem_fotos, table_fotos=table_fotos, form=form)
+    return dict(listagem_fotos=listagem_fotos if not f else None, table_fotos=table_fotos if not f else None, form=form, f=f)
 
 
 

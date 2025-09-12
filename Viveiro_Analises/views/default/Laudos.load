@@ -66,7 +66,7 @@ input[type="checkbox"]:focus + label {
 
 
 <div class="container", align='left'>
-{{=A('Editar', _href=URL(c='default', f='editar_laudo', extension='', args=[request.args(0)]), _class='btn btn-primary',  )  if not session.edit_laudo else '' }}
+{{=A('Editar', _href=URL(c='default', f='editar_laudo', extension='', args=[request.args(0)]), _class='btn btn-primary',  )  if f else '' }}
 </div>
 
     {{=form.custom.begin}}
