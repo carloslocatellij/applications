@@ -8,6 +8,7 @@ if 0 == 1:
                        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01, BEAUTIFY, BUTTON, SPAN,
                        IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE,
                        IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC) # type: ignore
+    
     request = current.request # type: ignore
     response = current.response # type: ignore
     session = current.session # type: ignore
@@ -39,7 +40,7 @@ def avisos():
     markdowner = Markdown2(html4tags=True, tab_width=4, )
     
     
-    return dict(avisos=XML(markdowner.convert(*avisos)))
+    return dict(avisos=XML(markdowner.convert(*avisos))) # type: ignore
 
 
 def index():
@@ -296,14 +297,15 @@ def Especies(): #Menu
     tablename = f'{db[table]._tablename[:-1]}'
     registro = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else None
+    session.registro_especie = registro
 
     if f=='editar':
-        form = SQLFORM(db[table], registro, submit_button=f'Atualizar {tablename}' ) # type: ignore
+        form = SQLFORM(db[table], registro, submit_button=f'Atualizar {tablename}', formname=table + registro) # type: ignore
     elif f=='ver':
-        form = SQLFORM(db[table], registro, readonly=True, ) 
+        form = SQLFORM(db[table], registro, readonly=True, formname=table + registro) 
     else:
         db[table].id.requires = IS_NOT_IN_DB(db, f'{table}.id', error_message='Já está registrado.')
-        form = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
+        form = SQLFORM(db[table], submit_button=f'Registrar {tablename}', formname=table)
         
     if form.process().accepted:
         session.flash = f'Dados atualizados' if registro else 'Registrado'
@@ -325,6 +327,60 @@ def Especies(): #Menu
                          )
 
     return response.render(dict(form=form, formbusca=formbusca, especie=registro))
+
+
+def fotos():
+    table = 'fotos'
+    tablename = f'{db[table]._tablename[:-1]}'
+    registro = request.args(0) or None
+    item_em_questao = session.registro_especie or None
+    fotos_do_item_em_questao = db(db.fotos.idEspecie == item_em_questao)
+
+    fields = ['titulo', 'foto', 'fonte', 'url']
+    f = request.vars['f'] if request.vars['f']  else None
+        
+        
+    listagem_fotos = []
+    for foto in fotos_do_item_em_questao.select().as_list():
+        listagem_fotos.append((foto.get('id'), foto.get('foto'), foto.get('titulo')))
+        
+        
+    db.fotos.idEspecie.default = item_em_questao 
+
+    form = SQLFORM(db.fotos, submit_button=f'Registrar {tablename}', fields=fields, formname= table)
+    
+    if form.process().accepted:
+        session.flash = f'Registrado'
+        redirect(URL('default', 'Especies' , extension='', args=[registro], vars={'f':'ver'})) # type: ignore
+        
+    elif form.errors:
+        response.flash = 'Corrija os Erros indicados'
+        
+    table_fotos = TABLE(  ) # type: ignore
+    
+
+    linha_cards_fotos = TR() # type: ignore
+    num_col = 5
+        
+    for item, elemento in enumerate(listagem_fotos): 
+        card_foto = TD( B(f'Foto: {elemento[2]}'),  # type: ignore
+                        DIV(  IMG( _src=URL(r=request, f='download', args=elemento[1]), # type: ignore
+                                    _alt=f'foto não encontrada', _width='150', _height='150') , _width='20%', _align='center', _class="card"))
+        
+        linha_cards_fotos.append(card_foto)
+        
+            
+        if len(listagem_fotos) <= num_col and len(linha_cards_fotos) == len(listagem_fotos):
+            table_fotos.append(linha_cards_fotos)
+            linha_cards_fotos = TR()
+        
+        elif  len(listagem_fotos) > num_col and (item ) % num_col == 0:
+            table_fotos.append(linha_cards_fotos)
+            linha_cards_fotos = TR()
+            
+
+    return dict(listagem_fotos=listagem_fotos, table_fotos=table_fotos, form=form)
+
 
 
 @auth.requires_login()

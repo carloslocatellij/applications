@@ -1,0 +1,11 @@
+
+<div class="container"><h3 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h3> </div> 
+
+
+{{=form}}
+
+<table width="100%" >
+{{if len(listagem_fotos) > 0:}}
+    {{=table_fotos}}
+{{pass}}
+</table>

@@ -145,6 +145,6 @@ def form_variaveis():
     
     table_buttons = TABLE()
     for itens_linha in range(len(list_campos)//8):     
-        table_buttons.append(TR(btns_vars[itens_linha  * 8: (itens_linha + 1) * 8]))
+        table_buttons.append(TR(btns_vars[itens_linha  * 8 : (itens_linha + 1) * 8]))
         
     return dict(for_tabelas=for_tabelas, btns_vars=table_buttons)

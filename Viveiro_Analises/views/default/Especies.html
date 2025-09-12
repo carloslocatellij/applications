@@ -83,22 +83,27 @@
             <td width="25%" align='left' style="padding-inline: 10px">{{=B('Nativa do Brasil:')}}<div align='left' class="card">
                     {{=form.custom.widget['NativaBr']}}</div>
             </td>
-                        <td width="25%" align='left' style="padding-inline: 10px">{{=B('Foto:')}}<div align='left' class="card">
-                                        {{=form.custom.widget['foto']}}</div>
-                        </td>
         </tr>
         <tr>
-            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Frutífera:')}}<div align='left' class="card">
-                    {{=form.custom.widget['Frutifera']}}</div>
-            </td>
-            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Calçada:')}}<div align='left' class="card">
-                    {{=form.custom.widget['Calcada']}}</div>
-            </td>
-            <td colspan="2" width="50%" align='left' style="padding-inline: 10px">{{=B('Observações:')}}<div align='left' class="card">
-                    {{=form.custom.widget['obs']}}</div>
-            </td>
+                <td width="25%" align='left' style="padding-inline: 10px">{{=B('Frutífera:')}}<div align='left' class="card">
+                        {{=form.custom.widget['Frutifera']}}</div>
+                </td>
+                <td width="25%" align='left' style="padding-inline: 10px">{{=B('Calçada:')}}<div align='left' class="card">
+                        {{=form.custom.widget['Calcada']}}</div>
+                </td>
+                <td colspan="2" width="50%" align='left' style="padding-inline: 10px">{{=B('Observações:')}}<div align='left' class="card">
+                        {{=form.custom.widget['obs']}}</div>
+                </td>
         </tr>
-    </table>
-    {{=form.custom.submit}}
-    {{=form.custom.end}}
+</table>
+{{=form.custom.submit}}
+{{=form.custom.end}}
+<td width="25%" align='left' style="padding-inline: 10px">{{=B('Fotos:')}}
+        <div align='left' class="card">
+                <tr>
+                        {{=DIV(LOAD('default', 'fotos.load', args=[request.args(0)], content='Carregando...',  ajax=True),
+                        _id='fotos', _class="jumbotron", _style="border: 1px solid; padding:10px;word-wrap:break-word;")}}
+                </tr>
+        </div>
+</td>
 </div>
