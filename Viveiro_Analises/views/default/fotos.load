@@ -2,12 +2,6 @@
 <div class="container"><h3 class="container center">{{=' '.join(x.capitalize() for x in request.function.split('_'))}}</h3> </div> 
 
 
-<div class="container", align='left'>
-
-{{=A('Editar', _href=URL(c='default', f='fotos', extension='load', args=[request.args(0)] ), _class='btn btn-primary',  )}}
-
-</div>
-
 {{=form}}
 
 <table width="100%" >

@@ -1,0 +1,11 @@
+{{extend 'layout.html'}}
+{{block head}}
+{{end}}
+
+<div class="container" , align='left'>
+    {{=A('Editar', _href=URL(c='default', f='fotos', extension='html', args=[request.args(0)], vars={'f':'editar'} ), _class='btn btn-primary',)}}
+</div>
+
+{{=TABLE(DIV( IMG( _src=URL(r=request, f='download', args= db.fotos(db.fotos.id == request.args(0)).foto),_width='38%'), _align='center' ),_align='center' )}}
+
+{{=form}}

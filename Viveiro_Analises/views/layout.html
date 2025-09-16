@@ -194,6 +194,19 @@
         });
 </script>
 
+<script>
+  $(document).ready(function () {
+    $('#open_modal').click(function () {
+      // Carrega o conteúdo do modal via AJAX para o container
+      $('#avisos').load('{{=URL("default", "avisos")}}', function () {
+        // Após carregar, abre o modal
+        $('#myModal').modal('show');
+      });
+    });
+  });
+</script>
+
+
     <script src="{{=URL('static','js/bootstrap.bundle.min.js')}}"></script>
     <script src="{{=URL('static','js/web2py-bootstrap4.js')}}"></script>
     {{block page_js}}

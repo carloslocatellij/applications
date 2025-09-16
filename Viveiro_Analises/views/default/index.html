@@ -14,14 +14,3 @@
 <div style="align-self: center"><button id="open_modal" class="btn btn-primary",  >Avisos {{=SPAN(len(list(avisos)), _class='badge bg-danger')}} </button></div>
 {{pass}}
 
-<script>
-    $(document).ready(function () {
-        $('#open_modal').click(function () {
-            // Carrega o conteúdo do modal via AJAX para o container
-            $('#avisos').load('{{=URL("default", "avisos")}}', function () {
-                // Após carregar, abre o modal
-                $('#myModal').modal('show');
-            });
-        });
-    });
-</script>

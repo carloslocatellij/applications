@@ -9,7 +9,7 @@ from configs import pasta_viveiro_fotos  # type: ignore
 if 0 == 1:
     from gluon import *  # type: ignore
     from gluon import (
-        db, configuration, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
+        db, configuration, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP, IS_LENGTH, # type: ignore
         Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db, IS_CHKBOX01, DAL, IS_INT_IN_RANGE, IS_CPF_OR_CNPJ,  MASK_CPF,
         MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE, SQLFORM, IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC, )  # type: ignore
 
@@ -130,7 +130,7 @@ cores = ['vermelho', 'amarelo', 'rosa', 'branco', 'azul', 'lilás', 'creme', 'sa
 Especies = db.define_table(
     "Especies",
     Field('id', 'id'),
-    Field("Nome", "string", length=40, notnull=True, requires=[IS_NOT_EMPTY(), IS_NOT_IN_DB(db, 'Especies.Nome')]),
+    Field("Nome", "string", length=40, notnull=True, requires=[IS_NOT_EMPTY(), IS_NOT_IN_DB(db, 'Especies.Nome'), IS_LOWER()]),
     Field("Especie", "string", length=40, requires=[IS_NOT_EMPTY(), IS_NOT_IN_DB(db, 'Especies.Especie')]),
     Field("Familia", "string", requires=IS_IN_SET(familias), length=30),
     Field("OutroNome", "string", label='Outros Nomes', length=250),
@@ -139,7 +139,7 @@ Especies = db.define_table(
         'Floresta Tropical', 'Mata Atlântica', 'Pampa' , 'Pantanal',
         'Pradaria', 'Taiga', 'Tundra', 'Savanas'
         ] ) ),
-    Field("Regiao", "string", requires=IS_IN_SET(['Norte', 'Nordeste', 'Centro-Oeste', 'Sudeste', 'Sul']), length=15),
+    Field("Regiao", "string", requires=IS_IN_SET(['',  'Norte', 'Nordeste', 'Centro-Oeste', 'Sudeste', 'Sul']), length=15),
     Field("Ameaca", "string", requires=IS_EMPTY_OR(IS_IN_SET(ameaças)), length=20),
     Field("GrupoEco", "string", length=10),
     Field("ClasseSucessao", "string", requires=IS_EMPTY_OR(IS_IN_SET(['Pioneira', 'Intermediária', 'Climax'])), length=20),
@@ -166,6 +166,7 @@ Especies = db.define_table(
     format = (lambda row : especie_represent(row)),
     migrate=True if not configuration.get('app.production') else False,
     fake_migrate=True if not configuration.get('app.production') else False,
+    
 )
 
 
@@ -508,6 +509,7 @@ Laudos = db.define_table(
             )
         ),
     ),
+    primarykey=["Protocolo"],
     format="%(Protocolo)s",
     rname="`{}`".format(tabela_laudos),
     migrate=True if not configuration.get('app.production') else False,
@@ -633,12 +635,13 @@ def relat_podas_periodo(data_inicial, data_final):
 
 Fotos = db.define_table('fotos',
         Field('titulo'),
-        Field('foto', 'upload', uploadfolder = pasta_viveiro_fotos),
+        Field('foto', 'upload', uploadfolder= pasta_viveiro_fotos, uploadseparate=True, requires=[IS_LENGTH(3145728, 2048), IS_IMAGE(extensions=('jpeg', 'png'))]),
         Field('idEspecie', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Especies.id', "%(Nome)s"))),
-        Field('idLaudo', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Laudos.id', "%(Protocolo)s")), ),
+        Field('idLaudo', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Laudos.Protocolo', "%(Protocolo)s")), ),
         Field('fonte', 'string'),
         Field('url', 'string'),
-        Field('tipo'),
+        Field('tipo', label='tipo da foto'),
+        Field('obs', 'text'),
         auth.signature,
         migrate= True if not configuration.get('app.production') else False,
         fake_migrate= True if not configuration.get('app.production') else False,
