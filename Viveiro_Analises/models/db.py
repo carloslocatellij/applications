@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from importlib.metadata import requires
 from my_validador import *  # type: ignore
 import num2words
 import locale
 locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
 from configs import pasta_viveiro_fotos  # type: ignore
+from pathlib import Path
 
 if 0 == 1:
     from gluon import *  # type: ignore
@@ -633,9 +633,16 @@ def relat_podas_periodo(data_inicial, data_final):
     return rows
 
 
+
+
 Fotos = db.define_table('fotos',
         Field('titulo'),
-        Field('foto', 'upload', uploadfolder= pasta_viveiro_fotos, uploadseparate=True, requires=[IS_LENGTH(3145728, 2048), IS_IMAGE(extensions=('jpeg', 'png'))]),
+        Field('foto', 'upload',               
+                uploadseparate=True, uploadfolder= Path(pasta_viveiro_fotos, session.function if session.function else 'Outras_fotos')  ,
+                requires=[IS_EMPTY_OR(IS_LENGTH(3145728, 2048, error_message= 'deve ser maior que 2k e menor que 3m bites')),
+                          IS_IMAGE( error_message='deve ser imagem no formato jpeg ou png')], autodelete = True, 
+                ),
+
         Field('idEspecie', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Especies.id', "%(Nome)s"))),
         Field('idLaudo', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Laudos.Protocolo', "%(Protocolo)s")), ),
         Field('fonte', 'string'),
@@ -646,6 +653,8 @@ Fotos = db.define_table('fotos',
         migrate= True if not configuration.get('app.production') else False,
         fake_migrate= True if not configuration.get('app.production') else False,
                         )
+
+
 
 
 # DADOS DE TESTE INSERIDOS AUTOMÁTICAMENTE EM AMBIENTE DE TESTE.

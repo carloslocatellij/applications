@@ -2,9 +2,11 @@
 {{block head}}
 {{end}}
 
-<div class="container" , align='left'>
-    {{=A('Editar', _href=URL(c='default', f='fotos', extension='html', args=[request.args(0)], vars={'f':'editar'} ), _class='btn btn-primary',)}}
-</div>
+
+    <div class="container" style="border: 1px solid; padding-block: 2px;">
+        {{=A('Editar', _href=URL(c='default', f='fotos', extension='html', args=[request.args(0)], vars={'f':'editar'} ), _class='btn btn-primary',)}}
+        {{=A('Voltar', _href=URL(c='default',f=session.function, args=[session.registro], vars={'f':'ver'}), _class='btn btn-primary', ) if session.function and session.registro else ''}}
+    </div>
 
 {{=TABLE(DIV( IMG( _src=URL(r=request, f='download', args= db.fotos(db.fotos.id == request.args(0)).foto),_width='38%'), _align='center' ),_align='center' )}}
 

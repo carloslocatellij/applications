@@ -134,7 +134,7 @@ def Requerimentos(): #Menu
     processo = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else None
     session.registro = processo
-    
+    session.function = table
     tem_laudo = db(db.Laudos.Protocolo == processo).count() > 0
 
 
@@ -227,7 +227,6 @@ def Laudos():
     except Exception as e:
         form = SQLFORM(db[table], submit_button=f'Registrar {db[table]._tablename[:-1]}')
     
-    session.function = table
         
     if form.process().accepted:
         session.flash = f'Dados do Laudo atualizados' if laudo else 'Laudo Registrado'
@@ -337,11 +336,13 @@ def fotos():
     registro = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else None
     fields = ['titulo', 'foto', 'fonte', 'tipo'] if not f else None
+    
     item_em_questao = session.registro or None
     
-    vinculo = 'id'+session.function[:-1]
     
-    db.fotos[vinculo].default = item_em_questao 
+    if session.function:
+        vinculo = 'id'+session.function[:-1] if not session.function == 'Requerimentos' else 'idLaudo'
+        db.fotos[vinculo].default = item_em_questao 
 
     db.fotos.tipo.requires = IS_IN_SET(['árvore', 'caule', 'casca', 'copa', 'galho', 'folha', 'flor', 'fruto', 'muda', 'raiz', 'semente', 'tronco', 'outro' ])   
     
@@ -354,37 +355,53 @@ def fotos():
     
     if form.process().accepted:
         session.flash = f'Registrado'
-        redirect(URL('default', session.function , extension='', args=[item_em_questao], vars={'f':'ver'})) # type: ignore
+        if item_em_questao:
+            redirect(URL('default', session.function , extension='', args=[item_em_questao], vars={'f':'ver'})) # type: ignore
+        else:
+            redirect(URL('default', 'fotos', args=[request.args(0)], vars={'f':'ver'}))
+            
     elif form.errors:
         response.flash = 'Corrija os Erros indicados'
         
-    table_fotos = TABLE(  _align='center') # type: ignore
-    linha_cards_fotos = TR( ) # type: ignore
-    num_col = 5
     
-    
-    fotos_do_item_em_questao = db(db.fotos[vinculo] == item_em_questao)
+    if session.function:
+        fotos_do_item_em_questao = db(db.fotos[vinculo] == item_em_questao)
     
     listagem_fotos = []
+    
     if not f:
         for foto in fotos_do_item_em_questao.select(orderby=~db.fotos.tipo).as_list():
             listagem_fotos.append((foto.get('id'), foto.get('foto'), foto.get('titulo'), foto.get('tipo')))
-        for item, elemento in enumerate(listagem_fotos): 
-            card_foto = TD( B(A(f'Foto: {elemento[2]}', _href=URL(c=request.controller, f='fotos', extension='', args=[elemento[0]], vars={'f':'ver'} ))),  # type: ignore
-                            DIV(  IMG( _src=URL(r=request, f='download', args=elemento[1]), # type: ignore
-                                        _alt=f'foto não encontrada', _width='250', _height='300') ,  _align='center', _class="card", _style='padding:25px' ), f'tipo: {elemento[3]}', )
             
+        table_fotos = TABLE( _align='center') # type: ignore
+        linha_cards_fotos = TR( ) # type: ignore
+        num_col = 4
+        resto = len(listagem_fotos) % num_col
+        
+        for item, elemento in enumerate(listagem_fotos): 
+            card_foto = TD( B(A(f'Foto: {elemento[2]}',
+                                _href=URL(c=request.controller, f='fotos', extension='',
+                                          args=[elemento[0]], vars={'f':'ver'} ))),  # type: ignore
+                            DIV(  IMG( _src=URL(r=request, f='download', args=elemento[1]), # type: ignore
+                                 _alt=f'foto não encontrada', _width='20%', 
+                                 _style='display: block;  margin-left: auto; margin-right: auto'),
+                                _align='center', _class="card", _style='padding:20px' ), f'tipo: {elemento[3]}',  _width='20%') 
             linha_cards_fotos.append(card_foto)
             
-            if len(listagem_fotos) <= num_col and len(linha_cards_fotos) == len(listagem_fotos):
-                table_fotos.append(linha_cards_fotos)
+            if len(listagem_fotos) <= num_col and len(linha_cards_fotos) == len(listagem_fotos):          
+                table_fotos.append(linha_cards_fotos)               
                 linha_cards_fotos = TR() # type: ignore
             
-            elif  len(listagem_fotos) > num_col and (item ) % num_col == 0:
-                table_fotos.append(linha_cards_fotos)
-                linha_cards_fotos = TR() # type: ignore
+            elif len(table_fotos) >= len(listagem_fotos) // num_col:
+                if len(linha_cards_fotos) == resto: 
+                    table_fotos.append(linha_cards_fotos)
+                    linha_cards_fotos = TR()
+            else:
+                if len(linha_cards_fotos) == num_col:
+                    table_fotos.append(linha_cards_fotos)
+                    linha_cards_fotos = TR()
             
-
+                
     return dict(listagem_fotos=listagem_fotos if not f else '',
                 table_fotos=table_fotos if not f else '',
                 form=form, f=f)
