@@ -8,6 +8,7 @@ if 0 == 1:
                        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01, BEAUTIFY, BUTTON, SPAN,
                        IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE,
                        IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC) # type: ignore
+    
     request = current.request # type: ignore
     response = current.response # type: ignore
     session = current.session # type: ignore
@@ -39,7 +40,8 @@ def avisos():
     markdowner = Markdown2(html4tags=True, tab_width=4, )
     
     
-    return dict(avisos=XML(markdowner.convert(*avisos)))
+    return dict(avisos=XML(markdowner.convert(*avisos))) # type: ignore
+
 
 
 def index():
@@ -131,7 +133,8 @@ def Requerimentos(): #Menu
     tablename = f'{db[table]._tablename[:-1]}'
     processo = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else None
-
+    session.registro = processo
+    session.function = table
     tem_laudo = db(db.Laudos.Protocolo == processo).count() > 0
 
 
@@ -153,7 +156,7 @@ def Requerimentos(): #Menu
     else:
         pass
     
-    db.Requerimentos.especie_ret2.show_if = (db.Requerimentos.especie_poda1!=None)
+    db.Requerimentos.especie_ret2.show_if = db.Requerimentos.especie_ret1 == ''
  
     
     list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente,
@@ -171,7 +174,7 @@ def Requerimentos(): #Menu
                          Bairro={},
                          cep= {'type':'integer',  'label':'cep'}, list_fields=list_fields )
         
-    return response.render(dict(formprocess=formprocess, processo=processo, formbusca=formbusca, tem_laudo=tem_laudo))
+    return dict(formprocess=formprocess, processo=processo, formbusca=formbusca, tem_laudo=tem_laudo)
 
 
 def editar_laudo():
@@ -221,7 +224,6 @@ def Laudos():
             form = SQLFORM(db[table], laudo, submit_button=f'Atualizar {db[table]._tablename[:-1]}', deletable=True)
         else:
             form = SQLFORM(db[table], laudo, readonly=True, represent_none='')
-
     except Exception as e:
         form = SQLFORM(db[table], submit_button=f'Registrar {db[table]._tablename[:-1]}')
     
@@ -295,36 +297,115 @@ def Especies(): #Menu
     table = 'Especies'
     tablename = f'{db[table]._tablename[:-1]}'
     registro = request.args(0) or None
+    
     f = request.vars['f'] if request.vars['f']  else None
+    session.registro = registro
+    session.function = table
 
     if f=='editar':
-        form = SQLFORM(db[table], registro, submit_button=f'Atualizar {tablename}' ) # type: ignore
+        form = SQLFORM(db[table], registro, submit_button=f'Atualizar {tablename}', formname=table + registro if registro else '') # type: ignore
     elif f=='ver':
-        form = SQLFORM(db[table], registro, readonly=True, ) 
+        form = SQLFORM(db[table], registro, readonly=True, formname=table + registro if registro else '') 
     else:
         db[table].id.requires = IS_NOT_IN_DB(db, f'{table}.id', error_message='Já está registrado.')
-        form = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
+        form = SQLFORM(db[table], submit_button=f'Registrar {tablename}', formname=table)
         
     if form.process().accepted:
         session.flash = f'Dados atualizados' if registro else 'Registrado'
-        redirect(URL('default', table , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
+        redirect(URL('default', session.function , extension='', args=[form.vars.id], vars={'f':'ver'})) # type: ignore
     elif form.errors:
         response.flash = 'Corrija os Erros indicados'
     else:
         pass
    
-    formbusca = buscador('Especies',  # type: ignore
-                         Nome={'label': 'Nome Popular'},
-                         Especie={'label': 'Nome Científico'},
-                         OutroNome={'label': 'Outros Nomes'},
-                         Familia={'label': 'Família'},
-                         Bioma={},
-                         Porte={},
-                         CorDaFlor={'label': 'Cor da Flor'},
-                         
-                         )
+  
+    links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=request.controller, # type: ignore
+                              f=request.function, args=[row.id] , vars={'f': 'ver'})))]
+    
+    
+    grd_especies = SQLFORM.grid(db(db.Especies.id >0), orderby=db.Especies.Nome, links=links, user_signature=False, editable=False, searchable=True,
+    deletable=False, create=False,csv=False, maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left')
 
-    return response.render(dict(form=form, formbusca=formbusca, especie=registro))
+
+    return response.render(dict(form=form,  especie=registro, grd_especies=grd_especies))
+
+
+def fotos():
+    table = 'fotos'
+    tablename = f'{db[table]._tablename[:-1]}'
+    registro = request.args(0) or None
+    f = request.vars['f'] if request.vars['f']  else None
+    fields = ['titulo', 'foto', 'fonte', 'tipo'] if not f else None
+    
+    item_em_questao = session.registro or None
+    
+    
+    if session.function:
+        vinculo = 'id'+session.function[:-1] if not session.function == 'Requerimentos' else 'idLaudo'
+        db.fotos[vinculo].default = item_em_questao 
+
+    db.fotos.tipo.requires = IS_IN_SET(['árvore', 'caule', 'casca', 'copa', 'galho', 'folha', 'flor', 'fruto', 'muda', 'raiz', 'semente', 'tronco', 'outro' ])   
+    
+    if f=='editar':
+        form = SQLFORM(db.fotos, registro, submit_button=f'Alterar dados da {tablename}', fields=fields, formname= table, deletable=True)
+    elif f=='ver':
+        form = SQLFORM(db.fotos, registro, readonly=True, fields=fields, formname= table, )
+    else:
+        form = SQLFORM(db.fotos, submit_button=f'Registrar {tablename}', fields=fields, formname= table)
+    
+    if form.process().accepted:
+        session.flash = f'Registrado'
+        if item_em_questao:
+            redirect(URL('default', session.function , extension='', args=[item_em_questao], vars={'f':'ver'})) # type: ignore
+        else:
+            redirect(URL('default', 'fotos', args=[request.args(0)], vars={'f':'ver'}))
+            
+    elif form.errors:
+        response.flash = 'Corrija os Erros indicados'
+        
+    
+    if session.function:
+        fotos_do_item_em_questao = db(db.fotos[vinculo] == item_em_questao)
+    
+    listagem_fotos = []
+    
+    if not f:
+        for foto in fotos_do_item_em_questao.select(orderby=~db.fotos.tipo).as_list():
+            listagem_fotos.append((foto.get('id'), foto.get('foto'), foto.get('titulo'), foto.get('tipo')))
+            
+        table_fotos = TABLE( _align='center') # type: ignore
+        linha_cards_fotos = TR( ) # type: ignore
+        num_col = 4
+        resto = len(listagem_fotos) % num_col
+        
+        for item, elemento in enumerate(listagem_fotos): 
+            card_foto = TD( B(A(f'Foto: {elemento[2]}',
+                                _href=URL(c=request.controller, f='fotos', extension='',
+                                          args=[elemento[0]], vars={'f':'ver'} ))),  # type: ignore
+                            DIV(  IMG( _src=URL(r=request, f='download', args=elemento[1]), # type: ignore
+                                 _alt=f'foto não encontrada', _width='20%', 
+                                 _style='display: block;  margin-left: auto; margin-right: auto'),
+                                _align='center', _class="card", _style='padding:20px' ), f'tipo: {elemento[3]}',  _width='20%') 
+            linha_cards_fotos.append(card_foto)
+            
+            if len(listagem_fotos) <= num_col and len(linha_cards_fotos) == len(listagem_fotos):          
+                table_fotos.append(linha_cards_fotos)               
+                linha_cards_fotos = TR() # type: ignore
+            
+            elif len(table_fotos) >= len(listagem_fotos) // num_col:
+                if len(linha_cards_fotos) == resto: 
+                    table_fotos.append(linha_cards_fotos)
+                    linha_cards_fotos = TR()
+            else:
+                if len(linha_cards_fotos) == num_col:
+                    table_fotos.append(linha_cards_fotos)
+                    linha_cards_fotos = TR()
+            
+                
+    return dict(listagem_fotos=listagem_fotos if not f else '',
+                table_fotos=table_fotos if not f else '',
+                form=form, f=f)
+
 
 
 @auth.requires_login()

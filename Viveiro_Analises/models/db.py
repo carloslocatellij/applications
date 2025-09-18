@@ -3,12 +3,13 @@ from my_validador import *  # type: ignore
 import num2words
 import locale
 locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
-
+from configs import pasta_viveiro_fotos  # type: ignore
+from pathlib import Path
 
 if 0 == 1:
     from gluon import *  # type: ignore
     from gluon import (
-        db, configuration, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
+        db, configuration, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP, IS_LENGTH, # type: ignore
         Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db, IS_CHKBOX01, DAL, IS_INT_IN_RANGE, IS_CPF_OR_CNPJ,  MASK_CPF,
         MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE, SQLFORM, IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC, )  # type: ignore
 
@@ -32,7 +33,7 @@ else:
 db.define_table('Avisos',
                 Field('titulo','string'),
                 Field('corpo', 'text'),
-                Field('recebido_por', 'list:integer', requires=IS_IN_DB(authdb, 'auth_user.id', multiple=True)),
+                Field('recebido_por', 'list:integer', requires=IS_IN_DB(auth, 'auth_user.id', multiple=True)),
                 )
 
 
@@ -70,35 +71,88 @@ def especie_represent(row):
     esp_repr = db(db.Especies.id == int(row.id)).select().first()
     
     if esp_repr.Especie:
-        nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie.split(' ')[1])}"
+        if len(esp_repr.Especie.split(' ')) > 0:
+            nome_cientifico = f"{str(esp_repr.Especie[0])}. {str(esp_repr.Especie.split(' ')[-1]) }"
+        else:
+            nome_cientifico = f"{str(esp_repr.Especie[0])}"
+            
     else:
         nome_cientifico = ''
     nome = esp_repr.Nome.replace('-', ' ')
     return f"{nome} - {nome_cientifico}"
         
         
+ameaças = {
+    '(EX)': 'Extinta',
+    '(EW)': 'Extinta na Natureza',
+    '(CR)': 'Criticamente em Perigo',
+    '(EN)': 'Em Perigo',
+    '(VU)': 'Vulnerável',
+    '(NT)': 'Quase Ameaçada',
+    '(LC)': 'Pouco Preocupante'
+}
+
+familias = [
+    'Acanthaceae', 'Achariaceae', 'Amaryllidaceae', 'Anacardiaceae', 'Anisophylleaceae', 'Annonaceae',
+    'Apodanthaceae', 'Arecaceae', 'Asteraceae', 'Begoniaceae', 'Biebersteiniaceae', 'Bignoniaceae',
+    'Boraginaceae', 'Brassicaceae', 'Bromeliaceae', 'Burmanniaceae', 'Burseraceae', 'Cabombaceae',
+    'Cactaceae', 'Calceolariaceae', 'Campanulaceae', 'Canellaceae', 'Cannabaceae', 'Capparaceae',
+    'Caprifoliaceae', 'Caricaceae', 'Celastraceae', 'Chrysobalanaceae', 'Cistaceae', 'Cleomaceae',
+    'Clusiaceae', 'Combretaceae', 'Commelinaceae', 'Convolvulaceae', 'Costaceae', 'Crassulaceae',
+    'Cucurbitaceae', 'Cunoniaceae', 'Cyperaceae', 'Dichapetalaceae', 'Dilleniaceae', 'Dipterocarpaceae',
+    'Ebenaceae', 'Elaeocarpaceae', 'Ericaceae', 'Eriocaulaceae', 'Erythroxylaceae', 'Escalloniaceae',
+    'Euphorbiaceae', 'Fabaceae', 'Flacourtiaceae', 'Gelsemiaceae', 'Gentianaceae', 'Geraniaceae',
+    'Gesneriaceae', 'Gnetaceae', 'Griseliniaceae', 'Haemodoraceae', 'Haloragaceae', 'Herreriaceae',
+    'Hugoniaceae', 'Hydnoraceae', 'Hydrocharitaceae', 'Hypericaceae', 'Icacinaceae', 'Iridaceae',
+    'Ixonanthaceae', 'Juglandaceae', 'Juncaceae', 'Lamiaceae', 'Lauraceae', 'Lecythidaceae',
+    'Lepidobotryaceae', 'Linaceae', 'Linderniaceae', 'Lissocarpaceae', 'Loasaceae', 'Lobeliaceae',
+    'Loganiaceae', 'Loranthaceae', 'Lythraceae', 'Malpighiaceae', 'Malvaceae', 'Marantaceae',
+    'Marcgraviaceae', 'Martyniaceae', 'Melastomataceae', 'Menispermaceae', 'Monimiaceae', 'Moraceae',
+    'Moringaceae', 'Myristicaceae', 'Myrsinaceae', 'Ochnaceae', 'Oleaceae', 'Onagraceae', 'Orchidaceae',
+    'Orobanchaceae', 'Oxalidaceae', 'Papaveraceae', 'Passifloraceae', 'Phrymaceae', 'Phyllanthaceae',
+    'Phytolaccaceae', 'Picrodendraceae', 'Piperaceae', 'Plantaginaceae', 'Poaceae', 'Podocarpaceae',
+    'Polygalaceae', 'Polygonaceae', 'Potamogetonaceae', 'Primulaceae', 'Proteaceae', 'Quiinaceae',
+    'Rafflesiaceae', 'Ranunculaceae', 'Rhamnaceae', 'Rhizophoraceae', 'Rosaceae', 'Rubiaceae',
+    'Rutaceae', 'Sabiaceae', 'Salicaceae', 'Santalaceae', 'Sapindaceae', 'Scrophulariaceae',
+    'Simaroubaceae', 'Solanaceae', 'Styracaceae', 'Symplocaceae', 'Tetrameristaceae', 'Theaceae',
+    'Theophrastaceae', 'Thymelaeaceae', 'Trigoniaceae', 'Triuridaceae', 'Turneraceae', 'Ulmaceae',
+    'Urticaceae', 'Valerianaceae', 'Velloziaceae', 'Verbenaceae', 'Violaceae', 'Vivianiaceae',
+    'Vochysiaceae', 'Welwitschiaceae', 'Winteraceae', 'Xyridaceae'
+]
+
+meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro',
+'outubro', 'novembro', 'dezembro']
+
+dispersoes = {'Anemocoria': 'ANE' , 'Zoocoria': 'ZOO', 'Autocoria': 'AUT' , 'Barocoria': 'BAR' }
+polinizasoes = {'Anemofilia': 'ANE' , 'Hidrofilia': 'HID', 'Entomofilia': 'ENT', 'Ornitofilia': 'ORN' , 'Quiropterofilia': 'QUI', 'Zoofilia': 'ZOO' }
+cores = ['vermelho', 'amarelo', 'rosa', 'branco', 'azul', 'lilás', 'creme', 'salmão', 'laranja', 'roxo', 'verde', 'preto']
+
 Especies = db.define_table(
     "Especies",
     Field('id', 'id'),
-    Field("Nome", "string", length=30, notnull=True),
-    Field("Especie", "string", length=40),
-    Field("Familia", "string", length=30),
-    Field("OutroNome", "string", length=250),
-    Field("Bioma", "string", length=15),
-    Field("Regiao", "string", length=15),
-    Field("Ameaca", "string", length=20),
+    Field("Nome", "string", length=40, notnull=True, requires=[IS_NOT_EMPTY(), IS_NOT_IN_DB(db, 'Especies.Nome'), IS_LOWER()]),
+    Field("Especie", "string", length=40, requires=[IS_NOT_EMPTY(), IS_NOT_IN_DB(db, 'Especies.Especie')]),
+    Field("Familia", "string", requires=IS_IN_SET(familias), length=30),
+    Field("OutroNome", "string", label='Outros Nomes', length=250),
+    Field("Bioma", "string", requires=IS_IN_SET([
+        'Amazônia', 'Caatinga', 'Cerrado', 'Deserto', 'Floresta Temperada',
+        'Floresta Tropical', 'Mata Atlântica', 'Pampa' , 'Pantanal',
+        'Pradaria', 'Taiga', 'Tundra', 'Savanas'
+        ] ) ),
+    Field("Regiao", "string", requires=IS_IN_SET(['',  'Norte', 'Nordeste', 'Centro-Oeste', 'Sudeste', 'Sul']), length=15),
+    Field("Ameaca", "string", requires=IS_EMPTY_OR(IS_IN_SET(ameaças)), length=20),
     Field("GrupoEco", "string", length=10),
-    Field("ClasseSucessao", "string", length=20),
-    Field("Porte", "string", length=10),
+    Field("ClasseSucessao", "string", requires=IS_EMPTY_OR(IS_IN_SET(['Pioneira', 'Intermediária', 'Climax'])), length=20),
+    Field("Porte",  "string",  requires=IS_IN_SET(['Pequeno', 'Médio', 'Grande']), length=10),
     Field("TamanhoMax", "decimal(3,2)"),
-    Field("IniFloracao", "string", length=15),
-    Field("FimFloracao", "string", length=15),
-    Field("IniFrutificacao", "string", length=15),
-    Field("FimFrutificacao", "string", length=15),
-    Field("CorDaFlor", "string", length=20),
-    Field("TipoFruto", "string", length=10),
-    Field("SinPolinizacao", "string", length=20),
-    Field("SinDispercao", "string", length=20),
+    Field("IniFloracao", "string", requires=IS_EMPTY_OR(IS_IN_SET(meses)), length=15),
+    Field("FimFloracao", "string", requires=IS_EMPTY_OR(IS_IN_SET(meses)), length=15),
+    Field("IniFrutificacao", "string", requires=IS_EMPTY_OR(IS_IN_SET(meses)), length=15),
+    Field("FimFrutificacao", "string", requires=IS_EMPTY_OR(IS_IN_SET(meses)), length=15),
+    Field("CorDaFlor", "string", requires=IS_EMPTY_OR(IS_IN_SET(cores)), length=20),
+    Field("TipoFruto", "string", requires=IS_EMPTY_OR(IS_IN_SET(['Carnoso','Seco'])), length=10),
+    Field("SinPolinizacao", "string", requires=IS_EMPTY_OR(IS_IN_SET(polinizasoes)), length=20),
+    Field("SinDispercao", "string", requires=IS_EMPTY_OR(IS_IN_SET(dispersoes)), length=20),
     Field("NativaBr", "integer", requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " "),
@@ -108,17 +162,17 @@ Especies = db.define_table(
     Field("Calcada", "integer", requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " "),
-    Field("foto", "upload"),
     Field("obs", "text"),
     format = (lambda row : especie_represent(row)),
     migrate=True if not configuration.get('app.production') else False,
     fake_migrate=True if not configuration.get('app.production') else False,
+    
 )
 
 
 Requerimentos = db.define_table(
     "Requerimentos",
-    Field("Protocolo", 'string' , requires= [IS_NOT_EMPTY(), ProtocPattern()]),
+    Field("Protocolo", 'integer' , requires= [IS_NOT_EMPTY(), ProtocPattern()]),  # type: ignore
     Field("Requerente", requires=[IS_UPPER(), Remove_Acentos()]),
     Field(
         "data_entrada",
@@ -456,6 +510,7 @@ Laudos = db.define_table(
         ),
     ),
     primarykey=["Protocolo"],
+    format="%(Protocolo)s",
     rname="`{}`".format(tabela_laudos),
     migrate=True if not configuration.get('app.production') else False,
     fake_migrate=True if not configuration.get('app.production') else False,
@@ -576,6 +631,30 @@ def relat_podas_periodo(data_inicial, data_final):
 
     rows = db(query, )
     return rows
+
+
+
+
+Fotos = db.define_table('fotos',
+        Field('titulo'),
+        Field('foto', 'upload',               
+                uploadseparate=True, uploadfolder= Path(pasta_viveiro_fotos, session.function if session.function else 'Outras_fotos')  ,
+                requires=[IS_EMPTY_OR(IS_LENGTH(3145728, 2048, error_message= 'deve ser maior que 2k e menor que 3m bites')),
+                          IS_IMAGE( error_message='deve ser imagem no formato jpeg ou png')], autodelete = True, 
+                ),
+
+        Field('idEspecie', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Especies.id', "%(Nome)s"))),
+        Field('idLaudo', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Laudos.Protocolo', "%(Protocolo)s")), ),
+        Field('fonte', 'string'),
+        Field('url', 'string'),
+        Field('tipo', label='tipo da foto'),
+        Field('obs', 'text'),
+        auth.signature,
+        migrate= True if not configuration.get('app.production') else False,
+        fake_migrate= True if not configuration.get('app.production') else False,
+                        )
+
+
 
 
 # DADOS DE TESTE INSERIDOS AUTOMÁTICAMENTE EM AMBIENTE DE TESTE.
@@ -767,3 +846,5 @@ if not configuration.get("app.production"):
                 ),
             )
             db.commit()
+
+

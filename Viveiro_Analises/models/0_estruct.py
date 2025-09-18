@@ -60,7 +60,11 @@ class ProtocPattern():
             self.value = value
             REGEX = re.compile(r'^(\d\d\d\d)(0*)(\d+)$')
             match = REGEX.match(str(value))
-            return int(match.group(1) + match.group(3))
+            if match:
+                return int(match.group(1) + match.group(3))
+            else:
+                return value
+                
 
 
 
@@ -100,6 +104,7 @@ def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
                  
         if len(q) > 0:
             busca = db(*q)
+                   
     
     links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=session.controller,
                               f=regform, args=row[tabela][busca_id] 
@@ -114,5 +119,5 @@ def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
                           orderby=~[db[tabela][f] for f in db[tabela].fields if db[tabela][f].type == 'date'][-1] 
                           if any([True if db[tabela][f].type == 'date' else False for f in db[tabela].fields])  else db[tabela][busca_id])
     
-    return dict(formbusca=formbusca, grade=Modal('Busca', grade, 'Busca', ))
+    return dict(formbusca=formbusca, grade=Modal('Busca', grade, 'Busca'))
 
