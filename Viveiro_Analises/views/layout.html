@@ -201,11 +201,45 @@
       $('#avisos').load('{{=URL("default", "avisos")}}', function () {
         // Após carregar, abre o modal
         $('#myModal').modal('show');
+        $('#myModal').on('hidden.bs.modal', function () {
+          window.location.reload();
+        });
+        
       });
     });
   });
 </script>
 
+<!--
+    <script>
+      $(document).ready(function () {
+        // Incorpora o dicionário de avisos do controlador como um objeto JavaScript
+        const avisos = JSON.parse('{{=URL("default", "avisos")}}');
+        const chavesOrdenadas = Object.keys(avisos).sort((a, b) => a - b);
+        let indiceAtual = 0;
+
+        const mostrarProximoAviso = () => {
+          if (indiceAtual < chavesOrdenadas.length) {
+            const chave = chavesOrdenadas[indiceAtual];
+            const mensagem = avisos[chave];
+
+            $('#myModal .modal-body').text(mensagem);
+            $('#myModal').modal('show');
+
+            indiceAtual++;
+          }
+        };
+
+        $('#myModal').on('hidden.bs.modal', function () {
+          mostrarProximoAviso();
+        });
+
+        if (chavesOrdenadas.length > 0) {
+          mostrarProximoAviso();
+        }
+      });
+    </script>
+  -->
 
     <script src="{{=URL('static','js/bootstrap.bundle.min.js')}}"></script>
     <script src="{{=URL('static','js/web2py-bootstrap4.js')}}"></script>

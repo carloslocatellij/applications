@@ -26,30 +26,32 @@ def api_get_user_email():
 
 
 def avisos():
-    registros_de_avisos = db(
-    (db.Avisos.id > 0) & (~db.Avisos.recebido_por.belongs([auth.user_id]))).select()
-    avisos = [aviso.corpo for aviso in registros_de_avisos] 
+    registros_de_avisos = db(~(db.Avisos.recebido_por.contains(auth.user_id))).select()
     
-    for aviso in registros_de_avisos:
-        recebidos = aviso.recebido_por or []
-        if auth.user_id not in aviso.recebido_por:
-            recebidos.append(auth.user_id)
-            aviso.update_record(recebido_por=recebidos)
+    aviso = registros_de_avisos[-1]
+    
+    
+    recebido = aviso.recebido_por or []
+    if auth.user_id not in recebido:
+        recebido.append(auth.user_id)
+        aviso.update_record(recebido_por=recebido)
         
     db.commit()
+    
     markdowner = Markdown2(html4tags=True, tab_width=4, )
     
     
-    return dict(avisos=XML(markdowner.convert(*avisos))) # type: ignore
+    return dict(aviso=XML(markdowner.convert(aviso.corpo))) # type: ignore
 
 
 
 def index():
-    registros_de_avisos = db(
-    (db.Avisos.id > 0) & (~db.Avisos.recebido_por.belongs([auth.user_id]))).select()
-    avisos = [aviso for aviso in registros_de_avisos] 
+    user = authdb(authdb.auth_user.id == auth.user_id).select().first()# type: ignore
+    if user:
+        registros_de_avisos = db(~(db.Avisos.recebido_por.contains(user.id ) ) ).select()
+        avisos = [aviso for aviso in registros_de_avisos] 
 
-    return dict(mensagem=T('Sistema de Dados da Secretaria Municipal de Meio Ambiente - São José do Rio Preto'), avisos=avisos)
+    return dict(mensagem=T(f'Olá {user.first_name if user else ''}! Você está no Sistema de Dados da Sec. Municipal de Meio Ambiente - São José do Rio Preto'), avisos=avisos if user else '')
 
 
 
@@ -330,6 +332,7 @@ def Especies(): #Menu
     return response.render(dict(form=form,  especie=registro, grd_especies=grd_especies))
 
 
+@auth.requires_login()
 def fotos():
     table = 'fotos'
     tablename = f'{db[table]._tablename[:-1]}'
@@ -353,12 +356,13 @@ def fotos():
     else:
         form = SQLFORM(db.fotos, submit_button=f'Registrar {tablename}', fields=fields, formname= table)
     
+    
     if form.process().accepted:
         session.flash = f'Registrado'
         if item_em_questao:
             redirect(URL('default', session.function , extension='', args=[item_em_questao], vars={'f':'ver'})) # type: ignore
         else:
-            redirect(URL('default', 'fotos', args=[request.args(0)], vars={'f':'ver'}))
+            redirect(URL('default', 'fotos', args=[request.args(0)], vars={'f':'ver'})) # type: ignore
             
     elif form.errors:
         response.flash = 'Corrija os Erros indicados'
@@ -379,13 +383,13 @@ def fotos():
         resto = len(listagem_fotos) % num_col
         
         for item, elemento in enumerate(listagem_fotos): 
-            card_foto = TD( B(A(f'Foto: {elemento[2]}',
-                                _href=URL(c=request.controller, f='fotos', extension='',
+            card_foto = TD( B(A(f'Foto: {elemento[2]}', # type: ignore
+                                _href=URL(c=request.controller, f='fotos', extension='', # type: ignore
                                           args=[elemento[0]], vars={'f':'ver'} ))),  # type: ignore
                             DIV(  IMG( _src=URL(r=request, f='download', args=elemento[1]), # type: ignore
                                  _alt=f'foto não encontrada', _width='20%', 
-                                 _style='display: block;  margin-left: auto; margin-right: auto'),
-                                _align='center', _class="card", _style='padding:20px' ), f'tipo: {elemento[3]}',  _width='20%') 
+                                 _style='display: block;  margin-left: auto; margin-right: auto; width: 20%; height: auto;'),
+                                _align='center', _class="card", _style='padding:20px', _width='20%' ), f'tipo: {elemento[3]}',  _width='20%') 
             linha_cards_fotos.append(card_foto)
             
             if len(listagem_fotos) <= num_col and len(linha_cards_fotos) == len(listagem_fotos):          
@@ -395,11 +399,11 @@ def fotos():
             elif len(table_fotos) >= len(listagem_fotos) // num_col:
                 if len(linha_cards_fotos) == resto: 
                     table_fotos.append(linha_cards_fotos)
-                    linha_cards_fotos = TR()
+                    linha_cards_fotos = TR() # type: ignore
             else:
                 if len(linha_cards_fotos) == num_col:
                     table_fotos.append(linha_cards_fotos)
-                    linha_cards_fotos = TR()
+                    linha_cards_fotos = TR() # type: ignore
             
                 
     return dict(listagem_fotos=listagem_fotos if not f else '',

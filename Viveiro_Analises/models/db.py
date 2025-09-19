@@ -9,7 +9,7 @@ from pathlib import Path
 if 0 == 1:
     from gluon import *  # type: ignore
     from gluon import (
-        db, configuration, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP, IS_LENGTH, # type: ignore
+        db, configuration, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP, IS_LENGTH, IS_IMAGE, # type: ignore
         Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db, IS_CHKBOX01, DAL, IS_INT_IN_RANGE, IS_CPF_OR_CNPJ,  MASK_CPF,
         MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE, SQLFORM, IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC, )  # type: ignore
 
@@ -30,10 +30,10 @@ else:
     tab_ruas = """Ruas"""
 
 
-db.define_table('Avisos',
+Avisos = db.define_table('Avisos',
                 Field('titulo','string'),
                 Field('corpo', 'text'),
-                Field('recebido_por', 'list:integer', requires=IS_IN_DB(auth, 'auth_user.id', multiple=True)),
+                Field('recebido_por', 'list:integer', ),
                 )
 
 
@@ -635,21 +635,25 @@ def relat_podas_periodo(data_inicial, data_final):
 
 
 
-Fotos = db.define_table('fotos',
+fotos = db.define_table('fotos',
         Field('titulo'),
         Field('foto', 'upload',               
                 uploadseparate=True, uploadfolder= Path(pasta_viveiro_fotos, session.function if session.function else 'Outras_fotos')  ,
                 requires=[IS_EMPTY_OR(IS_LENGTH(3145728, 2048, error_message= 'deve ser maior que 2k e menor que 3m bites')),
-                          IS_IMAGE( error_message='deve ser imagem no formato jpeg ou png')], autodelete = True, 
+                          IS_IMAGE( error_message='deve ser imagem no formato jpeg ou png')], autodelete = True,  
                 ),
-
+        Field('caminho', 'string'),
         Field('idEspecie', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Especies.id', "%(Nome)s"))),
         Field('idLaudo', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Laudos.Protocolo', "%(Protocolo)s")), ),
         Field('fonte', 'string'),
         Field('url', 'string'),
         Field('tipo', label='tipo da foto'),
         Field('obs', 'text'),
-        auth.signature,
+        Field('created_by', default=auth.user_id),
+        Field('created_on',),
+        Field('modified_by', update=auth.user_id),
+        Field('modified_on',),
+        
         migrate= True if not configuration.get('app.production') else False,
         fake_migrate= True if not configuration.get('app.production') else False,
                         )

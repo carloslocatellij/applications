@@ -1,6 +1,8 @@
 
 Title "Implementador - Sistema SMMAURB - (c) Carlos A. Locatelli"
 
+for /d /r . %%f in ("__pycache__") do rmdir /s /q "%%f"
+
 xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\controllers\" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\controllers\" /S /E /Y /H /D
 
 xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\models\" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\models\" /S /E /Y /H /D
@@ -18,6 +20,8 @@ xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\Version.txt" "F:\SMM
 xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\README.md" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\README.md" /S /E /Y /H /D
 
 xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\LICENSE" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\LICENSE" /S /E /Y /H /D
+
+xcopy "%userprofile%\web2py\site-packages" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\site-packages\" /S /E /Y /H /D
 
 echo 'ISNTALAÇÃO FINALIZADA-';
 
