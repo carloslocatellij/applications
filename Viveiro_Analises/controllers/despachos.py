@@ -10,6 +10,7 @@ if 0 == 1:
     cache = current.cache # type: ignore
     T = current.T # type: ignore
     
+from gluon.sqlhtml import ExporterCSV
     
 @auth.requires_login()
 def Gerenciar_Modelos(): #Menu
@@ -38,16 +39,17 @@ def Gerenciar_Modelos(): #Menu
     else:
         pass
     
-    formbusca = buscador('despacho_template', 
-                        nome={'label': 'Nome'},
-                        texto={'label': 'Texto'},
-                        descricao={'label': 'Descrição'})
-    links = [
-    dict(header='Ver', body=lambda row: A('Ver', _href=URL(c=request.controller , f= request.function, # type: ignore
-     args=row.id, vars={'f': 'ver'}))),
-    dict(header='Editar', body=lambda row: A('Editar', _href=URL(c=request.controller , f= request.function, # type: ignore
-     args=row.id, vars={'f': 'editar'})))
-     ]
+    links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=request.controller, # type: ignore
+                              f=request.function, args=[row.id] , vars={'f': 'ver'}))),
+             dict(header='Editar', body=lambda row: A('Editar', _class='btn btn-primary' , _href=URL(c=request.controller, # type: ignore
+                              f=request.function, args=[row.id] , vars={'f': 'editar'})))]
+    
+    formbusca= SQLFORM.grid(db[table].id > 0, represent_none='', editable=False, searchable=True, deletable=False, links=links,
+                         create=False, details=False, paginate=30,  maxtextlength = 120, _class="table", 
+                         exportclasses=dict(csv=False, tsv=False, tsv_with_hidden_cols=False, json=False, xml=False,
+                         html=False, csv_with_hidden_cols=(ExporterCSV, 'CSV' )), user_signature=False, links_placement = 'left', 
+                          )
+    
     
     grid_despachos = SQLFORM.grid(db.despacho_template, links=links,user_signature=False, editable=False, searchable=True, details=False,
     deletable=False, create=False,csv=False, maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left')

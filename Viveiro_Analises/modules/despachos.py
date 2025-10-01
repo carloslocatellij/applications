@@ -1,7 +1,7 @@
-import num2words #type: ignore
-import locale
-locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
-from datetime import datetime
+# import num2words #type: ignore
+# import locale
+# locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
+# from datetime import datetime
 
 
 def Despachar(query, relation_query, query_protoc_ref):

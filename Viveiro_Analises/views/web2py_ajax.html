@@ -5,7 +5,7 @@
     w2p_ajax_disable_with_message = T('Working...'),
     w2p_ajax_date_format = T('%d/%m/%Y'),
     w2p_ajax_datetime_format = T('%d/%m/%Y %H:%M:%S'),
-    ajax_error_500 = T('An error occured, please reload the page')
+    ajax_error_500 = T.M('An error occured, please [[reload %s]] the page') % URL(args=request.args, vars=request.get_vars)
     )}}
     //--></script>
 {{

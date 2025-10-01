@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-
-
+from pathlib import Path
 from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
+from gluon.sqlhtml import ExporterCSV
 
 if 0 == 1:
     from gluon import (db, current, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
@@ -47,11 +47,18 @@ def avisos():
 
 def index():
     user = authdb(authdb.auth_user.id == auth.user_id).select().first()# type: ignore
+    mensagens= ''
     if user:
         registros_de_avisos = db(~(db.Avisos.recebido_por.contains(user.id ) ) ).select()
         avisos = [aviso for aviso in registros_de_avisos] 
+        num_avisos = len(avisos)
+        
+        mensagens= TABLE([P(f'''Olá {user.first_name if user else ""}! Você está no Sistema de Dados da Sec. Municipal de Meio Ambiente'''), # type: ignore
+                    P(str(f'''Você tem {num_avisos}'''  if num_avisos > 0 else '') + str(' aviso' if num_avisos > 0 else 'avisos'))  if num_avisos > 0 else '', # type: ignore
+                        
+                        ])
 
-    return dict(mensagem=T(f'Olá {user.first_name if user else ''}! Você está no Sistema de Dados da Sec. Municipal de Meio Ambiente - São José do Rio Preto'), avisos=avisos if user else '')
+    return dict(mensagem=mensagens, avisos=avisos if user else '')
 
 
 
@@ -104,7 +111,7 @@ def wiki(): #Menu
 # ---- Action for login/register/etc (required for auth) -----
 def user():
     """
-    expõe:
+    exposes:
     http://..../[app]/default/user/login
     http://..../[app]/default/user/logout
     http://..../[app]/default/user/register
@@ -150,16 +157,13 @@ def Requerimentos(): #Menu
         
 
     if formprocess.process().accepted:
-        session.flash = f'Dados do protocolo atualizados' if processo else 'Protocolo Registrado'
-        redirect(URL('default', 'Requerimentos', args=[formprocess.vars.Protocolo], vars={'f':'ver'})) # type: ignore
+        session.flash = f'Dados do {tablename} atualizados' if processo else f'{tablename} Registrado'
+        redirect(URL('default', table, args=[formprocess.vars.Protocolo], vars={'f':'ver'})) # type: ignore
 
     elif formprocess.errors:
         response.flash = 'Corrija os Erros indicados'
     else:
         pass
-    
-    db.Requerimentos.especie_ret2.show_if = db.Requerimentos.especie_ret1 == ''
- 
     
     list_fields= [db.Requerimentos.Protocolo, db.Requerimentos.Requerente,
                   db.Requerimentos.Endereco, db.Requerimentos.data_do_laudo, db.Requerimentos.telefone1,
@@ -167,14 +171,15 @@ def Requerimentos(): #Menu
                   db.Requerimentos.local_arvore, db.Requerimentos.tipo_imovel
                   ]
     
-    formbusca = buscador('Requerimentos',  # type: ignore
-                         Protocolo={'label': 'Protocolo'},
-                         data_do_laudo={'type': 'date' ,'label': 'Data', 'requires': IS_EMPTY_OR(
-                            IS_DATE(format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx") )},
-                         Requerente={'label': 'Requerente' },
-                         Endereco1={'name':'Endereco1', 'label':'Endereço'},
-                         Bairro={},
-                         cep= {'type':'integer',  'label':'cep'}, list_fields=list_fields )
+    links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=request.controller, # type: ignore
+                              f=request.function, args=[row.Protocolo] , vars={'f': 'ver'})))]
+    
+    formbusca = SQLFORM.grid(db(db.Requerimentos.Protocolo > 0), orderby=~db.Requerimentos.data_do_laudo, represent_none='',
+                         editable=False, searchable=True, deletable=False, links=links, create=False, details=False, paginate=30,
+                         maxtextlength = 120, _class="table", exportclasses=dict(csv=False, tsv=False, tsv_with_hidden_cols=False,
+                         json=False, xml=False, html=False, csv_with_hidden_cols=(ExporterCSV, 'CSV' )), user_signature=False,
+                         fields=list_fields, links_placement = 'left',)
+    
         
     return dict(formprocess=formprocess, processo=processo, formbusca=formbusca, tem_laudo=tem_laudo)
 
@@ -332,6 +337,19 @@ def Especies(): #Menu
     return response.render(dict(form=form,  especie=registro, grd_especies=grd_especies))
 
 
+def processar_formulario(form):
+    # Acessar o validador do campo de imagem
+    validator = None
+    for val in form.table.foto.requires:
+        if isinstance(val, IS_IMAGE_COMPACT):
+            validator = val
+            break
+    
+    if validator and validator.coordinate:
+        # Preencher automaticamente o outro campo
+        form.vars.obs = validator.coordinate
+        
+
 @auth.requires_login()
 def fotos():
     table = 'fotos'
@@ -357,8 +375,11 @@ def fotos():
         form = SQLFORM(db.fotos, submit_button=f'Registrar {tablename}', fields=fields, formname= table)
     
     
-    if form.process().accepted:
+    if form.process(onvalidation=processar_formulario).accepted:
         session.flash = f'Registrado'
+        if form.vars.foto:
+            db(db.fotos.id == form.vars.id).update(**dict(caminho=Path(str(pasta_viveiro_fotos),session.function or 'Outras_fotos',form.vars.foto[:10],form.vars.foto[11:13],form.vars.foto)))
+        
         if item_em_questao:
             redirect(URL('default', session.function , extension='', args=[item_em_questao], vars={'f':'ver'})) # type: ignore
         else:
@@ -373,42 +394,92 @@ def fotos():
     
     listagem_fotos = []
     
-    if not f:
+    form_num_col = ''
+    
+    if not f and item_em_questao:
         for foto in fotos_do_item_em_questao.select(orderby=~db.fotos.tipo).as_list():
             listagem_fotos.append((foto.get('id'), foto.get('foto'), foto.get('titulo'), foto.get('tipo')))
-            
-        table_fotos = TABLE( _align='center') # type: ignore
-        linha_cards_fotos = TR( ) # type: ignore
-        num_col = 4
+
+        # form_num_col = SQLFORM.factory(Field('num_de_col', requires=IS_IN_SET(['3', '4']), label='Colunas') )
+        # #Adiciona script jQuery para atualizar num_col e recarregar a página em tempo real
+        # script = SCRIPT("""
+        #     $(document).ready(function(){
+        #     $('#no_table_num_de_col').on('change', function(){
+        #         var val = $(this).val();
+        #         window.num_col = parseInt(val) || 4;
+        #         // Recarrega a página ao alterar o valor
+        #         window.location.href = window.location.pathname + '?num_de_col=' + window.num_col;
+        #     });
+        #     // Inicializa a variável global na primeira carga
+        #     window.num_col = parseInt($('#no_table_num_de_col').val()) || 4;
+        #     });
+        # """)
+        # session.num_col = request.vars.get('num_de_col') or 4
+        
+        num_col = 3
+        
+        # form_num_col[0].append(script)
+
+        # Atualiza num_col com base no parâmetro da URL, se existir
         resto = len(listagem_fotos) % num_col
         
-        for item, elemento in enumerate(listagem_fotos): 
-            card_foto = TD( B(A(f'Foto: {elemento[2]}', # type: ignore
-                                _href=URL(c=request.controller, f='fotos', extension='', # type: ignore
-                                          args=[elemento[0]], vars={'f':'ver'} ))),  # type: ignore
-                            DIV(  IMG( _src=URL(r=request, f='download', args=elemento[1]), # type: ignore
-                                 _alt=f'foto não encontrada', _width='20%', 
-                                 _style='display: block;  margin-left: auto; margin-right: auto; width: 20%; height: auto;'),
-                                _align='center', _class="card", _style='padding:20px', _width='20%' ), f'tipo: {elemento[3]}',  _width='20%') 
-            linha_cards_fotos.append(card_foto)
+        table_fotos = TABLE( _align='center', paginate=10) # type: ignore
+        linha_cards_fotos = TR( ) # type: ignore
             
-            if len(listagem_fotos) <= num_col and len(linha_cards_fotos) == len(listagem_fotos):          
-                table_fotos.append(linha_cards_fotos)               
-                linha_cards_fotos = TR() # type: ignore
             
-            elif len(table_fotos) >= len(listagem_fotos) // num_col:
-                if len(linha_cards_fotos) == resto: 
-                    table_fotos.append(linha_cards_fotos)
+        for item, elemento in enumerate(listagem_fotos):
+            if item < 9:
+                card_foto = TD( B(A(f'Foto: {elemento[2]}', # type: ignore
+                _href=URL(c=request.controller, f='fotos', extension='', # type: ignore
+                args=[elemento[0]], vars={'f':'ver'} ))),  # type: ignore
+                DIV(  IMG( _src=URL(r=request, f='download', args=elemento[1]), # type: ignore
+                    _alt=f'foto não encontrada', _width='20%', 
+                    _style='display: block;  margin-left: auto; margin-right: auto; width: 20%; height: auto;'),
+                    _align='center', _class="card", _style='padding:20px', _width='20%' ), f'tipo: {elemento[3]}',  _width='20%') 
+                linha_cards_fotos.append(card_foto)
+        
+                if len(listagem_fotos) <= num_col and len(linha_cards_fotos) == len(listagem_fotos):          
+                    table_fotos.append(linha_cards_fotos)               
                     linha_cards_fotos = TR() # type: ignore
+                
+                elif len(table_fotos) >= len(listagem_fotos) // num_col:
+                    if len(linha_cards_fotos) == resto: 
+                        table_fotos.append(linha_cards_fotos)
+                        linha_cards_fotos = TR() # type: ignore
+                else:
+                    if len(linha_cards_fotos) == num_col:
+                        table_fotos.append(linha_cards_fotos)
+                        linha_cards_fotos = TR() # type: ignore
+                    
+            elif request.vars['mais'] == 'true':
+                card_foto = TD( B(A(f'Foto: {elemento[2]}', # type: ignore
+                _href=URL(c=request.controller, f='fotos', extension='', # type: ignore
+                args=[elemento[0]], vars={'f':'ver'} ))),  # type: ignore
+                DIV(  IMG( _src=URL(r=request, f='download', args=elemento[1]), # type: ignore
+                    _alt=f'foto não encontrada', _width='20%', 
+                    _style='display: block;  margin-left: auto; margin-right: auto; width: 20%; height: auto;'),
+                    _align='center', _class="card", _style='padding:20px', _width='20%' ), f'tipo: {elemento[3]}',  _width='20%') 
+                linha_cards_fotos.append(card_foto)
+        
+                if len(listagem_fotos) <= num_col and len(linha_cards_fotos) == len(listagem_fotos):          
+                    table_fotos.append(linha_cards_fotos)               
+                    linha_cards_fotos = TR() # type: ignore
+                
+                elif len(table_fotos) >= len(listagem_fotos) // num_col:
+                    if len(linha_cards_fotos) == resto: 
+                        table_fotos.append(linha_cards_fotos)
+                        linha_cards_fotos = TR() # type: ignore
+                else:
+                    if len(linha_cards_fotos) == num_col:
+                        table_fotos.append(linha_cards_fotos)
+                        linha_cards_fotos = TR() # type: ignore
             else:
-                if len(linha_cards_fotos) == num_col:
-                    table_fotos.append(linha_cards_fotos)
-                    linha_cards_fotos = TR() # type: ignore
-            
+                table_fotos.append(DIV(A('Clique para mais', _href=URL(c=request.controller, f=request.function, vars={'mais':'true'})),_class='card')) # type: ignore
+                break
                 
     return dict(listagem_fotos=listagem_fotos if not f else '',
-                table_fotos=table_fotos if not f else '',
-                form=form, f=f)
+                table_fotos=table_fotos if not f and item_em_questao else '',
+                form=form, form_num_col=form_num_col, f=f)
 
 
 
@@ -435,9 +506,16 @@ def Bairros(): #Menu
     else:
         pass
     
-    formbusca = buscador(table,  # type: ignore
-                         Bairro ={'label': table[:-1]},
-                         )
+    links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=request.controller, # type: ignore
+                              f=request.function, args=[row.id] , vars={'f': 'ver'}))),
+             dict(header='Editar', body=lambda row: A('Editar', _class='btn btn-primary' , _href=URL(c=request.controller, # type: ignore
+                              f=request.function, args=[row.id] , vars={'f': 'editar'})))]
+    
+    formbusca= SQLFORM.grid(db[table].id > 0, represent_none='', editable=False, searchable=True, deletable=False, links=links,
+                         create=False, details=False, paginate=30,  maxtextlength = 120, _class="table", 
+                         exportclasses=dict(csv=False, tsv=False, tsv_with_hidden_cols=False, json=False, xml=False,
+                         html=False, csv_with_hidden_cols=(ExporterCSV, 'CSV' )), user_signature=False, links_placement = 'left', 
+                          )
 
     return response.render(dict(form=form, formbusca=formbusca, registro=registro, tabela=table))
 

@@ -133,12 +133,17 @@
             <td width="25%" align='left' style="padding-inline: 10px">{{=B('Tipo de Fruto:')}}<div align='left' class="card">
                     {{=form.custom.widget['TipoFruto']}}</div>
             </td>
-            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Polinização:')}}<div align='left' class="card"></div>
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Sindrome de Polinização:')}}<div align='left' class="card"></div>
                     {{=form.custom.widget['SinPolinizacao']}}</div>
             </td>
-            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Dispersão:')}}<div align='left' class="card">
+            <td width="25%" align='left' style="padding-inline: 10px">{{=B('Sindrome de Dispersão:')}}<div align='left' class="card">
                     {{=form.custom.widget['SinDispercao']}}</div>
             </td>
+        <td width="25%" align='left' style="padding-inline: 10px">{{=B('DAP Máximo:')}}<div align='left'
+                        class="card">
+                        {{=form.custom.widget['DAP_max']}}</div>
+        </td>
+
         </tr>
         <tr>
             <td width="25%" align='left' style="padding-inline: 10px">{{=B('Início da Floração:')}}<div align='left' class="card">
@@ -173,11 +178,13 @@
 {{=form.custom.submit}}
 {{=form.custom.end}}
 <td width="25%" align='left' style="padding-inline: 10px">{{=B('Fotos:')}}
+        {{if request.args:}}
         <div align='left' class="card">
                 <tr>
                         {{=DIV(LOAD('default', 'fotos.load', args=[request.args(0)], content='Carregando...',  ajax=True),
                         _id='fotos', _class="jumbotron", _style="border: 1px solid; padding:10px;word-wrap:break-word;")}}
                 </tr>
         </div>
+        {{pass}}
 </td>
 </div>

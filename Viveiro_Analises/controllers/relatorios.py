@@ -1,18 +1,42 @@
-
-
 if 0 == 1:
-    from gluon import *  # type: ignore
     from gluon import (
         db, configuration, IS_IN_SET, IS_UPPER, T, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
         Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db, IS_CHKBOX01, DAL, IS_INT_IN_RANGE, IS_CPF_OR_CNPJ,  MASK_CPF)
  
+
+def relat_supress_periodo(data_inicial, data_final, despacho=None, criterio=None):
+    query = db.Requerimentos.Protocolo == db.Laudos.Protocolo
+    query &= (db.Requerimentos.Bairro == db.Bairros.Bairro)
+    query &= (db.Requerimentos.data_do_laudo >= data_inicial) 
+    query &= (db.Requerimentos.data_do_laudo <= data_final)
+    if despacho:
+        query &= (db.Requerimentos.Despacho == despacho )
+    # if criterio:
+    #     query &= (db.Laudos.motivos.contains(criterio) )
+        
+
+    rows = db(query, )
+    return rows
+
+
+def relat_podas_periodo(data_inicial, data_final):
+    query =  db.Requerimentos.qtd_poda1 > 0
+    query &= (db.Requerimentos.Bairro == db.Bairros.Bairro)
+    query &= (db.Requerimentos.data_do_laudo >= data_inicial) 
+    query &= (db.Requerimentos.data_do_laudo <= data_final)
+
+    rows = db(query, )
+    return rows
+
 
 def Supressões_por_periodo(): #Menu
     response.flash = ("Seja Bem Vindo") # type: ignore
     
     grid = None
     if request.vars.data_ini and request.vars.data_fim: # type: ignore
-        query= relat_supress_periodo(request.vars.data_ini, request.vars.data_fim) # type: ignore
+        query= relat_supress_periodo(request.vars.data_ini, # type: ignore
+                                     request.vars.data_fim, # type: ignore
+                                     request.vars.Despacho) # type: ignore
     else:
         query= None
     
@@ -22,10 +46,21 @@ def Supressões_por_periodo(): #Menu
         )),
         Field('Data_Final', type='date', requires=IS_EMPTY_OR(
             IS_DATE(format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx")
-        )))
+        )),
+        Field('Despacho', requires=IS_IN_SET(["Deferido",
+                "Parcialmente Deferido",
+                "Indeferido",
+                "Em Análise",
+                "Aguardando",
+                "Com Pendência",
+                "Pendente de Compesação",
+                "", ])),
+        )
     
     if form.process().accepted:
-        redirect(URL(f=request.function, vars={'data_ini': form.vars.Data_Inicial, 'data_fim': form.vars.Data_Final })) # type: ignore
+        redirect(URL(f=request.function, vars={'data_ini': form.vars.Data_Inicial, # type: ignore
+                                               'data_fim': form.vars.Data_Final,
+                                               'Despacho': form.vars.Despacho})) # type: ignore
     else:
         pass
         

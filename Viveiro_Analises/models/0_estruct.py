@@ -83,31 +83,40 @@ def buscador(tabela, regform=request.function, list_fields=[] ,**fields, ):
     tab2 = None
 
     if formbusca.process():
-        for k, v in fields.items():
-            session[k] = formbusca.vars[k]
         q = []
         for k, v in fields.items():
+            session[k] = formbusca.vars[k]
             if session[k] is not None:
+                
+                
                 if 'table' in v:
                     tab2 = v['table']
-                    campo2 = busca_id + v['table'][:-1] if v['table'][-1] == 's' else busca_id + v['table']
+                    if v['table'] == 'Bairros':
+                        campo2 = 'Bairro'
+                        id = 'Bairro'
+                    else:
+                        campo2 = busca_id + v['table'][:-1] if v['table'][-1] == 's' else busca_id + v['table']
+                        id = 'id'
+                    
                     if db[tab2][k].type == 'string':
-                        q.append((db[tabela][campo2] == db[tab2].id) & (db[tab2][k].contains(str(session[k]))))
+                        q &= ((db[tabela][campo2] == db[tab2][id]) & (db[tab2][k].contains(str(session[k]))))
                     elif db[tab2][k].type == 'integer':
-                        q.append((db[tabela][campo2] == db[tab2].id) & (db[tab2][k] == int(session[k]) if not k == 'Protocolo' else int(padronizaprotoc(session[k]))))
+                        q &= ((db[tabela][campo2] == db[tab2][id]) & (db[tab2][k] == int(session[k]) if not k == 'Protocolo' else int(padronizaprotoc(session[k]))))
+                        
+                        
                 elif 'string' in db[tabela][k].type:
-                    q.append((db[tabela][k].contains(str(session[k]).upper().strip())))
+                    q &= ((db[tabela][k].contains(str(session[k]).upper().strip())))
                 elif db[tabela][k].type == 'integer':
-                    q.append((db[tabela][k] ==  int(padronizaprotoc(session[k])) if k == 'Protocolo' else int(session[k]) ))
+                    q &= ((db[tabela][k] ==  int(padronizaprotoc(session[k])) if k == 'Protocolo' else int(session[k]) ))
                 else:
-                    q.append((db[tabela][k] == session[k] if not k == 'Protocolo' else padronizaprotoc(session[k]) ))
+                    q &= ((db[tabela][k] == session[k] if not k == 'Protocolo' else padronizaprotoc(session[k]) ))
                  
-        if len(q) > 0:
-            busca = db(*q)
+        
+        busca = db(q)
                    
     
     links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=session.controller,
-                              f=regform, args=row[tabela][busca_id] 
+                              f=regform, args=row[busca_id] 
                               if tab2 != None else row[busca_id], vars={'f': 'ver'})))]
     
     from gluon.sqlhtml import ExporterCSV

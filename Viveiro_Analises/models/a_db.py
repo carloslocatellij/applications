@@ -6,7 +6,8 @@
 # -------------------------------------------------------------------------
 from gluon.contrib.appconfig import AppConfig # type: ignore
 from gluon.tools import Auth # type: ignore
-#import copy
+from configs import pasta_viveiro_fotos
+from my_validador import *
 
 if 0==1:
     from gluon import * # type: ignore
@@ -36,7 +37,7 @@ if 0==1:
 # once in production, remove reload=True to gain full speed
 # -------------------------------------------------------------------------
 
-configuration = AppConfig(reload=True)
+configuration = AppConfig(reload=False)
 
 # session.connect(request, response, cookie_key=configuration.take("db")['password'],)
 # session.secure()
@@ -135,19 +136,17 @@ else:
 # -------------------------------------------------------------------------
 
 
-
-
-# from validador import IS_CPF
-# auth.settings.extra_fields['auth_user'] = [
-#     Field('IdDepto', 'integer'), # type: ignore
-#     #Field('CPF', 'text', requires=IS_CPF()),
-# ]
+auth.settings.extra_fields['auth_user'] = [
+    Field('IdDepto', 'integer'), # type: ignore
+]
 
 auth.define_tables(username=True,  
                    migrate=True if not configuration.get('app.production') else False,   
                    fake_migrate=True if not configuration.get('app.production') else False, )
 
+
 #auth.settings.update_fields = [ 'first_name', 'last_name', 'username', 'email', 'IdDepto']
+auth.settings.remember_me_form = False
 
 # -------------------------------------------------------------------------
 # configure email

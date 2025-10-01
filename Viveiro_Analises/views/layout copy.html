@@ -122,7 +122,7 @@
                 </nav>
           </td>
           <td width='10%' align="center">{{if len(request.args) > 0:}}{{=P(request.args[0]) if request.function == 'Processos'  else ''}}<div>{{=A('Criar Tarefa', _href=URL(c='default',f='Criar_Tarefa', args=request.args[0], ), _class='btn btn-success', _style="align: center") if request.function == 'Processos' and request.args[0]  else ''}}</div>{{pass}} </td>
-          <td width='80%' align="right"><h1 class="display-5">{{='Viveiro Análises'}} </h1></td>
+          <td width='80%' align="right"><h1 class="display-5">{{=request.application.replace('_', ' ')}} </h1></td>
 
         </table>
       </div>
@@ -166,68 +166,21 @@
         $('#Pessoas_celular').mask('(00) 00000-0000', {placeholder: "(  )      -     "});
       });
 
-        $(':input').keydown(function (e) {
-          // Ignora textarea para permitir Enter (quebra de linha)
-          if ($(this).is('textarea')) return true;
-          var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
-          if (key == 13) {
-            e.preventDefault();
-            var inputs = $(this).closest('form').find(':input:visible:enabled');
-            if ((inputs.length - 1) == inputs.index(this))
+      $(':input').keydown(function (e) {
+        // Ignora textarea para permitir Enter (quebra de linha)
+        if ($(this).is('textarea')) return true;
+        var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+        if (key == 13) {
+          e.preventDefault();
+          var inputs = $(this).closest('form').find(':input:visible:enabled');
+          if ((inputs.length-1) == inputs.index(this))
               $(':input:enabled:visible:first').focus();
-            else
-              inputs.eq(inputs.index(this) + 1).focus();
-          }
-        });
-
-</script>
-
-<script>
-  $(document).ready(function () {
-    $('#open_modal').click(function () {
-      // Carrega o conteúdo do modal via AJAX para o container
-      $('#avisos').load('{{=URL("default", "avisos")}}', function () {
-        // Após carregar, abre o modal
-        $('#myModal').modal('show');
-        $('#myModal').on('hidden.bs.modal', function () {
-          window.location.reload();
-        });
-        
-      });
-    });
-  });
-</script>
-
-<!--
-    <script>
-      $(document).ready(function () {
-        // Incorpora o dicionário de avisos do controlador como um objeto JavaScript
-        const avisos = JSON.parse('{{=URL("default", "avisos")}}');
-        const chavesOrdenadas = Object.keys(avisos).sort((a, b) => a - b);
-        let indiceAtual = 0;
-
-        const mostrarProximoAviso = () => {
-          if (indiceAtual < chavesOrdenadas.length) {
-            const chave = chavesOrdenadas[indiceAtual];
-            const mensagem = avisos[chave];
-
-            $('#myModal .modal-body').text(mensagem);
-            $('#myModal').modal('show');
-
-            indiceAtual++;
-          }
-        };
-
-        $('#myModal').on('hidden.bs.modal', function () {
-          mostrarProximoAviso();
-        });
-
-        if (chavesOrdenadas.length > 0) {
-          mostrarProximoAviso();
+          else
+            inputs.eq(inputs.index(this) + 1).focus();
         }
-      });
-    </script>
-  -->
+    });
+    
+</script>
 
     <script src="{{=URL('static','js/bootstrap.bundle.min.js')}}"></script>
     <script src="{{=URL('static','js/web2py-bootstrap4.js')}}"></script>

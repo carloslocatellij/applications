@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-from my_validador import *  # type: ignore
-import num2words
 import locale
 locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
-from configs import pasta_viveiro_fotos  # type: ignore
+import num2words
 from pathlib import Path
 
 if 0 == 1:
@@ -162,6 +160,7 @@ Especies = db.define_table(
     Field("Calcada", "integer", requires=IS_CHKBOX01(on=True, off=False),
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " "),
+    Field('DAP_max',  "decimal(3,2)"),
     Field("obs", "text"),
     format = (lambda row : especie_represent(row)),
     migrate=True if not configuration.get('app.production') else False,
@@ -613,34 +612,14 @@ db.Laudos.motivos = Field.Virtual(
                          )
 )
 
-def relat_supress_periodo(data_inicial, data_final):
-    query = db.Requerimentos.Protocolo == db.Laudos.Protocolo
-    query &= (db.Requerimentos.Bairro == db.Bairros.Bairro)
-    query &= (db.Requerimentos.data_do_laudo >= data_inicial) 
-    query &= (db.Requerimentos.data_do_laudo <= data_final)
-
-    rows = db(query, )
-    return rows
-
-
-def relat_podas_periodo(data_inicial, data_final):
-    query =  db.Requerimentos.qtd_poda1 > 0
-    query &= (db.Requerimentos.Bairro == db.Bairros.Bairro)
-    query &= (db.Requerimentos.data_do_laudo >= data_inicial) 
-    query &= (db.Requerimentos.data_do_laudo <= data_final)
-
-    rows = db(query, )
-    return rows
-
-
-
+ 
 
 fotos = db.define_table('fotos',
         Field('titulo'),
         Field('foto', 'upload',               
                 uploadseparate=True, uploadfolder= Path(pasta_viveiro_fotos, session.function if session.function else 'Outras_fotos')  ,
-                requires=[IS_EMPTY_OR(IS_LENGTH(3145728, 2048, error_message= 'deve ser maior que 2k e menor que 3m bites')),
-                          IS_IMAGE( error_message='deve ser imagem no formato jpeg ou png')], autodelete = True,  
+                requires=[IS_EMPTY_OR(IS_LENGTH( 7864320, 20480, error_message= 'deve ser maior que 20k e menor que 7,5 megabites')),
+                          IS_IMAGE_COMPACT( error_message='deve ser imagem no formato jpeg ou png')], autodelete = True,   # type: ignore
                 ),
         Field('caminho', 'string'),
         Field('idEspecie', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Especies.id', "%(Nome)s"))),
@@ -649,10 +628,14 @@ fotos = db.define_table('fotos',
         Field('url', 'string'),
         Field('tipo', label='tipo da foto'),
         Field('obs', 'text'),
-        Field('created_by', default=auth.user_id),
-        Field('created_on',),
-        Field('modified_by', update=auth.user_id),
-        Field('modified_on',),
+        Field('created_by', default=auth.user_id,
+              label='Registrado por:',
+              represent = lambda row, val: authdb.auth_user(authdb.auth_user.id== row).first_name), # type: ignore
+        Field('created_on', label='Registrado em:', default=request.now),
+        Field('modified_by', update=auth.user_id,
+              label='Modificado por:',
+              represent = lambda row, val: authdb.auth_user(authdb.auth_user.id== row).first_name if row else ''), # type: ignore
+        Field('modified_on', label='Modificado em:', default=request.now, update=request.now), 
         
         migrate= True if not configuration.get('app.production') else False,
         fake_migrate= True if not configuration.get('app.production') else False,
