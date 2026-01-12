@@ -274,12 +274,12 @@ def Enderecos(): #Menu
     """
     import re
 
-    endereco = request.args(0) if request.args(0) else request.vars['endereco_id']
+    endereco = request.args(0) or request.vars['endereco_id'] or None
     logradouro = request.vars.logradouro
     if logradouro:
         db.Enderecos.IdLogradouro.default = logradouro
 
-    f = request.vars['f'] if request.vars['f']  else None
+    f = request.vars['f'] or None
     if f=='editar':
         form = SQLFORM(db.Enderecos, endereco, formname='formendereco' , submit_button='Atualizar Endereço')
     elif f=='ver':

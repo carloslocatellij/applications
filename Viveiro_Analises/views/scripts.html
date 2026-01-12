@@ -20,25 +20,26 @@
     <!-- Speaking of Google, don't forget to set your site up:
          http://google.com/webmasters -->
     <meta name="google-site-verification" content="">
-    <!-- include stylesheets -->
 
+    <!-- include stylesheets -->
     <link rel="stylesheet" href="{{=URL('static', 'css/font-awesome-4.7.0/css/font-awesome.min.css')}}" />
     <link rel="stylesheet" href="{{=URL('static','css/bootstrap.min.css')}}" />
     <link rel="stylesheet" href="{{=URL('static','css/web2py-bootstrap4.css')}}" />
-
     <link rel="shortcut icon" href="{{=URL('static','images/favicon.png')}}" type="image/x-icon">
-    <link rel="apple-touch-icon" href="{{=URL('static','images/favicon.png')}}">
+    <link rel="apple-touch-icon" href="{{=URL('static','images/favicon.png')}}" />
     <!-- All JavaScript at the bottom, except for Modernizr which enables
          HTML5 elements & feature detects -->
     <script src="{{=URL('static','js/modernizr-2.8.3.min.js')}}"></script>
     <!-- Favicons -->
-    {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
+
     {{block head}}
     {{end}}
 </head>
 <body>   
     {{include}}
+    <div class="w2p_flash alert alert-dismissable">{{=response.flash or ''}}</div>
 </body>
+{{block page_js}}
 
 <script type="text/javascript">
     $(document).ready(function () {
@@ -62,3 +63,7 @@
     });
 </script>
 
+<script src="{{=URL('static','js/bootstrap.bundle.min.js')}}"></script>
+<script src="{{=URL('static','js/web2py-bootstrap4.js')}}"></script>
+
+{{end page_js}}

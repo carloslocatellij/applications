@@ -52,9 +52,9 @@ class ProtocPattern():
             
             try:
                 value = int(match.group(1) + match.group(3))
-                return (value, None)
+                return value
             except:
-                return (value, self.err)
+                return self.err
             
         def formatter(self, value):
             self.value = value

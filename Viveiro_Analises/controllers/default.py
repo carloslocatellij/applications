@@ -232,6 +232,7 @@ def Laudos():
         else:
             form = SQLFORM(db[table], laudo, readonly=True, represent_none='')
     except Exception as e:
+        print(f"Erro {e}")
         form = SQLFORM(db[table], submit_button=f'Registrar {db[table]._tablename[:-1]}')
     
         

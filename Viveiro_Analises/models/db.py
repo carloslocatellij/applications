@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 import locale
+
+from my_validador import MASK_CPF
 locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
 import num2words
 from pathlib import Path
+from datetime import datetime, date
 
 if 0 == 1:
     from gluon import *  # type: ignore
     from gluon import (
         db, configuration, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP, IS_LENGTH, IS_IMAGE, # type: ignore
-        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db, IS_CHKBOX01, DAL, IS_INT_IN_RANGE, IS_CPF_OR_CNPJ,  MASK_CPF,
+        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db, IS_CHKBOX01, DAL, IS_INT_IN_RANGE, IS_CPF_OR_CNPJ,
         MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE, SQLFORM, IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC, )  # type: ignore
 
     request = current.request  # type: ignore
@@ -171,14 +174,15 @@ Especies = db.define_table(
 
 Requerimentos = db.define_table(
     "Requerimentos",
-    Field("Protocolo", 'integer' , requires= [IS_NOT_EMPTY(), ProtocPattern()]),  # type: ignore
+    Field("Protocolo", 'integer' , requires= [IS_NOT_EMPTY(error_message="Não pode ser vazio.")]),  # type: ignore
     Field("Requerente", requires=[IS_UPPER(), Remove_Acentos()]),
     Field(
         "data_entrada",
         "date",
-        requires=IS_EMPTY_OR(
-            IS_DATE(format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx")
-        ),
+        requires=IS_DATE_IN_RANGE(format=T("%d/%m/%Y"),
+                       minimum=date(2024,1,1),
+                       maximum=date.today(),
+                       error_message="Deve ter o formato xx/xx/20xx"),
         rname="`Data de Entrada`",
         label='Data de Entrada'
     ),
@@ -191,7 +195,7 @@ Requerimentos = db.define_table(
     widget=SQLFORM.widgets.autocomplete(
      request, db.Bairros.Bairro,  limitby=(0, 7), min_length=3),
      label='Bairro'),
-    Field("cpf_cnpj", rname="`cpf-cnpj`", label='CPF/CNPJ'),
+    Field("cpf_cnpj", rname="`cpf-cnpj`", label='CPF/CNPJ', represents= (lambda row: MASK_CPF()(row))),
     Field("cep", label='CEP'),
     Field("telefone1", label='Telefone'),
     Field("email", rname="`e-mail`", label='E-mail'),
@@ -231,9 +235,10 @@ Requerimentos = db.define_table(
     Field(
         "data_do_laudo",
         "date",
-        requires=IS_DATE(
-            format=T("%d/%m/%Y"), error_message="Deve ter o formato xx/xx/20xx"
-        ),
+        requires=IS_EMPTY_OR(IS_DATE_IN_RANGE(format=T("%d/%m/%Y"),
+                       minimum=date(2024,1,1),
+                       maximum=date.today(),
+                       error_message="Deve ter o formato xx/xx/20xx")),
         rname="`data do laudo`",
         label='Data do Laudo'
     ),
@@ -257,14 +262,14 @@ Requerimentos = db.define_table(
         rname="`local arvore`",
         label="Local",
         requires=IS_IN_SET(
-            ["calçada", "calçada com fiação", "área interna", "área aberta", "praça", "canteiro central", "não há árvore"]
+            ["","calçada", "calçada com fiação", "área interna", "área aberta", "praça", "canteiro central", "não há árvore"]
         ),
     ),
     Field(
         "tipo_imovel",
         rname="`tipo imovel`",
         label="Tipo de Imóvel",
-        requires=IS_IN_SET(["público", "privado", "institucional", "terreno", "rural"]),
+        requires=IS_IN_SET(["","público", "privado", "institucional", "terreno", "rural"]),
     ),
     Field("protocolo_anterior", 'reference Requerimentos',
           requires=IS_EMPTY_OR(IS_IN_DB(db, "Requerimentos.Protocolo" ))),
@@ -275,6 +280,9 @@ Requerimentos = db.define_table(
     fake_migrate=True if not configuration.get('app.production') else False,
 )
 
+db.Requerimentos.Protocolo.filter_in = lambda obj: ProtocPattern()(obj)
+
+db.Requerimentos.cpf_cnpj.filter_out = lambda row: MASK_CPF()(row) if row else ''
 
 db.Requerimentos.Endereco = Field.Virtual(
     "Endereco",
@@ -288,7 +296,6 @@ db.Requerimentos.Endereco = Field.Virtual(
         )
     ),
 )
-
 
 
 db.Requerimentos.total_podas_requeridas = Field.Virtual(
@@ -350,9 +357,9 @@ db.Requerimentos.Podas_requeridas = Field.Virtual(
             f", ({row.Requerimentos.qtd_poda3}) {row.Requerimentos.especie_poda3}"
             if row.Requerimentos.qtd_poda3
             else "",
-            f", ({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}"
-            if row.Requerimentos.qtd_poda4
-            else "",
+            ', '+ str(row.Requerimentos.especie_poda4) if ',' in str(row.Requerimentos.especie_poda4)
+            else f", ({row.Requerimentos.qtd_poda4}) {row.Requerimentos.especie_poda4}"
+            if row.Requerimentos.qtd_poda4 else '',
         ]
     ).replace("'", "").replace("[", "").replace("]", ""),
 )
@@ -385,7 +392,10 @@ Laudos = db.define_table(
         "data_do_laudo",
         "date",
         rname="`data do laudo`",
-        requires=IS_EMPTY_OR(IS_DATE(format="%d/%m/%Y")),
+        requires=IS_EMPTY_OR(IS_DATE_IN_RANGE(format=T("%d/%m/%Y"),
+                       minimum=date(2024,1,1),
+                       maximum=date.today(),
+                       error_message="Deve ter o formato xx/xx/20xx")),
     ),
     Field("proprietario", "string"),
     Field("morador", "string"),
@@ -492,7 +502,7 @@ Laudos = db.define_table(
         widget=SQLFORM.widgets.boolean.widget,
         represent=lambda v, r: " [ X ]  " if v else " ",
     ),
-    Field("Obs", rname="`Obs.`"),
+    Field("Obs", "text",length= 2048, rname="`Obs.`"),
     Field(
         "tecnico",
         "string",
@@ -543,14 +553,11 @@ db.Laudos.Podas_laudadas = Field.Virtual(
     lambda row: " ".join(
         [
             f"({row.Laudos.qtd_poda1}) {row.Laudos.especie_poda1}"
-            if row.Laudos.especie_poda1
-            else "",
+            if row.Laudos.especie_poda1 else "",
             f", ({row.Laudos.qtd_poda2}) {row.Laudos.especie_poda2}"
-            if row.Laudos.especie_poda2
-            else "",
+            if row.Laudos.especie_poda2 else "",
             f", ({row.Laudos.qtd_poda3}) {row.Laudos.especie_poda3}"
-            if row.Laudos.especie_poda3
-            else "",
+            if row.Laudos.especie_poda3 else "",
             f", {row.Laudos.especie_poda4}"
             if ',' in str(row.Laudos.especie_poda4)
             else f", ({row.Laudos.qtd_poda4}) {row.Laudos.especie_poda4}"
@@ -570,9 +577,9 @@ db.Laudos.total_podas_laudadas = Field.Virtual(
 
 db.Laudos.total_supressoes_laudadas = Field.Virtual(
     "total_supressoes_laudadas",
-            lambda row: sum([int(row.Laudos.qtd_ret1 or 0), int(row.Laudos.qtd_ret2 or 0),
-            int(row.Laudos.qtd_ret3 or 0) , int(row.Laudos.qtd_ret4 or 0)]
-            ))
+        lambda row: sum([int(row.Laudos.qtd_ret1 or 0), int(row.Laudos.qtd_ret2 or 0),
+        int(row.Laudos.qtd_ret3 or 0) , int(row.Laudos.qtd_ret4 or 0)]
+        ))
 
 
 db.Laudos.num_extens_poda_laudadas = Field.Virtual(
@@ -595,6 +602,7 @@ db.Laudos.num_extens_repor = Field.Virtual(
     .replace('UM', 'UMA').replace('DOIS', 'DUAS').replace('DEZA', 'DEZE')
 )
 
+
 db.Laudos.motivos = Field.Virtual(
     "motivos",
     lambda row: ''.join( [
@@ -612,12 +620,17 @@ db.Laudos.motivos = Field.Virtual(
                          )
 )
 
- 
+
+db.Laudos.reposicao = Field.Virtual(
+    "reposicao",
+    lambda row: f"O requerente acima mencionado declara sob as penas da legislação em vigor, que **assume o compromisso de plantar {row.Laudos.qtd_repor} ( {row.Laudos.num_extens_repor} ) muda(s) de árvore(s) de porte ({row.Laudos.porte_repor})** em substituição àquelas a serem removidas no local supracitado, no prazo de 60 (sessenta) dias a partir da data do recebimento desta autorização. Para cada muda a ser plantada, o canteiro permeável deverá ter dimensões no padrão ESPAÇO ÁRVORE, que deve ter como medidas mínimas 40% da largura da calçada e para o comprimento, o dobro da largura, respeitando sempre as medidas que concerne à acessibilidade (1,2m). PROIBIDO POR LEI Nº 13.031/2018 O USO DE MANILHA (TUBO)." if row.Laudos.qtd_repor else ''
+)
+
 
 fotos = db.define_table('fotos',
         Field('titulo'),
         Field('foto', 'upload',               
-                uploadseparate=True, uploadfolder= Path(pasta_viveiro_fotos, session.function if session.function else 'Outras_fotos')  ,
+                uploadseparate=True, uploadfolder= Path(pasta_viveiro_fotos, session.function if session.function else 'Outras_fotos')  , # type: ignore
                 requires=[IS_EMPTY_OR(IS_LENGTH( 7864320, 20480, error_message= 'deve ser maior que 20k e menor que 7,5 megabites')),
                           IS_IMAGE_COMPACT( error_message='deve ser imagem no formato jpeg ou png')], autodelete = True,   # type: ignore
                 ),
