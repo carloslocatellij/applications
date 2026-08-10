@@ -30,7 +30,7 @@ def relat_podas_periodo(data_inicial, data_final):
 
 
 def Supressões_por_periodo(): #Menu
-    response.flash = ("Seja Bem Vindo") # type: ignore
+    response.flash = (f" {auth.user.first_name} seja Bem Vindo a sessão de Relatórios de Supressões") # type: ignore
     
     grid = None
     if request.vars.data_ini and request.vars.data_fim: # type: ignore
@@ -83,7 +83,7 @@ def Supressões_por_periodo(): #Menu
 
 
 def Podas_por_periodo(): #Menu
-    response.flash = ("Seja Bem Vindo") # type: ignore
+    response.flash = (f" {auth.user.first_name} seja Bem Vindo a sessão de Relatórios de Podas") # type: ignore
     
     grid = None
     if request.vars.data_ini and request.vars.data_fim: # type: ignore

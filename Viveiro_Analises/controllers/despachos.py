@@ -72,8 +72,8 @@ def form_condicoes():
             and not field[-1].isdigit() and not field in list_campos):
             list_campos.append(field)
             
-    key_operators = ["=", "!=", "<", ">", "<=", ">=", "contêm", "não contem"]
-    operators = ["é igual a", "é diferente de", "é menor que", "é maior que", "é menor ou igual a", "é maior ou igual a", "contêm", "não contem"]
+    key_operators = ["=", "!=", "<", ">", "<=", ">=", "contem", "não contem"]
+    operators = ["é igual a", "é diferente de", "é menor que", "é maior que", "é menor ou igual a", "é maior ou igual a", "contêm", "não contêm"]
     dict_operador = dict(zip(key_operators, operators))
     
     form_condicoes = SQLFORM.factory(

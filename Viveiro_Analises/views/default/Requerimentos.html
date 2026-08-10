@@ -91,7 +91,7 @@
                                         {{=formprocess.custom.widget['especie_ret4']}}</td>
                             </table>
                         </tr>
-                            <tr>    
+                        <tr>    
                             <td width="20%" align='left'>{{=B('Despacho:')}} <div align='center' class="card">
                                     {{=formprocess.custom.widget['Despacho']}}</div></td>
                             <td width="20%" align='left'>{{=B('Data do Laudo:')}} <div align='center' class="card">
@@ -100,10 +100,24 @@
                             <td width="20%" align='left'>{{=B('Local da Árvore:')}} <div align='center' class="card">
                                     {{=formprocess.custom.widget['local_arvore']}}</div>
                             </td>
-                            <td width="20%" align='left'>{{=B('Tipo de Imóvel:')}} <div align='center' class="card">
-                                    {{=formprocess.custom.widget['tipo_imovel']}}</div>
-                            </td>
-                            </tr>
+                        </tr>
+                        <tr>
+                        <table>
+                                <div align='center' class="card">
+                                        <td width="70%" align='left' padding="25" style="padding-inline: 20px;">{{=B('Tipo de Imóvel:')}} 
+                                                {{=formprocess.custom.widget['tipo_imovel']}}
+                                        </td>
+                                </div>
+                                <div>
+                                        <div align='rigth' class="card" style="padding-inline: 20px;">
+                                        <td width="30%" align='rigth' padding="25", style="padding-inline: 20px;">{{=B('Denúncia: ')}} 
+                                        <div align='rigth' class="card" style="padding-inline: 20px;">  {{=formprocess.custom.widget['denuncia']}} </div>
+                                        </td>
+                                </div>
+                                </tr>
+                        </table>
+
+                        </tr>
                             <table class="jumbotron" style="border: 1px solid">
                             <br/>
                             <td width="15%" align='left' style="padding-inline: 20px;">{{=B('Referencias.:')}} 

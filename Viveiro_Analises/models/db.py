@@ -273,6 +273,8 @@ Requerimentos = db.define_table(
     ),
     Field("protocolo_anterior", 'reference Requerimentos',
           requires=IS_EMPTY_OR(IS_IN_DB(db, "Requerimentos.Protocolo" ))),
+    Field("denuncia", 'integer', requires=IS_CHKBOX01(on=True, off=False),
+        widget=SQLFORM.widgets.boolean.widget, represent=lambda v, r: "[ X ]" if v else " ",),
     rname="`{}`".format(tabela_solicitacoes),
     primarykey=["Protocolo"],
     format="%(Protocolo)s",

@@ -3,7 +3,7 @@ def atualizar(): #Menu
     import subprocess
     from pathlib import Path
     # Caminho para o seu arquivo .bat
-    caminho_arquivo_bat = Path(Path.home(), 'Documents', 'web2py' ,'atualizar_apps.bat')
+    caminho_arquivo_bat = Path(Path.home(), 'Documents', 'Viveiro_Analises' ,'atualizar_apps.bat')
 
     try:
         # Executa o arquivo .bat

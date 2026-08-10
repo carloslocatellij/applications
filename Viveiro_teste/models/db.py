@@ -58,6 +58,44 @@ migrate=True
 )
 
 
+db.define_table('Vistoria',
+    Field('IdProcesso', 'reference Processos', requires= IS_IN_DB(db, 'Processos.id', '%(Protocolo)s')),
+    Field('Data', 'datetime'),
+    Field('Vistoriante', 'string'),
+    Field('Assunto', 'string'),
+    Field('Descricao', 'string'),
+    Field('obs', 'text'),
+                )
+
+
+
+
+fotos = db.define_table('fotos',
+    Field('titulo'),
+    Field('foto', 'upload',               
+            uploadseparate=True, uploadfolder= Path(pasta_viveiro_fotos, session.function if session.function else 'Outras_fotos')  , # type: ignore
+            requires=[IS_EMPTY_OR(IS_LENGTH( 7864320, 20480, error_message= 'deve ser maior que 20k e menor que 7,5 megabites')),
+                        IS_IMAGE_COMPACT( error_message='deve ser imagem no formato jpeg ou png')], autodelete = True,   # type: ignore
+            ),
+    Field('caminho', 'string'),
+    Field('idEspecie', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Especies.id', "%(Nome)s"))),
+    Field('idLaudo', requires=IS_EMPTY_OR(IS_IN_DB(db, 'Laudos.Protocolo', "%(Protocolo)s")), ),
+    Field('fonte', 'string'),
+    Field('url', 'string'),
+    Field('tipo', label='tipo da foto'),
+    Field('obs', 'text'),
+    Field('created_by', default=auth.user_id,
+            label='Registrado por:',
+            represent = lambda row, val: authdb.auth_user(authdb.auth_user.id== row).first_name), # type: ignore
+    Field('created_on', label='Registrado em:', default=request.now),
+    Field('modified_by', update=auth.user_id,
+            label='Modificado por:',
+            represent = lambda row, val: authdb.auth_user(authdb.auth_user.id== row).first_name if row else ''), # type: ignore
+    Field('modified_on', label='Modificado em:', default=request.now, update=request.now), 
+    migrate= True if not configuration.get('app.production') else False,
+    fake_migrate= True if not configuration.get('app.production') else False,
+                )
+
 
 # DADOS DE TESTE INSERIDOS AUTOMÁTICAMENTE EM AMBIENTE DE TESTE.
 if not configuration.get("app.production"): # pyright: ignore[reportUndefinedVariable]

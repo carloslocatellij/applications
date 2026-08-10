@@ -145,15 +145,28 @@ def Requerimentos(): #Menu
     session.registro = processo
     session.function = table
     tem_laudo = db(db.Laudos.Protocolo == processo).count() > 0
+    
+    # if isinstance(processo, int) or processo == None:
+    #     tem_laudo = db(db.Laudos.Protocolo == processo).count() > 0
+    # else:
+    #     tem_laudo = False 
 
 
     if f=='editar':
-        formprocess = SQLFORM(db[table], processo, submit_button=f'Atualizar {tablename}' ) # type: ignore
+        if not auth.has_membership('Analise e Laudos'):
+            session.flash = "Você não tem permissão para editar."
+            redirect(URL('default', table, args=[processo], vars={'f':'ver'}))
+        else:
+            formprocess = SQLFORM(db[table], processo, submit_button=f'Atualizar {tablename}' ) # type: ignore
     elif f=='ver':
         formprocess = SQLFORM(db[table], processo, readonly=True, ) 
     else:
-        db.Requerimentos.Protocolo.requires = IS_NOT_IN_DB(db, 'Requerimentos.Protocolo', error_message='Já está registrado.')
-        formprocess = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
+        if not auth.has_membership('Analise e Laudos'):
+            session.flash = "Você não tem permissão para inserir requerimentos."
+            redirect(URL('default', table, vars={'f':'ver'}))
+        else:
+            db.Requerimentos.Protocolo.requires = IS_NOT_IN_DB(db, 'Requerimentos.Protocolo', error_message='Já está registrado.')
+            formprocess = SQLFORM(db[table], submit_button=f'Registrar {tablename}')
         
 
     if formprocess.process().accepted:
@@ -174,10 +187,18 @@ def Requerimentos(): #Menu
     links = [dict(header='Ver', body=lambda row: A('Ver', _class='btn btn-primary' , _href=URL(c=request.controller, # type: ignore
                               f=request.function, args=[row.Protocolo] , vars={'f': 'ver'})))]
     
+    tem_filtro = any(key.startswith('_f_') or key == 'keywords' 
+                     for key in request.vars)
+    
+    # Define os exportadores (desabilita CSV se não houver filtro)
+    export_config = dict(csv=False, tsv=False, tsv_with_hidden_cols=False,
+                         json=False, xml=False, html=False, csv_with_hidden_cols=False)
+    
+    export_config['csv'] = (ExporterCSV, 'CSV' ) if tem_filtro else None
+
     formbusca = SQLFORM.grid(db(db.Requerimentos.Protocolo > 0), orderby=~db.Requerimentos.data_do_laudo, represent_none='',
-                         editable=False, searchable=True, deletable=False, links=links, create=False, details=False, paginate=30,
-                         maxtextlength = 120, _class="table", exportclasses=dict(csv=False, tsv=False, tsv_with_hidden_cols=False,
-                         json=False, xml=False, html=False, csv_with_hidden_cols=(ExporterCSV, 'CSV' )), user_signature=False,
+                         editable=False, searchable=True, deletable=False, links=links, create=False, details=False, paginate=20,
+                         maxtextlength = 120, _class="table", exportclasses=export_config, user_signature=False,
                          fields=list_fields, links_placement = 'left',)
     
         
@@ -227,7 +248,7 @@ def Laudos():
     table= 'Laudos'
     laudo = request.args(0) or None
     try:
-        if session.edit_laudo==True:
+        if session.edit_laudo==True and auth.has_membership('Analise e Laudos'):
             form = SQLFORM(db[table], laudo, submit_button=f'Atualizar {db[table]._tablename[:-1]}', deletable=True)
         else:
             form = SQLFORM(db[table], laudo, readonly=True, represent_none='')
@@ -301,6 +322,7 @@ def Despachar_Processos(): #Menu
 
 
 @auth.requires_login()
+@auth.requires_membership('Analise e Laudos', otherwise=URL('default', 'index'))
 def Especies(): #Menu
     table = 'Especies'
     tablename = f'{db[table]._tablename[:-1]}'

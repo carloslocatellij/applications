@@ -15,17 +15,21 @@ xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\views\" "F:\SMMAURB\
 
 xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\static\" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\static\" /S /E /Y /H /D
 
-xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\Version.txt" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\Version.txt" /S /E /Y /H /D
-
 xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\README.md" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\README.md" /S /E /Y /H /D
 
 xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\LICENSE" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\LICENSE" /S /E /Y /H /D
 
 xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\compiled\" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\compiled\" /S /E /Y /H /D
 
+xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\private\appconfig.json" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\private\appconfig.json" /S /E /Y /H /D
+
 xcopy   "%userprofile%\web2py\site-packages" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\site-packages\" /S /E /Y /H /D
 
-echo 'INSTALAÇÃO FINALIZADA-';
+xcopy   "%userprofile%\web2py\atualiza_apps.bat" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\atualiza_apps.bat" /S /E /Y /H /D
+
+xcopy   "%userprofile%\web2py\requirements.txt" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\requirements.txt" /S /E /Y /H /D
+
+echo 'FINALIZADO!';
 
 
 PAUSE

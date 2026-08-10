@@ -27,7 +27,8 @@ if request.global_settings.web2py_version < "2.27.1":
 # -------------------------------------------------------------------------
 # once in production, remove reload=True to gain full speed
 # -------------------------------------------------------------------------
-configuration = AppConfig(reload=True)
+
+configuration = AppConfig(reload=False)
 # session.connect(request, response, cookie_key=configuration.take("db")['password'],)
 # session.secure()
 # session.samesite('Strict')
@@ -161,6 +162,7 @@ class DebugMail(Mail):
             raise
 
 auth.settings.mailer = DebugMail()
+
 mail = auth.settings.mailer
 mail.settings.server = configuration.get('smtp.server') # 'logging' if request.is_local else
 mail.settings.sender = configuration.get('smtp.sender')
@@ -172,7 +174,7 @@ mail.settings.ssl = False
 # -------------------------------------------------------------------------
 # configure auth policy
 # -------------------------------------------------------------------------
-auth.settings.registration_requires_verification = True
+auth.settings.registration_requires_verification = False
 auth.settings.registration_requires_approval = False
 auth.settings.reset_password_requires_verification = True
 

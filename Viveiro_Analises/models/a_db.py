@@ -180,7 +180,7 @@ class DebugMail(Mail):
             logging.error(f"Failed to send email: {str(e)}")
             raise
 
-auth.settings.mailer = DebugMail()
+auth.settings.mailer = DebugMail(Mail)
 
 mail = auth.settings.mailer
 mail.settings.server = configuration.get('smtp.server') # 'logging' if request.is_local else
@@ -192,7 +192,7 @@ mail.settings.ssl = False
 # -------------------------------------------------------------------------
 # configure auth policy
 # -------------------------------------------------------------------------
-auth.settings.registration_requires_verification = True
+auth.settings.registration_requires_verification = False
 auth.settings.registration_requires_approval = False
 auth.settings.reset_password_requires_verification = True
 

@@ -355,6 +355,7 @@
 'Proprietario': 'Proprietario',
 'Protocolo': 'Protocolo',
 'Protocolo Anterior': 'Protocolo Anterior',
+'Protocolo já Existe': 'Protocolo já Existe',
 'pygraphviz library not found': 'biblioteca pygraphviz não encontrada',
 'Python': 'Python',
 'Qtd': 'Qtd',

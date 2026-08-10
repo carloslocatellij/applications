@@ -3,7 +3,7 @@ from multiprocessing import context
 from my_validador import *  # type: ignore
 import json
 
-if 0 == 1:
+if 0 == 1: #ISSO É SEMPRE APENAS PARA CONFIG DO IDE (IGNORAR)
     from gluon import *  # type: ignore
     from gluon import (
         db, configuration, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
@@ -58,7 +58,8 @@ def determinar_despacho(req):
                     'local_arvore': req.get('Requerimentos').get('local_arvore'),
                     'proprietario': req.get('Laudos').get('proprietario'),
                     'tecnico': req.get('Laudos').get('tecnico'),
-                    'motivos': req.get('Laudos').get('motivos')
+                    'motivos': req.get('Laudos').get('motivos'),
+                    'denuncia': req.get('Requerimentos').get('denuncia')
                     }
     else:
         dict_req = {'Despacho': req.get('Despacho'),
@@ -68,6 +69,7 @@ def determinar_despacho(req):
                     'total_supressoes_requeridas': req.get('total_supressoes_requeridas'),
                     ''
                     'local_arvore': req.get('local_arvore'),
+                    'denuncia': req.get('denuncia')
                     }
     
     condic_templates, condic_txt = dict_condicoes_de_templates()
@@ -76,9 +78,9 @@ def determinar_despacho(req):
         condicoes_verificadas = {}
         condicionais = [condicionais] if not isinstance(condicionais, list) else condicionais
         for condicoes in condicionais:
-            condic_campo = condicoes.get("campo")
-            operador = condicoes.get('operador')
-            condic_valor = condicoes.get("valor")
+            condic_campo = condicoes.get("campo") if isinstance(condicoes, dict) else None
+            operador = condicoes.get('operador') if isinstance(condicoes, dict) else None
+            condic_valor = condicoes.get("valor") if isinstance(condicoes, dict) else None
             if condic_campo not in dict_req.keys():
                 condicoes_verificadas[condic_campo] =  False
             else:
@@ -102,7 +104,7 @@ def determinar_despacho(req):
                                 condicoes_verificadas[condic_campo] =  True if valor <= condic_valor else False
                         elif operador == '>=':
                                 condicoes_verificadas[condic_campo] =  True if valor >= condic_valor else False
-                        elif operador == 'contêm':
+                        elif operador == 'contem':
                                 condicoes_verificadas[condic_campo] =  True if isinstance(valor, str) and isinstance(condic_valor, str) and condic_valor.lower() in valor.lower() else False
                         elif operador == 'não contem':
                                 condicoes_verificadas[condic_campo] =  True if isinstance(valor, str) and isinstance(condic_valor, str) and condic_valor.lower() not in valor.lower() else False
