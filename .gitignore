@@ -212,14 +212,14 @@ parameters*.py
 cron.master
 binaries/*old*
 
-#./welcome
-#./welcome/*
+./welcome
+./welcome/*
 #./examples
 #./examples/*
 #./admin
 #./admin/*
 */.vscode/*
-./Qualidade_Ambiental   
+/Qualidade_Ambiental   
 
 *.zip
 *.w2p
@@ -255,3 +255,5 @@ admin/
 #graphify
 .graphify-out/
 appconfig.json
+./Qualidade_Ambiental/
+/welcome/
