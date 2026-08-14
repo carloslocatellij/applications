@@ -4,8 +4,8 @@
 # this file is released under public domain and you can use without limitations
 # -------------------------------------------------------------------------
 from pathlib import Path
-from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
-from gluon.sqlhtml import ExporterCSV
+from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2 # type: ignore
+from gluon.sqlhtml import ExporterCSV # type: ignore
 
 if 0 == 1:
     from gluon import (db, current, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
@@ -63,8 +63,8 @@ def download():
     return response.download(request, db)
 
 
-from my_validador import myAutocomplete
-from gluon.html import INPUT, XML
+from my_validador import myAutocomplete # type: ignore
+from gluon.html import INPUT, XML # type: ignore
 
 
 def buscaCep():

@@ -4,14 +4,14 @@
 
 from gluon.contrib.appconfig import AppConfig # type: ignore
 from gluon.tools import Auth # type: ignore
-from configs import pasta_viveiro_fotos
-from my_validador import *
+from configs import pasta_viveiro_fotos # type: ignore
+from my_validador import * # type: ignore
 import datetime
 
 if 0==1:
     from gluon import * # type: ignore
-    from gluon import (db, IS_IN_SET, IS_UPPER,  DAL, IS_INT_IN_RANGE, IS_EMPTY_OR, 
-    IS_IN_DB, IS_NOT_IN_DB, IS_MATCH, a_db, db, auth, Auth, pegaDof) # type: ignore
+    from gluon import (db, IS_IN_SET, IS_UPPER, HTTP, IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, IS_LENGTH,  DAL, IS_INT_IN_RANGE, IS_EMPTY_OR,  # type: ignore
+    IS_IN_DB, IS_NOT_IN_DB, IS_MATCH, a_db, db, auth, Auth, Field, pegaDof) # type: ignore
     request = current.request # type: ignore
     response = current.response # type: ignore
     session = current.session # type: ignore
@@ -135,20 +135,6 @@ auth.settings.remember_me_form = False
 from gluon.tools import Mail # type: ignore
 from gluon.html import XML # type: ignore
 
-
-# Crie uma nova classe de Mail que herda da original
-# class CustomMail(Mail):
-#     def send(self, to, subject, message, **kwargs):
-#         if hasattr(subject, 'xml'):  # Se for lazyT
-#             subject = str(subject)
-#         if hasattr(message, 'xml'):  # Se for lazyT
-#             message = str(message)
-#         return super().send(to, subject, message, **kwargs)
-
-# # Configure o auth para usar o novo mailer
-# auth.settings.mailer = CustomMail()
-
-import smtplib
 import logging
 
 class DebugMail(Mail):
@@ -200,50 +186,27 @@ response.show_toolbar = configuration.get('app.toolbar')
 auth.wiki(resolve=False)
 
 
-
-
 regiao_cor ={1:'CENTRAL', 2:'BOSQUE', 3:'TALHADO', 4:'REPRESA', 5:'VILA TONINHO', 6:'SCHIMITT',
 7:'HB', 8:'CIDADE DAS CRIANÇAS', 9:'PINHEIRINHO' , 10:'CÉU'}
 
-#BANCO LOCAIS
-Cidades = ['Cidades',
-	Field ('Cidade', 'string', notnull=True),
-	Field ('CEP', 'integer', notnull=True)
-]
 
+#BANCO LOCAIS
 
 Bairros = ['Bairros',
    	Field ('Bairro', 'string', notnull=True, requires=IS_UPPER()),
-   	Field ('IdCidade', 'reference Cidades', label='Cidade'),
 	Field ('Regiao', 'integer',requires= IS_IN_SET(regiao_cor, zero=None)),
     dict(format = '%(Bairro)s')
 ]
 
 
-Logradouros = ['Logradouros',
-	Field ('Logradouro', 'string', notnull=True, requires=[IS_NOT_EMPTY() ,IS_UPPER() ]), # type: ignore
-	Field ('Cep', 'integer',),
-	Field ('Denominacao',  requires=IS_IN_SET(['','ALAMEDA','Av.','ESTR. MUN.','ESTRADA',
-    'PRAÇA','RODOVIA','Rua','TRAVESSA','VIA']),notnull=True, label='Tipo'),
-	Field ('Prefixo',  requires=IS_IN_SET(['','DR.','COM.','GOV.','PRES.','PE.','CAP.','CEL.',
-    'DRA.','GAL.','PROF.','MAJ.','MISSIO','PAST','PAST.','SGTO.','FREI','BRIG.','IRMÃ','TEN.',
-    'PROFA.','SARG.','SRA.'])),
-	Field ('Num', 'integer', label='Nº expecifico'),
-	Field ('NumInicial','integer', label='Nº inicial'),
-	Field ('NumFinal', 'integer', label='Nº final'),
-	Field ('Lado'),
-	Field ('Complemento', 'string'),
-	Field ('IdBairro', 'reference Bairros', label='Bairro'),
-	Field ('IdCidade', 'reference Cidades', label='Cidade'),
-    dict(format= '%(Logradouro)s')
-]
-
-
 Enderecos = ['Enderecos',
-	Field ('IdLogradouro', 'reference Logradouros', label= 'Logradouro'),
+    Field ('Cep', 'integer',),
+	Field ('Logradouro', 'string', label= 'Logradouro'),
+    Field ('idBairro', 'reference Bairros', label='Bairro'),
 	Field ('Num'),
 	Field ('Quadra', 'string', ),
 	Field ('Lote', 'string'),
+    Field ('Complemento', 'string'),
 	Field ('Tipo', 'string',
      requires=IS_IN_SET([None,'-','BL.','FRENTE','ESQ.','FUNDO','SL.','N','ANDAR','LOJA.','CASA','MARGINAL.'])),
 	Field ('Complemento', 'string', ),
@@ -254,7 +217,6 @@ Enderecos = ['Enderecos',
     dict(format= '%(IdLogradouro)s - %(Num)s ')
 ]
 
- 
 
 #PESSOAS
 Pessoas = ['Pessoas',
@@ -301,11 +263,7 @@ Processos = ['Processos',
 ]
 
 
-
-
-lista_de_tabelas = [Cidades, Bairros, Logradouros, Enderecos, Pessoas, Dpto, Servicos, Processos]
-
-
+lista_de_tabelas = [Bairros, Enderecos, Pessoas, Dpto, Servicos, Processos]
 
 
 for tabela in lista_de_tabelas:
@@ -323,67 +281,23 @@ for tabela in lista_de_tabelas:
 
 
 #define_tabelas_em_lote(lista_de_tabelas)
-
-def logradouro_represent(row):
-	repr_logradouro = db((db.Logradouros.id == int(row.id)) &
-    (db.Logradouros.IdBairro == db.Bairros.id)).select(
-    db.Logradouros.Logradouro, db.Logradouros.NumInicial,
-    db.Logradouros.NumFinal, db.Logradouros.Cep, db.Bairros.Bairro).first()
-	if repr_logradouro:
-		logr = str(repr_logradouro.Logradouros.Logradouro) + ', Bairro: ' + str(repr_logradouro.Bairros.Bairro) + \
-        ', CEP: ' + str(repr_logradouro.Logradouros.Cep) + (', do n. ' if repr_logradouro.Logradouros.NumInicial else '') \
-         + str(repr_logradouro.Logradouros.NumInicial if repr_logradouro.Logradouros.NumInicial else '') + \
-         (', até  n. ' if repr_logradouro.Logradouros.NumFinal else '')+\
-          str(repr_logradouro.Logradouros.NumFinal if repr_logradouro.Logradouros.NumFinal else '')
-		return logr
-	else:
-		return ''
-
-try:
-    db.Logradouros.id.represent = (lambda row : logradouro_represent(row))
-except Exception as e:
-    print(f"Erro ao atribuir Logradouros.id.represent: {e}")
-    
-db.Enderecos.IdLogradouro.requires = IS_IN_DB(db, 'Logradouros.id', logradouro_represent)    
+  
 
 def endereco_represent(row):
     repr_endereco = db((db.Enderecos.id == int(row.id)) &
-     (db.Logradouros.id == db.Enderecos.IdLogradouro) &
-     (db.Logradouros.IdBairro == db.Bairros.id)).select(db.Logradouros.Logradouro,
-     db.Logradouros.Denominacao, db.Logradouros.Prefixo,
+     (db.Enderecos.idBairro == db.Bairros.id)).select(db.Enderecos.Logradouro,
      db.Enderecos.Num, db.Enderecos.Quadra, db.Enderecos.Lote, db.Bairros.Bairro,
-      orderby=db.Logradouros.Logradouro).first()
-    Denominacao = '' if repr_endereco.Logradouros.Denominacao in ['NULL', None, '-'] else repr_endereco.Logradouros.Denominacao
-    Prefixo = '' if repr_endereco.Logradouros.Prefixo in ['NULL', None, '-'] else repr_endereco.Logradouros.Prefixo
+      orderby=db.Enderecos.Logradouro).first()
     Num = 'Nº: S/N' if repr_endereco.Enderecos.Num in ['NULL', None, '-'] else str(repr_endereco.Enderecos.Num)
     Qd =  ',  Qd: ' + str(repr_endereco.Enderecos.Quadra) if repr_endereco.Enderecos.Quadra else ''
     Lt =  ',  Lt: ' + str(repr_endereco.Enderecos.Lote) if repr_endereco.Enderecos.Lote else ''
     
     if repr_endereco:
-        endereco = Denominacao + ' ' + Prefixo +  str(repr_endereco.Logradouros.Logradouro) + ', ' \
+        endereco =  str(repr_endereco.Enderecos.Logradouro) + ', ' \
             + Num  + Qd   + Lt  + ',   Bairro: ' + str(repr_endereco.Bairros.Bairro)
         return endereco
     else:
         return ''
-
-def endereco_represent1(row):
-    repr_endereco = db((db.Enderecos.id == int(row.id)) &
-     (db.Logradouros.id == db.Enderecos.IdLogradouro) &
-     (db.Logradouros.IdBairro == db.Bairros.id)).select(db.Logradouros.Logradouro,
-     db.Logradouros.Denominacao, db.Logradouros.Prefixo,
-     db.Enderecos.Num, db.Enderecos.Quadra, db.Enderecos.Lote, db.Bairros.Bairro,
-      orderby=db.Logradouros.Logradouro).first()
-    Num = 'Nº: S/N' if repr_endereco.Enderecos.Num in ['NULL', None, '-'] else str(repr_endereco.Enderecos.Num)
-    Qd =  ',  Qd: ' + str(repr_endereco.Enderecos.Quadra) if repr_endereco.Enderecos.Quadra else ''
-    Lt =  ',  Lt: ' + str(repr_endereco.Enderecos.Lote) if repr_endereco.Enderecos.Lote else ''
-    
-    if repr_endereco:
-        endereco = str(repr_endereco.Logradouros.Logradouro) + ', ' \
-            + Num  + Qd   + Lt  + ',   Bairro: ' + str(repr_endereco.Bairros.Bairro)
-        return endereco
-    else:
-        return ''
-
 
 
 def pessoa_represent(row):
@@ -394,10 +308,7 @@ def pessoa_represent(row):
         return pessoa
     else:
         return ''
-    
 
-
-    
 try:
     db.Pessoas.CPF.requires= [IS_EMPTY_OR(IS_CPF_OR_CNPJ()), IS_EMPTY_OR(IS_NOT_IN_DB(db, 'Pessoas.CPF', error_message='Já existe uma Pessoa com este Número de CPF'))]
     db.Pessoas.CNPJ.requires= [IS_EMPTY_OR(IS_CPF_OR_CNPJ()), IS_EMPTY_OR(IS_NOT_IN_DB(db, 'Pessoas.CNPJ', error_message='Já existe uma Empresa com este Número de CNPJ'))]
@@ -405,19 +316,12 @@ except Exception as e:
     print(f'Erro em requires {e}')
 
 
-
-try:
-    db.Enderecos._format =  (lambda row : endereco_represent1(row))
-except Exception as e:
-    print(f"Erro no represent de enderecos {e}")
-
-
 db.Enderecos.Endereco = Field.Virtual(
     "Endereco",
     lambda row: str(
         ", ".join(
             [
-                f"RUA/AV. {row.Enderecos.IdLogradouro}" or "",
+                f"{row.Enderecos.Logradouro}" or "",
                 f"Nº {row.Enderecos.Num}" or ""
             ]
         )

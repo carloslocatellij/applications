@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
-from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2
-from gluon.sqlhtml import ExporterCSV
+from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2  # type: ignore
+from gluon.sqlhtml import ExporterCSV  # type: ignore
 
 if 0 == 1:
     from gluon import (db, current, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
-                       Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01, BEAUTIFY, BUTTON, SPAN,
-                       IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE,
-                       IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC) # type: ignore
+                       Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01, BEAUTIFY, BUTTON, SPAN, IS_IMAGE_COMPACT,
+                       IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE, redirect, URL, CAT, A, SCRIP,  # type: ignore
+                       IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC, IS_DATE_IN_RANGE) # type: ignore
     
     request = current.request # type: ignore
     response = current.response # type: ignore
@@ -46,14 +46,15 @@ def avisos():
 
 
 def index():
-    user = authdb(authdb.auth_user.id == auth.user_id).select().first()# type: ignore
-    mensagens= ''
+    user = auth.user
+    mensagens = ''
+    avisos = []
     if user:
         registros_de_avisos = db(~(db.Avisos.recebido_por.contains(user.id ) ) ).select()
         avisos = [aviso for aviso in registros_de_avisos] 
         num_avisos = len(avisos)
         
-        mensagens= TABLE([P(f'''Olá {user.first_name if user else ""}! Você está no Sistema de Dados da Sec. Municipal de Meio Ambiente'''), # type: ignore
+        mensagens = TABLE([P(f'''Olá {user.first_name if user else ""}! Você está no Sistema de Dados da Sec. Municipal de Meio Ambiente'''), # type: ignore
                     P(str(f'''Você tem {num_avisos}'''  if num_avisos > 0 else '') + str(' aviso' if num_avisos > 0 else 'avisos'))  if num_avisos > 0 else '', # type: ignore
                         
                         ])
@@ -332,6 +333,9 @@ def Especies(): #Menu
     session.registro = registro
     session.function = table
 
+    if request.vars.nome:
+        db.Especies.Nome.default = request.vars.nome
+
     if f=='editar':
         form = SQLFORM(db[table], registro, submit_button=f'Atualizar {tablename}', formname=table + registro if registro else '') # type: ignore
     elif f=='ver':
@@ -363,12 +367,15 @@ def Especies(): #Menu
 def processar_formulario(form):
     # Acessar o validador do campo de imagem
     validator = None
-    for val in form.table.foto.requires:
+    requires = form.table.foto.requires or []
+    if not isinstance(requires, (list, tuple)):
+        requires = [requires]
+    for val in requires:
         if isinstance(val, IS_IMAGE_COMPACT):
             validator = val
             break
     
-    if validator and validator.coordinate:
+    if validator and getattr(validator, 'coordinate', None):
         # Preencher automaticamente o outro campo
         form.vars.obs = validator.coordinate
         
@@ -379,7 +386,7 @@ def fotos():
     tablename = f'{db[table]._tablename[:-1]}'
     registro = request.args(0) or None
     f = request.vars['f'] if request.vars['f']  else None
-    fields = ['titulo', 'foto', 'fonte', 'tipo'] if not f else None
+    fields = ['titulo', 'foto', 'fonte', 'tipo', 'idEspecie', 'obs'] if not f else None
     
     item_em_questao = session.registro or None
     
@@ -389,9 +396,67 @@ def fotos():
         db.fotos[vinculo].default = item_em_questao 
 
     db.fotos.tipo.requires = IS_IN_SET(['árvore', 'caule', 'casca', 'copa', 'galho', 'folha', 'flor', 'fruto', 'muda', 'raiz', 'semente', 'tronco', 'outro' ])   
+    db.fotos.idEspecie.label = 'Espécie'
+    db.fotos.idEspecie.widget = SQLFORM.widgets.autocomplete(
+        request, db.Especies.Nome, id_field=db.Especies.id, limitby=(0, 20), min_length=1
+    )
+    db.fotos.idEspecie.comment = CAT(
+        A('Adicionar Espécie', 
+          _id='btn-add-especie', 
+          _class='btn btn-info btn-xs', 
+          _style='margin-left:10px;',
+          _target='_blank',
+          _href=URL('default', 'Especies', extension='' )),
+        SCRIPT(""" 
+            jQuery(document).ready(function() {
+                var $btnAdd = jQuery('#btn-add-especie');
+                
+                function getInputValue() {
+                    var $auto = jQuery('input[name*="_autocomplete_Especies"]');
+                    if ($auto.length && $auto.val()) {
+                        return $auto.val().trim();
+                    }
+                    var $id = jQuery('#fotos_idEspecie');
+                    if ($id.length && $id.val()) {
+                        return $id.val().trim();
+                    }
+                    return '';
+                }
+                
+                function updateAddUrl() {
+                    var val = getInputValue();
+                    var baseUrl = '%(base_url)s';
+                    if (val) {
+                        $btnAdd.attr('href', baseUrl + '?nome=' + encodeURIComponent(val));
+                    } else {
+                        $btnAdd.attr('href', baseUrl);
+                    }
+                }
+                
+                updateAddUrl();
+                
+                jQuery(document).on('input change blur focus autocompleteselect autocompletechange', 
+                    '#fotos_idEspecie, input[name*="_autocomplete_Especies"]', 
+                    function() {
+                        setTimeout(updateAddUrl, 100);
+                    }
+                );
+                
+                $btnAdd.on('mouseenter focus mousedown click', function() {
+                    updateAddUrl();
+                });
+            });
+        """ % dict(
+            base_url=URL('default', 'Especies', extension='')
+        ))
+    )
     
     if f=='editar':
-        form = SQLFORM(db.fotos, registro, submit_button=f'Alterar dados da {tablename}', fields=fields, formname= table, deletable=True)
+        db.fotos.foto.writable = False
+        db.fotos.foto.readable = False
+        db.fotos.foto.requires = None
+        fields_editar = ['titulo', 'fonte', 'tipo', 'idEspecie','idLaudo', 'obs']
+        form = SQLFORM(db.fotos, registro, submit_button=f'Alterar dados da {tablename}', fields=fields_editar, formname= table, deletable=True)
     elif f=='ver':
         form = SQLFORM(db.fotos, registro, readonly=True, fields=fields, formname= table, )
     else:
@@ -401,7 +466,10 @@ def fotos():
     if form.process(onvalidation=processar_formulario).accepted:
         session.flash = f'Registrado'
         if form.vars.foto:
-            db(db.fotos.id == form.vars.id).update(**dict(caminho=Path(str(pasta_viveiro_fotos),session.function or 'Outras_fotos',form.vars.foto[:10],form.vars.foto[11:13],form.vars.foto)))
+            db(db.fotos.id == form.vars.id).update(**dict(caminho=Path(str(pasta_viveiro_fotos),# type: ignore
+                    
+                                                                       session.function or 'Outras_fotos',
+                                                                       form.vars.foto[:10], form.vars.foto[11:13], form.vars.foto)))
         
         if item_em_questao:
             redirect(URL('default', session.function , extension='', args=[item_em_questao], vars={'f':'ver'})) # type: ignore
@@ -566,3 +634,22 @@ def Lista_de_Registros():
     deletable=False, create=False,csv=False, maxtextlength = 120, _class="table", represent_none= '',links_placement= 'left'), table=table)
 
 
+def obter_id_especie():
+    nome = request.vars.nome
+    if nome:
+        nome_clean = nome.strip()
+        if nome_clean.isdigit():
+            registro = db(db.Especies.id == int(nome_clean)).first()
+            if registro:
+                return response.json(dict(id=registro.id))
+        
+        registro = db((db.Especies.Nome == nome_clean.lower()) | 
+                      (db.Especies.Nome == nome_clean) | 
+                      (db.Especies.Especie == nome_clean)).first()
+        if not registro:
+            registro = db(db.Especies.Nome.like(nome_clean)).first() or db(db.Especies.Especie.like(nome_clean)).first()
+        
+        if registro:
+            return response.json(dict(id=registro.id))
+            
+    return response.json(dict(id=None))

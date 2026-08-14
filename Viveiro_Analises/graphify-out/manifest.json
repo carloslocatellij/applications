@@ -1,0 +1,137 @@
+{
+  "controllers/appadmin.py": {
+    "mtime": 1741199746.582961,
+    "ast_hash": "f0d65a4d4fd64931d91429bdfa6e45c2",
+    "semantic_hash": "f0d65a4d4fd64931d91429bdfa6e45c2"
+  },
+  "controllers/default.py": {
+    "mtime": 1770914433.762198,
+    "ast_hash": "7619c15ff63073605d06d4ab5aaa37eb",
+    "semantic_hash": "7619c15ff63073605d06d4ab5aaa37eb"
+  },
+  "controllers/despachos.py": {
+    "mtime": 1773666924.3526802,
+    "ast_hash": "e8daf9caa4be4f4bba86a62d67baf111",
+    "semantic_hash": "e8daf9caa4be4f4bba86a62d67baf111"
+  },
+  "controllers/geral.py": {
+    "mtime": 1770991154.9229505,
+    "ast_hash": "0b4e746be9c2b777691645a2529c4fe1",
+    "semantic_hash": "0b4e746be9c2b777691645a2529c4fe1"
+  },
+  "controllers/relatorios.py": {
+    "mtime": 1770753400.9538853,
+    "ast_hash": "8980ccb606b9fbcd9d5ec00356c7f7a0",
+    "semantic_hash": "8980ccb606b9fbcd9d5ec00356c7f7a0"
+  },
+  "languages/en.py": {
+    "mtime": 1741199746.5909493,
+    "ast_hash": "f2bba70b681ad5b7fdeb083d0c7d379c",
+    "semantic_hash": "f2bba70b681ad5b7fdeb083d0c7d379c"
+  },
+  "languages/pt-br.py": {
+    "mtime": 1770747006.9352524,
+    "ast_hash": "5f731f459e43bca314b0611421357ec3",
+    "semantic_hash": "5f731f459e43bca314b0611421357ec3"
+  },
+  "languages/pt.py": {
+    "mtime": 1741199746.592934,
+    "ast_hash": "e99a15d253b8be39521487a9c8f9d868",
+    "semantic_hash": "e99a15d253b8be39521487a9c8f9d868"
+  },
+  "models/0_estruct.py": {
+    "mtime": 1763062821.2385118,
+    "ast_hash": "4cf5cc28de134d909366c62aa35d71d0",
+    "semantic_hash": "4cf5cc28de134d909366c62aa35d71d0"
+  },
+  "models/a_db.py": {
+    "mtime": 1770924815.1652324,
+    "ast_hash": "aa72c1301b6cf9821202bcfe6887f87b",
+    "semantic_hash": "aa72c1301b6cf9821202bcfe6887f87b"
+  },
+  "models/db.py": {
+    "mtime": 1770747907.220088,
+    "ast_hash": "1228e8346e9c18be322289cd3a19e020",
+    "semantic_hash": "1228e8346e9c18be322289cd3a19e020"
+  },
+  "models/menu.py": {
+    "mtime": 1741199746.592934,
+    "ast_hash": "b51b8e2b714025912b009b46a926106c",
+    "semantic_hash": "b51b8e2b714025912b009b46a926106c"
+  },
+  "models/textos_modelos.py": {
+    "mtime": 1773667802.1186762,
+    "ast_hash": "7fc7e399e09c61387b3744acd6f0cd53",
+    "semantic_hash": "7fc7e399e09c61387b3744acd6f0cd53"
+  },
+  "modules/despachos.py": {
+    "mtime": 1759148026.397073,
+    "ast_hash": "c148e0aac85a97884c800f3d212414cc",
+    "semantic_hash": "c148e0aac85a97884c800f3d212414cc"
+  },
+  "static/js/analytics.min.js": {
+    "mtime": 1741199746.7655237,
+    "ast_hash": "382bb7cc187d99491c8b698411d7c7b0",
+    "semantic_hash": "382bb7cc187d99491c8b698411d7c7b0"
+  },
+  "static/js/bootstrap.bundle.min.js": {
+    "mtime": 1741199746.7662115,
+    "ast_hash": "98d2c1da1c0a495f8fc8ad144ea1d3d2",
+    "semantic_hash": "98d2c1da1c0a495f8fc8ad144ea1d3d2"
+  },
+  "static/js/calendar-en.js": {
+    "mtime": 1741199746.7662115,
+    "ast_hash": "f33d19253da8acd29217772c4f5b7831",
+    "semantic_hash": "f33d19253da8acd29217772c4f5b7831"
+  },
+  "static/js/calendar.js": {
+    "mtime": 1741199746.7662115,
+    "ast_hash": "7a2f15ac0fc2e4b10ac6b25e6adf904a",
+    "semantic_hash": "7a2f15ac0fc2e4b10ac6b25e6adf904a"
+  },
+  "static/js/jquery.3.5.1.js": {
+    "mtime": 1741199746.7757518,
+    "ast_hash": "dc5e7f18c8d36ac1d3d4753a87c98d0a",
+    "semantic_hash": "dc5e7f18c8d36ac1d3d4753a87c98d0a"
+  },
+  "static/js/jquery.js": {
+    "mtime": 1741199746.7757518,
+    "ast_hash": "c9f5aeeca3ad37bf2aa006139b935f0a",
+    "semantic_hash": "c9f5aeeca3ad37bf2aa006139b935f0a"
+  },
+  "static/js/jquery.mask.min.js": {
+    "mtime": 1741199746.8063395,
+    "ast_hash": "cc290e6c3aeecf5021dd82ad8df2512a",
+    "semantic_hash": "cc290e6c3aeecf5021dd82ad8df2512a"
+  },
+  "static/js/jquery.maskedinput.js": {
+    "mtime": 1741199746.8063395,
+    "ast_hash": "d3bf2ff5c00942ee85d4058345662ea6",
+    "semantic_hash": "d3bf2ff5c00942ee85d4058345662ea6"
+  },
+  "static/js/modernizr-2.8.3.min.js": {
+    "mtime": 1741199746.8063395,
+    "ast_hash": "da941a6e1e1df098744318f6d25ba13a",
+    "semantic_hash": "da941a6e1e1df098744318f6d25ba13a"
+  },
+  "static/js/web2py-bootstrap4.js": {
+    "mtime": 1741199746.8063395,
+    "ast_hash": "7ddb60d984025e5b134aeebcd84e3a8f",
+    "semantic_hash": "7ddb60d984025e5b134aeebcd84e3a8f"
+  },
+  "static/js/web2py.js": {
+    "mtime": 1741199746.9494858,
+    "ast_hash": "ff968e000f60a7a524cbddaba6494540",
+    "semantic_hash": "ff968e000f60a7a524cbddaba6494540"
+  },
+  "tests/models/test_textos_modelos.py": {
+    "mtime": 1759510177.6010482,
+    "ast_hash": "6b5f07d43f3e4b1ef3dcdb9e4830033d",
+    "semantic_hash": "6b5f07d43f3e4b1ef3dcdb9e4830033d"
+  },
+  "views/__init__.py": {
+    "mtime": 1740769137.6161332,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  }
+}

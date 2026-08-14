@@ -54,6 +54,8 @@ def determinar_despacho(req):
                     'total_supressoes_laudadas': req.get('Laudos').get('total_supressoes_laudadas'),
                     'total_podas_requeridas': req.get('Requerimentos').get('total_podas_requeridas'),
                     'total_supressoes_requeridas': req.get('Requerimentos').get('total_supressoes_requeridas'),
+                    'total_podas': req.get('Laudos').get('total_podas_laudadas') if req.get('Laudos').get('total_podas_laudadas') is not None else req.get('Requerimentos').get('total_podas_requeridas'),
+                    'total_supressoes': req.get('Laudos').get('total_supressoes_laudadas') if req.get('Laudos').get('total_supressoes_laudadas') is not None else req.get('Requerimentos').get('total_supressoes_requeridas'),
                     'qtd_repor': req.get('Laudos').get('qtd_repor'),
                     'local_arvore': req.get('Requerimentos').get('local_arvore'),
                     'proprietario': req.get('Laudos').get('proprietario'),
@@ -67,7 +69,8 @@ def determinar_despacho(req):
                     'protocolo_anterior': req.get('protocolo_anterior'),
                     'total_podas_requeridas': req.get('total_podas_requeridas'),
                     'total_supressoes_requeridas': req.get('total_supressoes_requeridas'),
-                    ''
+                    'total_podas': req.get('total_podas') if req.get('total_podas') is not None else req.get('total_podas_requeridas'),
+                    'total_supressoes': req.get('total_supressoes') if req.get('total_supressoes') is not None else req.get('total_supressoes_requeridas'),
                     'local_arvore': req.get('local_arvore'),
                     'denuncia': req.get('denuncia')
                     }

@@ -79,6 +79,7 @@ else:
                 check_reserved=[configuration.take("db")['engine']],
                 adapter_args={'safe': True},
             )
+    authdb = db
 
 #db._adapter.types = copy.copy(db._adapter.types)
 db._adapter.types['boolean']='TINYINT(1)'

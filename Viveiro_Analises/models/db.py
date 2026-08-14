@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import locale
 
-from my_validador import MASK_CPF
+from my_validador import MASK_CPF  # type: ignore (web2py/site-packages)
 locale.setlocale(locale.LC_ALL, 'pt_BR.utf8')
 import num2words
 from pathlib import Path
@@ -9,7 +9,7 @@ from datetime import datetime, date
 
 if 0 == 1:
     from gluon import *  # type: ignore
-    from gluon import (
+    from gluon import (  # type: ignore
         db, configuration, IS_IN_SET, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP, IS_LENGTH, IS_IMAGE, # type: ignore
         Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db, IS_CHKBOX01, DAL, IS_INT_IN_RANGE, IS_CPF_OR_CNPJ,
         MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE, SQLFORM, IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC, )  # type: ignore
@@ -179,7 +179,7 @@ Requerimentos = db.define_table(
     Field(
         "data_entrada",
         "date",
-        requires=IS_DATE_IN_RANGE(format=T("%d/%m/%Y"),
+        requires=IS_DATE_IN_RANGE(format=T("%d/%m/%Y"),  # type: ignore
                        minimum=date(2024,1,1),
                        maximum=date.today(),
                        error_message="Deve ter o formato xx/xx/20xx"),
@@ -235,7 +235,7 @@ Requerimentos = db.define_table(
     Field(
         "data_do_laudo",
         "date",
-        requires=IS_EMPTY_OR(IS_DATE_IN_RANGE(format=T("%d/%m/%Y"),
+        requires=IS_EMPTY_OR(IS_DATE_IN_RANGE(format=T("%d/%m/%Y"), # type: ignore
                        minimum=date(2024,1,1),
                        maximum=date.today(),
                        error_message="Deve ter o formato xx/xx/20xx")),
@@ -282,7 +282,7 @@ Requerimentos = db.define_table(
     fake_migrate=True if not configuration.get('app.production') else False,
 )
 
-db.Requerimentos.Protocolo.filter_in = lambda obj: ProtocPattern()(obj)
+db.Requerimentos.Protocolo.filter_in = lambda obj: ProtocPattern()(obj) # type: ignore
 
 db.Requerimentos.cpf_cnpj.filter_out = lambda row: MASK_CPF()(row) if row else ''
 
@@ -394,7 +394,7 @@ Laudos = db.define_table(
         "data_do_laudo",
         "date",
         rname="`data do laudo`",
-        requires=IS_EMPTY_OR(IS_DATE_IN_RANGE(format=T("%d/%m/%Y"),
+        requires=IS_EMPTY_OR(IS_DATE_IN_RANGE(format=T("%d/%m/%Y"), # type: ignore
                        minimum=date(2024,1,1),
                        maximum=date.today(),
                        error_message="Deve ter o formato xx/xx/20xx")),

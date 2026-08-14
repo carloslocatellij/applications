@@ -301,6 +301,7 @@
 'Nome': 'Nome',
 'Nome do Modelo': 'Nome do Modelo',
 'not authorized': 'Não autorizado',
+'Not Authorized': 'Not Authorized',
 'not in': 'não se encontra em',
 'Number of entries: **%s**': 'Número de entradas: **%s**',
 'Numero1': 'Numero1',

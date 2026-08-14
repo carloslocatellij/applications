@@ -24,8 +24,9 @@ textos_modelos_module.__dict__['db'] = db_mock      # Inject db into its globals
 Field_mock = MagicMock() # Field is likely a class or factory function
 textos_modelos_module.__dict__['Field'] = Field_mock # Inject Field into its globals
 
-# Also add other things it might expect at the top level, like __file__
-textos_modelos_module.__file__ = '/app/Viveiro_Analises/models/textos_modelos.py' # Or a mock path
+import os
+base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+textos_modelos_module.__file__ = os.path.join(base_dir, 'models', 'textos_modelos.py')
 
 # Put this pre-configured module into sys.modules.
 # When the actual import happens, Python will find this existing module
@@ -43,7 +44,7 @@ sys.modules[module_name] = textos_modelos_module
 module_file_path = textos_modelos_module.__file__
 
 try:
-    with open(module_file_path, 'r') as f:
+    with open(module_file_path, 'r', encoding='utf-8') as f:
         module_code = f.read()
     # Execute the module's code within the prepared module's namespace
     # Pass globals and locals explicitly to mimic module execution context
@@ -412,7 +413,7 @@ class TestTextosModelos(unittest.TestCase):
             'Protocolo': '001/2023',
             'Requerente': 'João Silva',
             'Endereco': 'Rua Teste, 123',
-            'data_do_laudo': mock_date,
+            'data_entrada': mock_date,
             'total_podas': 2,
             'total_supressoes': 1,
             'Podas': 'Sim',
@@ -429,7 +430,7 @@ class TestTextosModelos(unittest.TestCase):
 
     @patch('Viveiro_Analises.models.textos_modelos.determinar_despacho')
     def test_despachar_successful_population_relation_query(self, mock_determinar_despacho):
-        mock_determinar_despacho.return_value = [(2, "Técnico: {tecnico}, Poda: {total_podas}")]
+        mock_determinar_despacho.return_value = [(2, "Técnico: {tecnico}, Poda: {total_podas_laudadas}")]
 
         mock_date_laudo = MagicMock()
         mock_date_laudo.strftime.return_value = "20/12/2023"
@@ -441,10 +442,10 @@ class TestTextosModelos(unittest.TestCase):
                 'data_do_laudo': mock_date_laudo,
                 'proprietario': 'Empresa X',
                 'morador': 'José',
-                'total_podas': 5,
-                'total_supressoes': 0,
-                'num_extens_poda': 'cinco',
-                'num_extens_supressoes': 'zero',
+                'total_podas_laudadas': 5,
+                'total_supressoes_laudadas': 0,
+                'num_extens_poda_laudadas': 'cinco',
+                'num_extens_supressoes_laudadas': 'zero',
                 'Supressoes': 'N/A',
                 'Podas': 'Sim',
                 'Obs': 'Nenhuma',
@@ -461,9 +462,8 @@ class TestTextosModelos(unittest.TestCase):
         self.assertEqual(result, ["Técnico: MARIA SOUZA, Poda: 5"]) # tecnico is .upper()
         mock_determinar_despacho.assert_called_once_with(relation_query) # determinar_despacho is called with relation_query
 
-        # Assert that strftime was NOT called, due to the bug in textos_modelos.py:
-        # The condition `if relation_query.get('data_do_laudo')` is false.
-        mock_date_laudo.strftime.assert_not_called()
+        # Assert that strftime was called on mock_date_laudo:
+        mock_date_laudo.strftime.assert_called_with('%d/%m/%Y')
 
 
     @patch('Viveiro_Analises.models.textos_modelos.determinar_despacho')
@@ -488,13 +488,13 @@ class TestTextosModelos(unittest.TestCase):
                 'tecnico': 'Carlos Ref',
             },
             'Requerimentos': { # This data_do_laudo should be used if present in Requerimentos under Laudos
-                 'data_do_laudo': mock_date_laudo_ref
+                 'data_entrada': mock_date_laudo_ref
             }
         }
 
         result = Despachar(prime_query, query_protoc_ref=query_protoc_ref)
 
-        expected_string = "Ref Protocolo: REF001, Ref Técnico: CARLOS REF"
+        expected_string = "Ref Protocolo: REF001, Ref Técnico: Carlos Ref"
         self.assertEqual(result, [expected_string])
         mock_determinar_despacho.assert_called_once_with(prime_query) # determinar_despacho is called with prime_query
         # Check if data_do_laudo from query_protoc_ref.Requerimentos was used

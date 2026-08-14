@@ -1,33 +1,30 @@
 
 Title "Implementador - Sistema SMMAURB - (c) Carlos A. Locatelli"
 
-for /d /r . %%f in ("__pycache__") do rmdir /s /q "%%f"
 
-xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\controllers\" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\controllers\" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py\applications\Viveiro_Analises\controllers" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\controllers" /E /XO
 
-xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\models\" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\models\" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py\applications\Viveiro_Analises\models" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\models" /E /XO
 
-xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\languages\" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\languages\" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py\applications\Viveiro_Analises\languages" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\languages" /E /XO
 
-xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\modules\" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\modules\" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py\applications\Viveiro_Analises\modules" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\modules" /E /XO
 
-xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\views\" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\views\" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py\applications\Viveiro_Analises\views" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\views" /E /XO
 
-xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\static\" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\static\" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py\applications\Viveiro_Analises\static" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\static" /E /XO
 
-xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\README.md" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\README.md" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py\applications\Viveiro_Analises" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises" README.md  /XO
 
-xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\LICENSE" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\LICENSE" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py\applications\Viveiro_Analises" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises" LICENSE /XO
 
-xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\compiled\" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\compiled\" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py\applications\Viveiro_Analises\private" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\private" appconfig.json /XO
 
-xcopy   "%userprofile%\web2py\applications\Viveiro_Analises\private\appconfig.json" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\private\appconfig.json" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py\site-packages" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\site-packages" /E /XO
 
-xcopy   "%userprofile%\web2py\site-packages" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\site-packages\" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises" atualiza_apps.bat /XO
 
-xcopy   "%userprofile%\web2py\atualiza_apps.bat" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\atualiza_apps.bat" /S /E /Y /H /D
-
-xcopy   "%userprofile%\web2py\requirements.txt" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\requirements.txt" /S /E /Y /H /D
+robocopy    "%userprofile%\web2py" "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises" requirements.txt /XO
 
 echo 'FINALIZADO!';
 
