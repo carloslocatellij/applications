@@ -219,6 +219,7 @@ binaries/*old*
 #./admin
 #./admin/*
 */.vscode/*
+./Qualidade_Ambiental   
 
 *.zip
 *.w2p
@@ -253,3 +254,4 @@ admin/
 
 #graphify
 .graphify-out/
+appconfig.json
