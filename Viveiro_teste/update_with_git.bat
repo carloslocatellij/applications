@@ -71,25 +71,24 @@ if exist "%pasta_viveiro%" (
         :: Entra na pasta do repositório para rodar o Git
         cd /d "%pasta_viveiro%"
 
-
-
-        echo Clonando o repositorio web2py...
         if exist "%pasta_viveiro%\.git" (
             git pull
-            git submodule update --init --recursive
         ) else (
-            git clone --recursive https://github.com/web2py/web2py.git "%pasta_documentos%"
+            echo Clonando o repositorio web2py...
+            git clone https://github.com/web2py/web2py.git "%pasta_documentos%\web2py"
             ren "%pasta_documentos%\web2py" "Viveiro_Analises"
             cd /d %pasta_viveiro%
-            git submodule update --init --recursive
         )
 
-        cd /d "%pasta_viveiro%"
+        rmdir /s /q "%pasta_viveiro%\binaries" >nul 2>&1
+
         if exist "%pasta_viveiro%\applications\.git" (
+            cd /d "%pasta_viveiro%\applications"
             git pull
         ) else (
+            rmdir /s /q "%pasta_viveiro%\applications"
             echo Clonando o repositorio da app...
-            git clone %REPO_URL% "%pasta_viveiro%"
+            git clone %REPO_URL% "%pasta_viveiro%\applications"
         )
 
 
@@ -101,14 +100,15 @@ if exist "%pasta_viveiro%" (
 
         cd "%pasta_documentos%"
 
-        git clone --recursive https://github.com/web2py/web2py.git "%pasta_documentos%"
+        git clone https://github.com/web2py/web2py.git "%pasta_documentos%\web2py"
         ren "%pasta_documentos%\web2py" "Viveiro_Analises"
         cd /d "%pasta_viveiro%"
-        git submodule update --init --recursive
 
-        cd /d "%pasta_viveiro%\applications\
+        rmdir /s /q "%pasta_viveiro%\binaries" >nul 2>&1
+        rmdir /s /q "%pasta_viveiro%\applications" >nul 2>&1
+
         echo Clonando o repositorio da app...
-        git clone %REPO_URL% "%pasta_viveiro%"
+        git clone %REPO_URL% "%pasta_viveiro%\applications"
     )
 
 
@@ -122,7 +122,7 @@ if exist "%pasta_viveiro%" (
     :: Atualiza requerimentos
     cd /d "%pasta_app_viveiro%"
     python -m pip install --upgrade pip
-    pip install -r requirements.txt
+    pip install -r "%pasta_app_viveiro%\requirements.txt"
 
 
 
@@ -132,40 +132,38 @@ if exist "%pasta_viveiro%" (
     echo A pasta 'Viveiro_Analises' nao foi encontrada em Documentos.
     echo Primeira Instalação.
    
-
-    cd "%pasta_documentos%"
-
-    git clone --recursive https://github.com/web2py/web2py.git "%pasta_documentos%"
+    git clone https://github.com/web2py/web2py.git "%pasta_documentos%\web2py"
 
     ren "%pasta_documentos%\web2py" "Viveiro_Analises"
 
     cd /d "%pasta_viveiro%"
-    git submodule update --init --recursive
+
+    rmdir /s /q "%pasta_viveiro%\binaries" >nul 2>&1
+    rmdir /s /q "%pasta_viveiro%\applications" >nul 2>&1
 
     echo Clonando o repositorio...
-    git clone %REPO_URL% "%pasta_viveiro%"
+    git clone %REPO_URL% "%pasta_viveiro%\applications"
 
 
-    cd %pasta_viveiro%
+    cd /d %pasta_viveiro%
 
     robocopy "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\applications\Viveiro_Analises\private" "%pasta_viveiro%\applications\Viveiro_Analises\private" appconfig.json /XO
     robocopy  "F:\SMMAURB\SISTEMA DE DADOS\Viveiro\Viveiro_Analises\site-packages" "%pasta_viveiro%\site-packages"  /E /XO
     set /p "senha=Digite a sua senha: "
-    ::  Define o nome do arquivo que será alterado
-    set "arquivo=%pasta_viveiro%\applications\Viveiro_Analises\private\appconfig.json"
+    
     :: 3. Executa o PowerShell para substituir o padrao pela senha
-    powershell -Command "(Get-Content '%arquivo%') -replace '----------', '%senha%' | Set-Content '%arquivo%'"
+    powershell -Command "(Get-Content '%arquivo_json%') -replace '----------', '%senha%' | Set-Content '%arquivo_json%'"
 
 
     cd /d "%pasta_app_viveiro%"
     python -m pip install --upgrade pip
-    pip install -r requirements.txt
+    pip install -r "%pasta_app_viveiro%\requirements.txt"
 
-    mklink "%userprofile%\Desktop\Viveiro_Analises.lnk" "%pasta_viveiro%\Viveiro_Analises.exe". 
+    mklink "%userprofile%\Desktop\Viveiro_Analises.lnk" "%pasta_viveiro%\web2py.exe"
 
 )
 
 
 echo Processo concluido com sucesso!
-pause
+pause   
 endlocal
