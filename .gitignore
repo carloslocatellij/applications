@@ -250,7 +250,7 @@ venv
 admin/
 */databases/
 *.ps1
-*.bat
+
 
 #graphify
 .graphify-out/

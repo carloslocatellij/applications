@@ -1,0 +1,5 @@
+faker
+num2words
+piexif  
+Pillow
+legacy-cgi
