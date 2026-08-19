@@ -1,4 +1,4 @@
-# 🌳 Sistema de Gestão de Laudos Ambientais - Web2py
+# 🌳 Sistema de Gestão de Laudos Ambientais
 
 ## Sobre o Projeto
 
@@ -111,7 +111,7 @@ Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes
 
 ## ✒️ Autores
 
-* **Seu Nome** - *Desenvolvimento* - [carloslocatellij](https://github.com/carloslocatellij)
+* **[carloslocatellij](https://github.com/carloslocatellij)**
 
 ## 📄 Notas
 
