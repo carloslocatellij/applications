@@ -3,7 +3,7 @@ def atualizar(): #Menu
     import subprocess
     from pathlib import Path
     # Caminho para o seu arquivo .bat
-    caminho_arquivo_bat = Path(Path.home(), 'Documents', 'Viveiro_Analises', 'site-packages',  'update_with_git.bat')
+    caminho_arquivo_bat = Path(Path.home(), 'Documents', 'Viveiro_Analises', 'site-packages',  'update_with_git.py')
 
     try:
         # Executa o arquivo .bat

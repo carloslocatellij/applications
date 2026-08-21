@@ -63,7 +63,7 @@ if configuration.get('app.production'):
                 configuration.take("db")['password'],
                 configuration.take("db")['uri'], 'Tconect' ) ,
             pool_size=50,
-            migrate_enabled=True, migrate=False, fake_migrate_all=False, lazy_tables=True,
+            migrate_enabled=False, migrate=False, fake_migrate_all=False, lazy_tables=True,
             check_reserved=['mysql'], adapter_args={'safe': True},
             )
 
@@ -142,7 +142,8 @@ auth.settings.extra_fields['auth_user'] = [
 ]
 
 auth.define_tables(username=True,  
-                   migrate=True if not configuration.get('app.production') else False,   
+                   migrate=False if not configuration.get(
+                       'app.production') else False,
                    fake_migrate=True if not configuration.get('app.production') else False, )
 
 
@@ -235,4 +236,4 @@ response.show_toolbar = configuration.get('app.toolbar')
 # >>> for row in rows: print row.id, row.myfield
 # -------------------------------------------------------------------------
 
-auth.wiki(resolve=False)
+auth.wiki(resolve=True)
