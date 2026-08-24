@@ -236,4 +236,4 @@ response.show_toolbar = configuration.get('app.toolbar')
 # >>> for row in rows: print row.id, row.myfield
 # -------------------------------------------------------------------------
 
-auth.wiki(resolve=True)
+auth.wiki(resolve=False, migrate=False)
