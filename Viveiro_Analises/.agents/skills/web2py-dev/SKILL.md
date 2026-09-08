@@ -58,3 +58,9 @@ Quando uma requisição Web2py falha em tempo de execução, o framework gera um
       <p>{{=r.nome}}</p>
   {{pass}}
   ```
+
+## Em caso de dúvidas: Verifique a documentação original do web2py e documentos relacionados em:
+ https://web2py.com/book
+ https://www.web2py.com/examples/default/examples
+ https://www.web2pyref.com/
+ 
