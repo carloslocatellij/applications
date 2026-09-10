@@ -1,5 +1,9 @@
 {{extend 'layout.html'}}
-<!-- Note that the response item named content 
-contains the helper returned by the auth.wiki() call
-and you can choose where to place it within your
-view layout -->
+<script>
+window.location.href = "{{=URL('wiki', 'index')}}";
+</script>
+<div class="container text-center py-5">
+  <div class="spinner-border text-primary" role="status"></div>
+  <p class="mt-3 text-muted">Redirecionando para a Base de Conhecimento...</p>
+  <a href="{{=URL('wiki', 'index')}}" class="btn btn-primary btn-sm">Clique aqui se não for redirecionado</a>
+</div>

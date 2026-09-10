@@ -1,0 +1,246 @@
+{{extend 'layout.html'}}
+
+{{block head}}
+<link rel="stylesheet" href="{{=URL('static', 'css/wiki.css')}}"/>
+{{end}}
+
+<div class="container-fluid wiki-main-wrapper py-3">
+
+  <!-- Hero Search Banner -->
+  <div class="wiki-hero text-center position-relative">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <h1><i class="fa fa-book text-warning mr-2"></i> Base de Conhecimento</h1>
+        <p class="lead mb-3">Comunidade de documentação, procedimentos operacionais, manuais técnicos e guias.</p>
+        
+        <form action="{{=URL('wiki', 'search')}}" method="GET" class="wiki-search-box">
+          <i class="fa fa-search search-icon"></i>
+          <input type="text" name="q" id="wikiLiveSearchInput" class="form-control" placeholder="Buscar por artigos, tutoriais, palavras-chave ou tags..." autocomplete="off"/>
+          <div id="wikiLiveSearchResults" class="list-group position-absolute w-100 shadow text-left" style="display:none; z-index: 1050; top: 100%; border-radius: 0.5rem; max-height: 320px; overflow-y: auto;"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stat Cards & CTA -->
+  <div class="row mb-4">
+    <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+      <div class="wiki-stat-card">
+        <div class="wiki-stat-icon">
+          <i class="fa fa-file-text-o"></i>
+        </div>
+        <div>
+          <div class="wiki-stat-number">{{=total_articles}}</div>
+          <div class="wiki-stat-label">Artigos Publicados</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+      <div class="wiki-stat-card">
+        <div class="wiki-stat-icon" style="background-color: #fef3c7; color: #d97706;">
+          <i class="fa fa-tags"></i>
+        </div>
+        <div>
+          <div class="wiki-stat-number">{{=total_tags}}</div>
+          <div class="wiki-stat-label">Categorias / Tags</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+      <div class="wiki-stat-card">
+        <div class="wiki-stat-icon" style="background-color: #ede9fe; color: #7c3aed;">
+          <i class="fa fa-users"></i>
+        </div>
+        <div>
+          <div class="wiki-stat-number">{{=total_contributors}}</div>
+          <div class="wiki-stat-label">Contribuidores</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+      <div class="wiki-stat-card justify-content-center bg-primary text-white" style="background: linear-gradient(135deg, #009c87 0%, #007a6a 100%) !important;">
+        <a href="{{=URL('wiki', 'create')}}" class="btn btn-light btn-block font-weight-bold shadow-sm" style="color: #007a6a; border-radius: 2rem;">
+          <i class="fa fa-plus-circle mr-1"></i> Criar Novo Artigo
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Left / Main Column: Recent & Featured Articles -->
+    <div class="col-lg-8">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="h4 font-weight-bold text-dark mb-0">
+          <i class="fa fa-clock-o text-muted mr-2"></i> Artigos Recentes & Atualizados
+        </h3>
+        <a href="{{=URL('wiki', 'pages')}}" class="btn btn-sm btn-outline-secondary">
+          <i class="fa fa-list mr-1"></i> Ver Todos os Artigos ({{=total_articles}})
+        </a>
+      </div>
+
+      {{if not recent_pages:}}
+        <div class="card p-5 text-center bg-light border-0 rounded-lg">
+          <div class="mb-3">
+            <i class="fa fa-folder-open-o fa-4x text-muted"></i>
+          </div>
+          <h4>Nenhum artigo publicado ainda</h4>
+          <p class="text-muted">Seja o primeiro a compartilhar conhecimento com a equipe!</p>
+          <div class="mt-2">
+            <a href="{{=URL('wiki', 'create')}}" class="btn btn-success">
+              <i class="fa fa-pencil mr-1"></i> Escrever o Primeiro Artigo
+            </a>
+          </div>
+        </div>
+      {{else:}}
+        <div class="row">
+          {{for page in recent_pages:}}
+            <div class="col-md-6 mb-3">
+              <div class="wiki-card">
+                <div>
+                  <div class="d-flex justify-content-between align-items-start mb-1">
+                    <h5 class="wiki-card-title">
+                      <a href="{{=URL('wiki', 'view', args=[page['slug']])}}">
+                        {{=page['title']}}
+                      </a>
+                    </h5>
+                  </div>
+                  
+                  <div class="mb-2">
+                    {{for t in (page['tags'] or []):}}
+                      {{if t:}}
+                        <a href="{{=URL('wiki', 'tag', args=[t])}}" class="wiki-tag">
+                          #{{=t}}
+                        </a>
+                      {{pass}}
+                    {{pass}}
+                  </div>
+
+                  <p class="wiki-card-body">
+                    {{=page['excerpt'] or 'Sem descrição prévia...'}}
+                  </p>
+                </div>
+
+                <div class="wiki-card-footer">
+                  <div class="d-flex align-items-center">
+                    <span class="wiki-avatar-initials">{{=page['author_initials']}}</span>
+                    <span class="text-truncate" style="max-width: 120px;" title="{{=page['author_name']}}">{{=page['author_name']}}</span>
+                  </div>
+                  <div>
+                    <span class="mr-2" title="Tempo estimado de leitura"><i class="fa fa-clock-o"></i> {{=page['reading_time']}}</span>
+                    <span title="Data de modificação"><i class="fa fa-calendar-o"></i> {{=page['modified_on'].strftime('%d/%m/%Y') if page['modified_on'] else ''}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {{pass}}
+        </div>
+      {{pass}}
+    </div>
+
+    <!-- Right Column: Tags & Navigation Tools -->
+    <div class="col-lg-4">
+      <!-- Quick Navigation Card -->
+      <div class="card mb-4 shadow-sm border-0" style="border-radius: 0.75rem;">
+        <div class="card-header bg-white font-weight-bold py-3 border-bottom">
+          <i class="fa fa-compass text-primary mr-2"></i> Navegação Rápida
+        </div>
+        <div class="list-group list-group-flush">
+          <a href="{{=URL('wiki', 'pages')}}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            <span><i class="fa fa-th-list text-secondary mr-2"></i> Catálogo Completo de Artigos</span>
+            <span class="badge badge-secondary badge-pill">{{=total_articles}}</span>
+          </a>
+          <a href="{{=URL('wiki', 'create')}}" class="list-group-item list-group-item-action">
+            <i class="fa fa-plus-circle text-success mr-2"></i> Publicar Novo Artigo
+          </a>
+          <a href="{{=URL('wiki', 'search')}}" class="list-group-item list-group-item-action">
+            <i class="fa fa-search text-info mr-2"></i> Pesquisa Avançada
+          </a>
+        </div>
+      </div>
+
+      <!-- Categories & Tag Cloud -->
+      <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
+        <div class="card-header bg-white font-weight-bold py-3 border-bottom d-flex justify-content-between align-items-center">
+          <span><i class="fa fa-tags text-warning mr-2"></i> Tópicos & Categorias</span>
+          <span class="badge badge-light text-muted">{{=total_tags}} tags</span>
+        </div>
+        <div class="card-body">
+          {{if not top_tags:}}
+            <p class="text-muted small mb-0">Nenhuma tag cadastrada ainda.</p>
+          {{else:}}
+            <div class="d-flex flex-wrap">
+              {{for t in top_tags:}}
+                <a href="{{=URL('wiki', 'tag', args=[t['name']])}}" class="wiki-tag d-inline-flex align-items-center mb-2 mr-2">
+                  <span>#{{=t['name']}}</span>
+                  <span class="badge badge-light text-dark ml-1 px-1" style="font-size: 0.7rem;">{{=t['count']}}</span>
+                </a>
+              {{pass}}
+            </div>
+          {{pass}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{{block page_js}}
+<script>
+$(document).ready(function() {
+  var searchInput = $('#wikiLiveSearchInput');
+  var resultsBox = $('#wikiLiveSearchResults');
+  var searchTimeout = null;
+
+  searchInput.on('keyup', function() {
+    var query = $(this).val().trim();
+    clearTimeout(searchTimeout);
+
+    if (query.length < 2) {
+      resultsBox.hide().empty();
+      return;
+    }
+
+    searchTimeout = setTimeout(function() {
+      $.getJSON("{{=URL('wiki', 'search')}}", { q: query, format: 'json' }, function(data) {
+        resultsBox.empty();
+        if (data && data.length > 0) {
+          $.each(data, function(i, item) {
+            var tagsHtml = '';
+            if (item.tags && item.tags.length > 0) {
+              tagsHtml = ' <small class="text-muted">(' + item.tags.join(', ') + ')</small>';
+            }
+            resultsBox.append(
+              '<a href="' + item.url + '" class="list-group-item list-group-item-action py-2">' +
+                '<div class="d-flex w-100 justify-content-between align-items-center">' +
+                  '<strong class="text-primary"><i class="fa fa-file-text-o mr-1"></i> ' + item.title + '</strong>' +
+                  '<small class="text-muted">' + item.reading_time + '</small>' +
+                '</div>' +
+                tagsHtml +
+              '</a>'
+            );
+          });
+          resultsBox.append(
+            '<a href="{{=URL("wiki", "search")}}?q=' + encodeURIComponent(query) + '" class="list-group-item list-group-item-action text-center bg-light py-1 font-weight-bold text-secondary" style="font-size:0.85rem;">' +
+              '<i class="fa fa-search mr-1"></i> Ver todos os resultados para "' + query + '"' +
+            '</a>'
+          );
+          resultsBox.show();
+        } else {
+          resultsBox.append('<div class="list-group-item text-muted text-center py-2">Nenhum resultado encontrado.</div>');
+          resultsBox.show();
+        }
+      });
+    }, 250);
+  });
+
+  $(document).on('click', function(e) {
+    if (!$(e.target).closest('.wiki-search-box').length) {
+      resultsBox.hide();
+    }
+  });
+});
+</script>
+{{end}}

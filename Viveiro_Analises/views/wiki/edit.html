@@ -1,0 +1,277 @@
+{{extend 'layout.html'}}
+
+{{block head}}
+<link rel="stylesheet" href="{{=URL('static', 'css/wiki.css')}}"/>
+{{end}}
+
+<div class="container-fluid wiki-main-wrapper py-3">
+
+  <!-- Breadcrumbs -->
+  <nav aria-label="breadcrumb" class="wiki-breadcrumb mb-3">
+    <ol class="breadcrumb bg-transparent p-0 m-0">
+      <li class="breadcrumb-item"><a href="{{=URL('default', 'index')}}"><i class="fa fa-home"></i> Início</a></li>
+      <li class="breadcrumb-item"><a href="{{=URL('wiki', 'index')}}"><i class="fa fa-book"></i> Base de Conhecimento</a></li>
+      <li class="breadcrumb-item"><a href="{{=URL('wiki', 'view', args=[page.slug])}}">{{=page.title or page.slug}}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Editar</li>
+    </ol>
+  </nav>
+
+  <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+      <h3 class="h5 font-weight-bold text-dark mb-0">
+        <i class="fa fa-pencil text-warning mr-2"></i> Editar Artigo: {{=page.title or page.slug}}
+      </h3>
+      <a href="{{=URL('wiki', 'view', args=[page.slug])}}" class="btn btn-sm btn-outline-secondary">
+        <i class="fa fa-times mr-1"></i> Cancelar
+      </a>
+    </div>
+
+    <div class="card-body p-4">
+      <form action="{{=URL('wiki', 'edit', args=[page.slug])}}" method="POST" enctype="multipart/form-data" id="wikiEditArticleForm">
+        
+        <!-- Row 1: Title & Slug (Slug is fixed/readonly in edit to maintain URLs) -->
+        <div class="row">
+          <div class="col-md-8 mb-3">
+            <label for="wikiTitleInput" class="font-weight-bold">Título do Artigo <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="title" id="wikiTitleInput" value="{{=page.title or ''}}" required/>
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label class="font-weight-bold">Slug URL</label>
+            <input type="text" class="form-control bg-light" value="{{=page.slug}}" readonly title="O slug não pode ser alterado para preservar referências e links existentes."/>
+          </div>
+        </div>
+
+        <!-- Row 2: Tags -->
+        <div class="form-group mb-3">
+          <label for="wikiTagsInput" class="font-weight-bold">Categorias / Tags</label>
+          <input type="text" class="form-control" name="tags" id="wikiTagsInput" value="{{=tags_str}}" placeholder="Ex: Procedimentos, Viveiro, Mudas, TI (separadas por vírgula)"/>
+          
+          {{if all_tags:}}
+            <div class="mt-2 small text-muted">
+              <span>Sugestões de tags (clique para adicionar):</span>
+              <div class="mt-1">
+                {{for t in all_tags[:15]:}}
+                  <button type="button" class="btn btn-xs btn-outline-secondary btn-tag-suggestion mb-1" data-tag="{{=t}}">
+                    + {{=t}}
+                  </button>
+                {{pass}}
+              </div>
+            </div>
+          {{pass}}
+        </div>
+
+        <!-- Row 3: Changelog note -->
+        <div class="form-group mb-3">
+          <label for="wikiChangelogInput" class="font-weight-bold">Motivo da Alteração / Nota de Revisão</label>
+          <input type="text" class="form-control" name="changelog" id="wikiChangelogInput" placeholder="Ex: Atualizado procedimentos da etapa 2 e adicionada nova tabela"/>
+          <small class="form-text text-muted">Uma breve descrição para ajudar outros colegas a entenderem o que mudou.</small>
+        </div>
+
+        <!-- Editor & Preview Tabs -->
+        <div class="form-group mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="font-weight-bold mb-0">Conteúdo do Artigo (Markdown) <span class="text-danger">*</span></label>
+            
+            <ul class="nav nav-pills" id="editorTabs" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active py-1 px-3" id="tab-write-btn" data-toggle="pill" href="#tab-write" role="tab">
+                  <i class="fa fa-code mr-1"></i> Editor
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link py-1 px-3" id="tab-preview-btn" data-toggle="pill" href="#tab-preview" role="tab">
+                  <i class="fa fa-eye mr-1"></i> Pré-visualização
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link py-1 px-3 text-muted" id="tab-help-btn" data-toggle="pill" href="#tab-help" role="tab">
+                  <i class="fa fa-question-circle mr-1"></i> Ajuda
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="tab-content mt-2">
+            <!-- Tab 1: Editor -->
+            <div class="tab-pane fade show active" id="tab-write" role="tabpanel">
+              <!-- Formatting Toolbar -->
+              <div class="wiki-editor-toolbar">
+                <button type="button" class="btn btn-light btn-sm" onclick="insertSyntax('**', '**', 'texto em negrito')" title="Negrito"><i class="fa fa-bold"></i></button>
+                <button type="button" class="btn btn-light btn-sm" onclick="insertSyntax('*', '*', 'texto em itálico')" title="Itálico"><i class="fa fa-italic"></i></button>
+                <button type="button" class="btn btn-light btn-sm" onclick="insertSyntax('# ', '', 'Título Nível 1')" title="Título 1">H1</button>
+                <button type="button" class="btn btn-light btn-sm" onclick="insertSyntax('## ', '', 'Título Nível 2')" title="Título 2">H2</button>
+                <button type="button" class="btn btn-light btn-sm" onclick="insertSyntax('### ', '', 'Título Nível 3')" title="Título 3">H3</button>
+                <span class="border-left mx-1"></span>
+                <button type="button" class="btn btn-light btn-sm" onclick="insertSyntax('- ', '', 'Item de lista')" title="Lista com marcadores"><i class="fa fa-list-ul"></i></button>
+                <button type="button" class="btn btn-light btn-sm" onclick="insertSyntax('1. ', '', 'Item numerado')" title="Lista numerada"><i class="fa fa-list-ol"></i></button>
+                <button type="button" class="btn btn-light btn-sm" onclick="insertSyntax('* [ ] ', '', 'Tarefa a fazer')" title="Checklist / Tarefa"><i class="fa fa-check-square-o"></i></button>
+                <span class="border-left mx-1"></span>
+                <button type="button" class="btn btn-light btn-sm" onclick="insertSyntax('```\n', '\n```', 'código ou comando aqui')" title="Bloco de Código"><i class="fa fa-code"></i></button>
+                <button type="button" class="btn btn-light btn-sm" onclick="insertSyntax('> ', '', 'Citação em destaque')" title="Citação"><i class="fa fa-quote-left"></i></button>
+                <button type="button" class="btn btn-light btn-sm" onclick="insertTable()" title="Inserir Tabela"><i class="fa fa-table"></i></button>
+                <button type="button" class="btn btn-light btn-sm" onclick="insertSyntax('[', '](https://exemplo.com)', 'texto do link')" title="Inserir Link"><i class="fa fa-link"></i></button>
+                <span class="border-left mx-1"></span>
+                <div class="dropdown d-inline-block">
+                  <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
+                    <i class="fa fa-exclamation-circle text-primary"></i> Caixa de Alerta
+                  </button>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#" onclick="insertCallout('NOTE', 'Informação ou nota adicional importante'); return false;"><i class="fa fa-info-circle text-info mr-1"></i> Nota / Informação</a>
+                    <a class="dropdown-item" href="#" onclick="insertCallout('TIP', 'Dica prática para os usuários'); return false;"><i class="fa fa-lightbulb-o text-success mr-1"></i> Dica</a>
+                    <a class="dropdown-item" href="#" onclick="insertCallout('IMPORTANT', 'Requisito obrigatório'); return false;"><i class="fa fa-exclamation-circle text-purple mr-1"></i> Importante</a>
+                    <a class="dropdown-item" href="#" onclick="insertCallout('WARNING', 'Atenção com possíveis impactos'); return false;"><i class="fa fa-warning text-warning mr-1"></i> Atenção</a>
+                  </div>
+                </div>
+              </div>
+
+              <textarea class="form-control wiki-editor-textarea" name="body" id="wikiBodyInput" required>{{=page.body or ''}}</textarea>
+            </div>
+
+            <!-- Tab 2: Live Preview -->
+            <div class="tab-pane fade" id="tab-preview" role="tabpanel">
+              <div class="wiki-preview-box wiki-content" id="wikiPreviewContainer">
+                <div class="text-center text-muted py-5">
+                  <i class="fa fa-spinner fa-spin fa-2x"></i><br/>Carregando pré-visualização...
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 3: Markdown Cheatsheet -->
+            <div class="tab-pane fade" id="tab-help" role="tabpanel">
+              <div class="card p-3 bg-light border">
+                <h6><i class="fa fa-lightbulb-o text-warning mr-1"></i> Guia Rápido de Formatação Markdown</h6>
+                <div class="row small">
+                  <div class="col-md-4">
+                    <strong>Cabeçalhos:</strong><br/>
+                    <code># Título Nível 1</code><br/>
+                    <code>## Título Nível 2</code><br/>
+                    <code>### Título Nível 3</code>
+                  </div>
+                  <div class="col-md-4">
+                    <strong>Listas e Tarefas:</strong><br/>
+                    <code>- Item</code><br/>
+                    <code>* [x] Concluído</code><br/>
+                    <code>* [ ] Pendente</code>
+                  </div>
+                  <div class="col-md-4">
+                    <strong>Caixas de Destaque (Callouts):</strong><br/>
+                    <code>&gt; [!NOTE]</code><br/>
+                    <code>&gt; [!TIP]</code><br/>
+                    <code>&gt; [!WARNING]</code>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Existing Attachments & Upload New -->
+        <div class="card bg-light border p-3 mb-4">
+          <h6 class="font-weight-bold text-dark mb-2"><i class="fa fa-paperclip text-muted mr-1"></i> Anexos & Arquivos</h6>
+          
+          {{if attachments:}}
+            <div class="mb-3">
+              <label class="small font-weight-bold text-secondary">Arquivos atualmente anexados:</label>
+              <div class="row">
+                {{for att in attachments:}}
+                  <div class="col-md-6 mb-2">
+                    <div class="wiki-media-item bg-white">
+                      <div class="d-flex align-items-center text-truncate">
+                        <i class="fa fa-file-text-o mr-2 text-muted"></i>
+                        <span class="text-truncate" title="{{=att.title}}">{{=att.title}}</span>
+                      </div>
+                      <div>
+                        <a href="{{=URL('default', 'download', args=[att.filename])}}" class="btn btn-xs btn-outline-primary mr-1" download title="Baixar"><i class="fa fa-download"></i></a>
+                        <a href="{{=URL('wiki', 'media_delete', args=[att.id])}}" class="btn btn-xs btn-outline-danger" onclick="return confirm('Deseja realmente remover este anexo?');" title="Remover"><i class="fa fa-trash-o"></i></a>
+                      </div>
+                    </div>
+                  </div>
+                {{pass}}
+              </div>
+            </div>
+          {{pass}}
+
+          <div class="border-top pt-2">
+            <label class="small font-weight-bold text-secondary">Adicionar Novo Anexo:</label>
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <input type="text" class="form-control form-control-sm" name="attachment_title" placeholder="Título ou descrição do arquivo"/>
+              </div>
+              <div class="col-md-6 mb-2">
+                <input type="file" class="form-control-file" name="attachment"/>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="d-flex justify-content-end align-items-center">
+          <a href="{{=URL('wiki', 'view', args=[page.slug])}}" class="btn btn-secondary mr-2">Cancelar</a>
+          <button type="submit" class="btn btn-primary px-4 font-weight-bold">
+            <i class="fa fa-save mr-1"></i> Salvar Alterações
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+
+{{block page_js}}
+<script>
+$(document).ready(function() {
+  // Tag suggestions click
+  $('.btn-tag-suggestion').on('click', function() {
+    var tag = $(this).data('tag');
+    var tagsInput = $('#wikiTagsInput');
+    var current = tagsInput.val().trim();
+    if (!current) {
+      tagsInput.val(tag);
+    } else {
+      var currentTags = current.split(',').map(function(t){ return t.trim(); });
+      if (currentTags.indexOf(tag) === -1) {
+        tagsInput.val(current + ', ' + tag);
+      }
+    }
+  });
+
+  // Live preview tab click
+  $('#tab-preview-btn').on('click', function() {
+    var body = $('#wikiBodyInput').val();
+    $('#wikiPreviewContainer').html('<div class="text-center text-muted py-5"><i class="fa fa-spinner fa-spin fa-2x"></i><br/>Carregando pré-visualização...</div>');
+    $.post("{{=URL('wiki', 'preview')}}", { body: body }, function(html) {
+      if (!html || html.trim() === '') {
+        $('#wikiPreviewContainer').html('<p class="text-muted font-italic">Nenhum conteúdo digitado ainda.</p>');
+      } else {
+        $('#wikiPreviewContainer').html(html);
+      }
+    });
+  });
+});
+
+// Helper for inserting markdown syntax into textarea
+function insertSyntax(before, after, defaultText) {
+  var textarea = document.getElementById('wikiBodyInput');
+  var start = textarea.selectionStart;
+  var end = textarea.selectionEnd;
+  var selected = textarea.value.substring(start, end) || defaultText;
+  var replacement = before + selected + after;
+  textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+  textarea.focus();
+  textarea.selectionStart = start + before.length;
+  textarea.selectionEnd = start + before.length + selected.length;
+}
+
+function insertTable() {
+  var tableTemplate = '\n| Coluna 1 | Coluna 2 | Coluna 3 |\n|---|---|---|\n| Item A | Detalhe 1 | Valor 100 |\n| Item B | Detalhe 2 | Valor 200 |\n\n';
+  insertSyntax('', '', tableTemplate);
+}
+
+function insertCallout(type, message) {
+  var callout = '\n> [!' + type + ']\n> ' + message + '\n\n';
+  insertSyntax('', '', callout);
+}
+</script>
+{{end}}

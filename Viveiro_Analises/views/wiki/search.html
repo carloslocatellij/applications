@@ -1,0 +1,110 @@
+{{extend 'layout.html'}}
+
+{{block head}}
+<link rel="stylesheet" href="{{=URL('static', 'css/wiki.css')}}"/>
+{{end}}
+
+<div class="container-fluid wiki-main-wrapper py-3">
+
+  <!-- Breadcrumbs -->
+  <nav aria-label="breadcrumb" class="wiki-breadcrumb mb-3">
+    <ol class="breadcrumb bg-transparent p-0 m-0">
+      <li class="breadcrumb-item"><a href="{{=URL('default', 'index')}}"><i class="fa fa-home"></i> Início</a></li>
+      <li class="breadcrumb-item"><a href="{{=URL('wiki', 'index')}}"><i class="fa fa-book"></i> Base de Conhecimento</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Pesquisa</li>
+    </ol>
+  </nav>
+
+  <!-- Search Filter Header in Gradient -->
+  <div class="wiki-hero mb-4 p-4 text-left">
+    <h2 class="h3 font-weight-bold text-white mb-3"><i class="fa fa-search text-warning mr-2"></i> Pesquisar na Base de Conhecimento</h2>
+    
+    <form action="{{=URL('wiki', 'search')}}" method="GET" class="row">
+      <div class="col-md-7 mb-2">
+        <input type="text" name="q" class="form-control form-control-lg" value="{{=query}}" placeholder="Digite termos de busca..." autofocus/>
+      </div>
+      <div class="col-md-3 mb-2">
+        <select name="tag" class="form-control form-control-lg">
+          <option value="">-- Todas as Categorias --</option>
+          {{for t in all_tags:}}
+            <option value="{{=t['name']}}" {{if tag_filter == t['name']:}}selected{{pass}}>{{=t['name']}} ({{=t['count']}})</option>
+          {{pass}}
+        </select>
+      </div>
+      <div class="col-md-2 mb-2">
+        <button type="submit" class="btn btn-light btn-lg btn-block font-weight-bold" style="color: #007a6a;">
+          <i class="fa fa-search mr-1"></i> Buscar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Search Results Summary -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="h5 font-weight-bold text-dark mb-0">
+      {{if query or tag_filter:}}
+        Resultados para {{if query:}}"<strong>{{=query}}</strong>"{{pass}} {{if tag_filter:}}na categoria <strong>#{{=tag_filter}}</strong>{{pass}}
+        <span class="badge badge-light border ml-2">{{=len(results)}} encontrados</span>
+      {{else:}}
+        Digite um termo acima para pesquisar artigos
+      {{pass}}
+    </h4>
+  </div>
+
+  <!-- Results List -->
+  {{if not results and (query or tag_filter):}}
+    <div class="card p-5 text-center bg-light border-0 rounded-lg">
+      <div class="mb-3">
+        <i class="fa fa-search-minus fa-3x text-muted"></i>
+      </div>
+      <h5>Nenhum resultado correspondente foi encontrado</h5>
+      <p class="text-muted small">Tente usar palavras-chave mais gerais ou selecione outra categoria.</p>
+      <div>
+        <a href="{{=URL('wiki', 'create', vars=dict(title=query))}}" class="btn btn-success btn-sm">
+          <i class="fa fa-plus-circle mr-1"></i> Criar um artigo com este título
+        </a>
+      </div>
+    </div>
+  {{else:}}
+    <div class="row">
+      {{for r in results:}}
+        <div class="col-lg-6 mb-3">
+          <div class="wiki-card">
+            <div>
+              <h5 class="wiki-card-title">
+                <a href="{{=URL('wiki', 'view', args=[r['slug']])}}">
+                  {{=XML(r['highlighted_title'])}}
+                </a>
+              </h5>
+
+              <div class="mb-2">
+                {{for t in (r['tags'] or []):}}
+                  {{if t:}}
+                    <a href="{{=URL('wiki', 'tag', args=[t])}}" class="wiki-tag">
+                      #{{=t}}
+                    </a>
+                  {{pass}}
+                {{pass}}
+              </div>
+
+              <p class="wiki-card-body">
+                {{=XML(r['highlighted_excerpt'])}}
+              </p>
+            </div>
+
+            <div class="wiki-card-footer">
+              <div>
+                <i class="fa fa-user-o mr-1"></i> {{=r['author_name']}}
+              </div>
+              <div>
+                <span class="mr-2"><i class="fa fa-clock-o"></i> {{=r['reading_time']}}</span>
+                <span><i class="fa fa-calendar-o"></i> {{=r['modified_on'].strftime('%d/%m/%Y') if r['modified_on'] else ''}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      {{pass}}
+    </div>
+  {{pass}}
+
+</div>

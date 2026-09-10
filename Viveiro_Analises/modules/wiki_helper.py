@@ -1,0 +1,265 @@
+# -*- coding: utf-8 -*-
+"""
+Helper module for Knowledge Base Wiki in Web2py.
+Provides Markdown parsing with callouts, TOC extraction, slug generation,
+reading time estimation, search snippet extraction, and access control.
+"""
+
+import re
+import unicodedata
+from html import escape
+
+
+def slugify(value):
+    """
+    Normalizes string, converts to lowercase, removes non-alpha characters,
+    and converts spaces to hyphens.
+    Example: 'Guia de Instalação & Configuração!' -> 'guia-de-instalacao-configuracao'
+    """
+    if not value:
+        return ""
+    # Normalize unicode (decompose accents)
+    value = unicodedata.normalize("NFKD", str(value))
+    value = "".join([c for c in value if not unicodedata.combining(c)])
+    # Lowercase
+    value = value.lower()
+    # Replace any non-alphanumeric character with a hyphen
+    value = re.sub(r"[^\w\s-]", "", value)
+    # Replace whitespace and multiple hyphens with a single hyphen
+    value = re.sub(r"[-\s]+", "-", value).strip("-")
+    return value
+
+
+def estimate_reading_time(text, words_per_minute=200):
+    """
+    Estimates reading time in minutes based on word count.
+    """
+    if not text:
+        return "1 min de leitura"
+    # Remove markdown formatting characters for approximate word count
+    clean_text = re.sub(r"[#*`_~\[\]\(\)\>\<\-\+\=]", " ", text)
+    words = len(clean_text.split())
+    minutes = max(1, round(words / words_per_minute))
+    return f"{minutes} min de leitura"
+
+
+def generate_excerpt(text, max_chars=180):
+    """
+    Generates a clean text excerpt from a Markdown body.
+    """
+    if not text:
+        return ""
+    # Remove headings, links, blockquotes, code fences
+    clean = re.sub(r"```[\s\S]*?```", "", text)
+    clean = re.sub(r"`[^`]*`", "", clean)
+    clean = re.sub(r"#+\s*", "", clean)
+    clean = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", clean)
+    clean = re.sub(r"[*_~>]", "", clean)
+    clean = re.sub(r"\s+", " ", clean).strip()
+    if len(clean) <= max_chars:
+        return clean
+    return clean[:max_chars].rsplit(" ", 1)[0] + "..."
+
+
+def process_callouts(text):
+    """
+    Converts GitHub-style callouts/alerts in blockquotes into styled HTML alert boxes.
+    Example:
+      > [!NOTE]
+      > Informação relevante
+    """
+    if not text:
+        return ""
+
+    callout_configs = {
+        "NOTE": {"class": "wiki-callout-note", "icon": "fa-info-circle", "title": "Nota"},
+        "TIP": {"class": "wiki-callout-tip", "icon": "fa-lightbulb-o", "title": "Dica"},
+        "IMPORTANT": {"class": "wiki-callout-important", "icon": "fa-exclamation-circle", "title": "Importante"},
+        "WARNING": {"class": "wiki-callout-warning", "icon": "fa-warning", "title": "Atenção"},
+        "CAUTION": {"class": "wiki-callout-danger", "icon": "fa-fire", "title": "Cuidado"},
+    }
+
+    # Match blockquotes starting with [!TYPE]
+    pattern = re.compile(
+        r"(?:^|\n)>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n((?:>(?:[^\n]*)\n?)+)",
+        re.IGNORECASE,
+    )
+
+    def replace_callout(match):
+        ctype = match.group(1).upper()
+        content_lines = match.group(2).splitlines()
+        cfg = callout_configs.get(ctype, callout_configs["NOTE"])
+
+        # Strip leading '>' and whitespace from content lines
+        clean_lines = []
+        for line in content_lines:
+            if line.startswith(">"):
+                line = line[1:].lstrip()
+            clean_lines.append(line)
+        inner_content = "\n".join(clean_lines).strip()
+
+        return (
+            f'\n<div class="wiki-callout {cfg["class"]}">'
+            f'<div class="wiki-callout-header"><i class="fa {cfg["icon"]}"></i> <strong>{cfg["title"]}</strong></div>'
+            f'<div class="wiki-callout-body">\n\n{inner_content}\n\n</div></div>\n'
+        )
+
+    return pattern.sub(replace_callout, text)
+
+
+def render_markdown(text, render_type="markdown"):
+    """
+    Renders markdown or markmin text to HTML with syntax support,
+    callout boxes, Bootstrap tables, task lists, and header IDs.
+    """
+    if not text:
+        return ""
+
+    if render_type == "markmin":
+        try:
+            from gluon.contrib.markmin.markmin2html import markmin2html
+            return markmin2html(text)
+        except Exception:
+            pass
+
+    # Default / markdown / html mode: process callouts and markdown syntax
+    processed_text = process_callouts(text)
+    try:
+        from gluon.contrib.markdown.markdown2 import markdown
+        html = markdown(
+            processed_text,
+            extras=[
+                "fenced-code-blocks",
+                "tables",
+                "break-on-newline",
+                "header-ids",
+                "strike",
+                "task_list",
+                "code-friendly",
+            ],
+        )
+    except Exception:
+        # Fallback simple converter
+        html = escape(processed_text).replace("\n", "<br/>")
+
+    # Add Bootstrap classes to HTML tables generated by markdown
+    html = re.sub(r"<table>", '<table class="table table-bordered table-hover table-striped wiki-table">', html)
+    return html
+
+
+def extract_toc(html_content):
+    """
+    Extracts heading elements (h1, h2, h3, h4) from rendered HTML to build a Table of Contents.
+    Returns a list of dicts: [{'level': 2, 'id': 'meu-topico', 'title': 'Meu Tópico'}, ...]
+    """
+    if not html_content:
+        return []
+
+    toc = []
+    # Pattern to find headings with id attribute or text
+    pattern = re.compile(
+        r"<h([1-4])(?:\s+id=[\"']([^\"']+)[\"'])?[^>]*>(.*?)</h\1>",
+        re.IGNORECASE | re.DOTALL,
+    )
+
+    for match in pattern.finditer(html_content):
+        level = int(match.group(1))
+        hid = match.group(2)
+        raw_title = match.group(3)
+
+        # Strip HTML tags inside title
+        clean_title = re.sub(r"<[^>]+>", "", raw_title).strip()
+        if not clean_title:
+            continue
+
+        if not hid:
+            hid = slugify(clean_title)
+
+        toc.append({
+            "level": level,
+            "id": hid,
+            "title": clean_title,
+        })
+
+    return toc
+
+
+def highlight_search_terms(text, query):
+    """
+    Highlights search terms within a text excerpt safely.
+    """
+    if not text or not query:
+        return escape(text or "")
+
+    words = [re.escape(w) for w in query.split() if len(w) > 1]
+    if not words:
+        return escape(text)
+
+    pattern = re.compile(f"({'|'.join(words)})", re.IGNORECASE)
+    safe_text = escape(text)
+    return pattern.sub(r'<mark class="wiki-highlight">\1</mark>', safe_text)
+
+
+def can_read_page(page, user, user_groups=None):
+    """
+    Determines if the given user can read the wiki page.
+    """
+    if not page:
+        return False
+
+    can_read = page.can_read or ["everybody"]
+    if isinstance(can_read, str):
+        can_read = [can_read]
+
+    # Public pages
+    if "everybody" in can_read or not can_read:
+        return True
+
+    if not user:
+        return False
+
+    # Author can always read
+    if page.created_by == user.id:
+        return True
+
+    user_groups = set(user_groups or [])
+    if "admin" in user_groups or "wiki_editor" in user_groups:
+        return True
+
+    # Check intersection with page permissions
+    if set(can_read).intersection(user_groups):
+        return True
+
+    return False
+
+
+def can_edit_page(page, user, user_groups=None):
+    """
+    Determines if the given user can edit the wiki page.
+    """
+    if not user:
+        return False
+
+    user_groups = set(user_groups or [])
+    if "admin" in user_groups or "wiki_editor" in user_groups:
+        return True
+
+    if not page:
+        # Creating a new page is allowed for logged-in users or authors
+        return True
+
+    # Author can edit their own page
+    if page.created_by == user.id:
+        return True
+
+    can_edit = page.can_edit or ["everybody"]
+    if isinstance(can_edit, str):
+        can_edit = [can_edit]
+
+    if "everybody" in can_edit:
+        return True
+
+    if set(can_edit).intersection(user_groups):
+        return True
+
+    return False

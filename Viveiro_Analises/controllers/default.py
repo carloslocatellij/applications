@@ -74,40 +74,26 @@ def grid():
     return dict(grid=grid)
 
 
-# ---- Embedded wiki (example) ----
-@auth.requires_login()
-def wiki(): #Menu
-    auth.wikimenu() # add the wiki to the menu
-#     """ ##
-#       [see](web2py.com/examples/static/sphinx/gluon/gluon.contrib.markdown.html)
-#       [Markdown see](https://groups.google.com/g/web2py/c/om9aXi3xg3Y/m/jE4t-KwpBQAJ)
-#     """
-    response.view = 'test_wiki.htmSCRIPT   response.flash = T("Welcome!")'
-#     my_md = '''## Welcome to the cov19cty App!
-# ### To generate County Comparison Charts:
-# 1. Click Menu >> Gen Chart >> Multi-County Input Form
-#   1. Add Your Counties to compare (state, county, typeOfData)
-#   2. Define Your Time Series
-# 2. Click Menu >> Gen Chart >> Show Multi-County Chart
-#     '''
-#     my_html = markdown(my_md)
-#     # return dict( message=my_html )
-#     return my_html mark = XML(meu_mark)
-
-    meu_mark ='''
-# Meu Titulo
-
-## Outro Titulo
-
-* <input type="checkbox" checked="checked" /> 1
-* <input type="checkbox" checked="checked" /> 2
-* <input type="checkbox" /> 3 '''
-
-    content = authdb(authdb.wiki_page.slug=="instalacao-atualizacao-do-sistema-viveiro-analises").select().first().body # type: ignore
-    markdowner = Markdown2(html4tags=True, tab_width=4, )
-    meu_mark = markdowner.convert(content)
-
-    return dict(wiki = auth.wiki() ,content=XML(meu_mark)) # type: ignore
+# ---- Wiki & Base de Conhecimento (Redirecionamento transparente) ----
+def wiki():
+    """
+    Encaminha rotas de default/wiki para o controller moderno de wiki.
+    """
+    if request.args:
+        arg0 = request.args(0)
+        if arg0 in ('_create', 'create', 'novo'):
+            redirect(URL('wiki', 'create', vars=request.vars))
+        elif arg0 in ('_search', 'search', 'busca'):
+            redirect(URL('wiki', 'search', vars=request.vars))
+        elif arg0 in ('_pages', 'pages', 'artigos'):
+            redirect(URL('wiki', 'pages', vars=request.vars))
+        elif arg0 in ('_tags', 'tags', '_cloud', 'topicos'):
+            redirect(URL('wiki', 'index', vars=request.vars))
+        elif arg0 in ('_edit', 'edit'):
+            redirect(URL('wiki', 'edit', args=request.args[1:], vars=request.vars))
+        else:
+            redirect(URL('wiki', 'view', args=request.args, vars=request.vars))
+    redirect(URL('wiki', 'index', vars=request.vars))
 
 # ---- Action for login/register/etc (required for auth) -----
 def user():

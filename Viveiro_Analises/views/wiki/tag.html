@@ -1,0 +1,115 @@
+{{extend 'layout.html'}}
+
+{{block head}}
+<link rel="stylesheet" href="{{=URL('static', 'css/wiki.css')}}"/>
+{{end}}
+
+<div class="container-fluid wiki-main-wrapper py-3">
+
+  <!-- Breadcrumbs -->
+  <nav aria-label="breadcrumb" class="wiki-breadcrumb mb-3">
+    <ol class="breadcrumb bg-transparent p-0 m-0">
+      <li class="breadcrumb-item"><a href="{{=URL('default', 'index')}}"><i class="fa fa-home"></i> Início</a></li>
+      <li class="breadcrumb-item"><a href="{{=URL('wiki', 'index')}}"><i class="fa fa-book"></i> Base de Conhecimento</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Categoria: #{{=tag_name}}</li>
+    </ol>
+  </nav>
+
+  <!-- Tag Header Banner in Gradient -->
+  <div class="wiki-hero mb-4 p-4 text-left">
+    <div class="d-flex flex-wrap justify-content-between align-items-center">
+      <div>
+        <h2 class="h3 font-weight-bold text-white mb-1">
+          <i class="fa fa-tag text-warning mr-2"></i> Artigos na categoria: <span class="text-white">#{{=tag_name}}</span>
+        </h2>
+        <p class="text-light mb-0">{{=len(articles)}} artigo(s) encontrado(s) com este marcador.</p>
+      </div>
+      <div class="my-1">
+        <a href="{{=URL('wiki', 'create', vars=dict(tags=tag_name))}}" class="btn btn-sm btn-light font-weight-bold" style="color: #007a6a; border-radius: 2rem;">
+          <i class="fa fa-plus mr-1"></i> Novo Artigo nesta Categoria
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Articles List -->
+    <div class="col-lg-8">
+      {{if not articles:}}
+        <div class="card p-5 text-center bg-light border-0 rounded-lg">
+          <div class="mb-3">
+            <i class="fa fa-tag fa-3x text-muted"></i>
+          </div>
+          <h5>Nenhum artigo encontrado nesta categoria</h5>
+          <p class="text-muted small">Crie o primeiro artigo associado a <strong>#{{=tag_name}}</strong>.</p>
+          <div>
+            <a href="{{=URL('wiki', 'create', vars=dict(tags=tag_name))}}" class="btn btn-primary btn-sm">
+              <i class="fa fa-pencil mr-1"></i> Criar Artigo
+            </a>
+          </div>
+        </div>
+      {{else:}}
+        <div class="row">
+          {{for a in articles:}}
+            <div class="col-md-6 mb-3">
+              <div class="wiki-card">
+                <div>
+                  <h5 class="wiki-card-title">
+                    <a href="{{=URL('wiki', 'view', args=[a['slug']])}}">
+                      {{=a['title']}}
+                    </a>
+                  </h5>
+
+                  <div class="mb-2">
+                    {{for t in (a['tags'] or []):}}
+                      {{if t:}}
+                        <a href="{{=URL('wiki', 'tag', args=[t])}}" class="wiki-tag {{if t == tag_name:}}active{{pass}}">
+                          #{{=t}}
+                        </a>
+                      {{pass}}
+                    {{pass}}
+                  </div>
+
+                  <p class="wiki-card-body">
+                    {{=a['excerpt'] or 'Sem descrição prévia...'}}
+                  </p>
+                </div>
+
+                <div class="wiki-card-footer">
+                  <div class="d-flex align-items-center">
+                    <span class="wiki-avatar-initials">{{=a['author_initials']}}</span>
+                    <span class="text-truncate" style="max-width: 120px;" title="{{=a['author_name']}}">{{=a['author_name']}}</span>
+                  </div>
+                  <div>
+                    <span class="mr-2"><i class="fa fa-clock-o"></i> {{=a['reading_time']}}</span>
+                    <span><i class="fa fa-calendar-o"></i> {{=a['modified_on'].strftime('%d/%m/%Y') if a['modified_on'] else ''}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {{pass}}
+        </div>
+      {{pass}}
+    </div>
+
+    <!-- Sidebar: Other Tags -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
+        <div class="card-header bg-white font-weight-bold py-3 border-bottom">
+          <i class="fa fa-tags text-warning mr-2"></i> Outras Categorias
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap">
+            {{for t in all_tags:}}
+              <a href="{{=URL('wiki', 'tag', args=[t['name']])}}" class="wiki-tag d-inline-flex align-items-center mb-2 mr-2 {{if t['name'] == tag_name:}}active{{pass}}">
+                <span>#{{=t['name']}}</span>
+                <span class="badge badge-light text-dark ml-1 px-1" style="font-size: 0.7rem;">{{=t['count']}}</span>
+              </a>
+            {{pass}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -20,6 +20,13 @@ Se precisar rodar um teste específico em um módulo:
 rtk python -m pytest tests/models/test_textos_modelos.py
 ```
 
+## Executando Scripts no Ambiente do Web2py
+
+Para executar scripts diagnósticos ou migrações que exigem o contexto dos Models carregados:
+```powershell
+rtk python C:\Users\clocatelli\web2py\web2py.py -S Viveiro_Analises -M -R applications\Viveiro_Analises\caminho\script.py
+```
+
 ## Diagnóstico de Erros (Tickets Web2py)
 
 Quando uma requisição Web2py falha em tempo de execução, o framework gera um ticket numerado em `errors/`.
@@ -59,8 +66,14 @@ Quando uma requisição Web2py falha em tempo de execução, o framework gera um
   {{pass}}
   ```
 
+## Padrões de Interface e Conteúdo (Base de Conhecimento / Wiki)
+- **Cabeçalhos e Banners em Degradê:** Utilize o padrão escuro e elegante para destaque e alto contraste:
+  `background: linear-gradient(135deg, #1f2937 0%, #111827 50%, #004d40 100%); color: #ffffff;`
+- **Renderização Resiliente de Markdown:** O renderizador deve processar sintaxe Markdown (`#`, `-`, `**`, callouts `> [!NOTE]`, tabelas) mesmo se o atributo `render` no banco for `'html'`, `'markdown'` ou nulo, mantendo tags HTML seguras.
+
 ## Em caso de dúvidas: Verifique a documentação original do web2py e documentos relacionados em:
  https://web2py.com/book
  https://www.web2py.com/examples/default/examples
  https://www.web2pyref.com/
+
  

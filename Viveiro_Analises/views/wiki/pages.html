@@ -1,0 +1,115 @@
+{{extend 'layout.html'}}
+
+{{block head}}
+<link rel="stylesheet" href="{{=URL('static', 'css/wiki.css')}}"/>
+{{end}}
+
+<div class="container-fluid wiki-main-wrapper py-3">
+
+  <!-- Breadcrumbs & Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <nav aria-label="breadcrumb" class="wiki-breadcrumb">
+      <ol class="breadcrumb bg-transparent p-0 m-0">
+        <li class="breadcrumb-item"><a href="{{=URL('default', 'index')}}"><i class="fa fa-home"></i> Início</a></li>
+        <li class="breadcrumb-item"><a href="{{=URL('wiki', 'index')}}"><i class="fa fa-book"></i> Base de Conhecimento</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Catálogo Geral</li>
+      </ol>
+    </nav>
+
+    <div>
+      <a href="{{=URL('wiki', 'create')}}" class="btn btn-sm btn-success font-weight-bold">
+        <i class="fa fa-plus-circle mr-1"></i> Publicar Novo Artigo
+      </a>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
+    <div class="card-header bg-white py-3 border-bottom d-flex flex-wrap justify-content-between align-items-center">
+      <h3 class="h5 font-weight-bold text-dark mb-0">
+        <i class="fa fa-th-list text-primary mr-2"></i> Todos os Artigos da Base de Conhecimento ({{=total}})
+      </h3>
+
+      <div class="my-1">
+        <input type="text" id="filterPagesTable" class="form-control form-control-sm" placeholder="Filtrar tabela..." style="max-width: 260px;"/>
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+      {{if not pages:}}
+        <div class="text-center p-5 text-muted">
+          <i class="fa fa-folder-open-o fa-3x mb-2"></i>
+          <h5>Nenhum artigo encontrado</h5>
+          <a href="{{=URL('wiki', 'create')}}" class="btn btn-primary btn-sm mt-2">Criar primeiro artigo</a>
+        </div>
+      {{else:}}
+        <div class="table-responsive">
+          <table class="table table-hover table-striped mb-0" id="tableWikiPages">
+            <thead class="thead-light">
+              <tr>
+                <th>Título do Artigo</th>
+                <th>Slug URL</th>
+                <th>Categorias / Tags</th>
+                <th>Autor</th>
+                <th>Atualizado em</th>
+                <th class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{for p in pages:}}
+                <tr>
+                  <td class="font-weight-bold">
+                    <a href="{{=URL('wiki', 'view', args=[p['slug']])}}" class="text-dark">
+                      <i class="fa fa-file-text-o text-primary mr-1"></i> {{=p['title']}}
+                    </a>
+                  </td>
+                  <td>
+                    <code>{{=p['slug']}}</code>
+                  </td>
+                  <td>
+                    {{for t in (p['tags'] or []):}}
+                      {{if t:}}
+                        <a href="{{=URL('wiki', 'tag', args=[t])}}" class="wiki-tag">
+                          #{{=t}}
+                        </a>
+                      {{pass}}
+                    {{pass}}
+                  </td>
+                  <td>
+                    <small class="text-muted"><i class="fa fa-user-o mr-1"></i> {{=p['author_name']}}</small>
+                  </td>
+                  <td>
+                    <small class="text-muted">{{=p['modified_on'].strftime('%d/%m/%Y %H:%M') if p['modified_on'] else ''}}</small>
+                  </td>
+                  <td class="text-right">
+                    <a href="{{=URL('wiki', 'view', args=[p['slug']])}}" class="btn btn-xs btn-outline-primary" title="Visualizar">
+                      <i class="fa fa-eye"></i>
+                    </a>
+                    {{if p['can_edit']:}}
+                      <a href="{{=URL('wiki', 'edit', args=[p['slug']])}}" class="btn btn-xs btn-outline-warning" title="Editar">
+                        <i class="fa fa-pencil"></i>
+                      </a>
+                    {{pass}}
+                  </td>
+                </tr>
+              {{pass}}
+            </tbody>
+          </table>
+        </div>
+      {{pass}}
+    </div>
+  </div>
+
+</div>
+
+{{block page_js}}
+<script>
+$(document).ready(function() {
+  $('#filterPagesTable').on('keyup', function() {
+    var value = $(this).val().toLowerCase();
+    $('#tableWikiPages tbody tr').filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+    });
+  });
+});
+</script>
+{{end}}

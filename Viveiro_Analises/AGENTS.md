@@ -4,6 +4,8 @@
 - Este projeto utiliza o framework web2py (Python 3).
 - **Regra de Ouro:** NUNCA adicione `import` para modelos ou bancos de dados nos Controllers ou Models. O web2py injeta o objeto `db` e globais (`auth`, `request`, `response`, `session`, `redirect`, `URL`, `Field`, `IS_NOT_EMPTY`, etc.) automaticamente.
 - Arquivos em `models/` são executados em ordem alfabética antes dos controllers.
+- **Múltiplos Bancos / Auth:** Em produção, `authdb` gerencia tabelas de autenticação (`auth_*`) e da base de conhecimento (`wiki_*`), enquanto `db` gerencia as entidades do Viveiro. Sempre utilize `authdb` (ou `auth.db`) para operações em `wiki_page`, `wiki_tag`, `wiki_media` e `auth_user`.
+- **Geração de Menu:** Para adicionar itens ao menu global via `models/menu.py`, adicione o comentário `#Menu` apenas em funções públicas sem parâmetros obrigatórios (ex: `def novo_artigo(): #Menu`).
 
 ## Estrutura do Workspace
 - Pasta raiz `.`: Aplicação no framework web2py (`web2py/applications/Viveiro_Analises`).
