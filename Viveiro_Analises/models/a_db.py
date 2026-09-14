@@ -6,7 +6,7 @@
 # -------------------------------------------------------------------------
 from gluon.contrib.appconfig import AppConfig # type: ignore
 from gluon.tools import Auth # type: ignore
-from configs import pasta_viveiro_fotos
+from configs import pasta_viveiro_fotos, pasta_viveiro
 from my_validador import *
 
 if 0==1:
@@ -237,3 +237,13 @@ response.show_toolbar = configuration.get('app.toolbar')
 # -------------------------------------------------------------------------
 
 auth.wiki(resolve=False, migrate=False)
+
+from pathlib import Path
+try:
+    subpasta = authdb( authdb.wiki_page.slug == request.args(0)).select().first().title
+except:
+    subpasta = ''
+
+    
+authdb.wiki_media.filename.uploadfolder = Path(
+    pasta_viveiro, 'ViveiroPedia', str(subpasta))
