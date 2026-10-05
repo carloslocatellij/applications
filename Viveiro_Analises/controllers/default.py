@@ -1,25 +1,357 @@
 # -*- coding: utf-8 -*-
+import json
+import re
+import urllib.error
+import urllib.request
 from pathlib import Path
 from gluon.contrib.markdown.markdown2 import MarkdownWithExtras as Markdown2  # type: ignore
 from gluon.sqlhtml import ExporterCSV  # type: ignore
+from gluon.utils import secure_dumps, secure_loads  # type: ignore
 
 if 0 == 1:
     from gluon import (db, current, IS_IN_SET, HTTP, SQLFORM, IS_UPPER, IS_EMPTY_OR, IS_IN_DB, IS_NOT_IN_DB, CLEANUP,  # type: ignore
                        Field, auth, IS_MATCH, IS_FLOAT_IN_RANGE, a_db, db,  IS_CHKBOX01, BEAUTIFY, BUTTON, SPAN, IS_IMAGE_COMPACT,
                        IS_CPF_OR_CNPJ, MASK_CPF, MASK_CNPJ, Remove_Acentos, IS_DECIMAL_IN_RANGE, redirect, URL, CAT, A, SCRIP,  # type: ignore
-                       IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC, IS_DATE_IN_RANGE) # type: ignore
+                       IS_DATE, CLEANUP, IS_NOT_EMPTY, IS_LOWER, Field, auth, IS_ALPHANUMERIC, IS_DATE_IN_RANGE, SCRIPT) # type: ignore
     
     request = current.request # type: ignore
     response = current.response # type: ignore
     session = current.session # type: ignore
     cache = current.cache # type: ignore
     T = current.T # type: ignore
+    configuration = current.configuration
 
 # ---- API (example) -----
 @auth.requires_login()
 def api_get_user_email():
     if not request.env.request_method == 'GET': raise HTTP(403)
     return response.json({'status':'success', 'email':auth.user.email})
+
+
+# ---- Integração SiGM / EMPRO ----
+def _normalizar_logradouro(logr):
+    """
+    Normaliza o logradouro removendo repetições de prefixo (ex: 'rua Rua ...' -> 'Rua ...')
+    e convertendo para letras maiúsculas.
+    """
+    if not logr:
+        return ""
+    logr = str(logr).strip()
+    padroes = [
+        r'^(rua|r\.)\s+(rua|r\.)\s+',
+        r'^(avenida|av\.|av)\s+(avenida|av\.|av)\s+',
+        r'^(alameda|al\.)\s+(alameda|al\.)\s+',
+        r'^(travessa|tv\.)\s+(travessa|tv\.)\s+',
+        r'^(praca|praça|pc\.)\s+(praca|praça|pc\.)\s+',
+        r'^(rodovia|rod\.)\s+(rodovia|rod\.)\s+',
+    ]
+    for padrao in padroes:
+        m = re.match(padrao, logr, re.IGNORECASE)
+        if m:
+            primeiro = m.group(1).capitalize()
+            logr = re.sub(padrao, f"{primeiro} ", logr, count=1, flags=re.IGNORECASE)
+            break
+    return logr.upper()
+
+
+def _obter_config_sigm():
+    """
+    Recupera a URL e a API Key do SiGM a partir do appconfig.json com fallback robusto.
+    """
+    url = None
+    api_key = None
+    try:
+        sigm_data = configuration.take('sigm') 
+        if isinstance(sigm_data, dict):
+            url = sigm_data.get('url')
+            api_key = sigm_data.get('api_key')
+    except Exception:
+        pass
+
+    if not url:
+        url = configuration.get('sigm.url')
+    if not api_key:
+        api_key = configuration.get('sigm.api_key')
+
+    if not api_key or not url:
+        try:
+            cfg_path = Path(request.folder, 'private', 'appconfig.json')
+            if cfg_path.exists():
+                with open(cfg_path, 'r', encoding='utf-8') as f:
+                    raw = json.load(f)
+                    sigm = raw.get('sigm') or {}
+                    url = url or sigm.get('url')
+                    api_key = api_key or sigm.get('api_key')
+        except Exception:
+            pass
+
+    url = (url).rstrip('/')
+    api_key = api_key or ''
+    return url, api_key
+
+
+def _obter_chave_cripto():
+    try:
+        _, api_key = _obter_config_sigm()
+        if api_key:
+            return api_key
+        db_cfg = configuration.take("db")
+        key = db_cfg.get('password') if isinstance(db_cfg, dict) else None
+        if not key:
+            key = configuration.get('app.name', 'Viveiro_Secret_Key_Default')
+    except Exception:
+        key = 'Viveiro_Secret_Key_Default'
+    return str(key)
+
+
+def _salvar_credenciais_sigm(user, password):
+    if not user or not password:
+        return False
+    key = _obter_chave_cripto()
+    payload = {'user': user, 'pass': password}
+    token = secure_dumps(payload, key)
+    session.sigm_auth = token.decode('utf-8') if isinstance(token, bytes) else str(token)
+    return True
+
+
+def _recuperar_credenciais_sigm():
+    token = session.get('sigm_auth')
+    if not token:
+        return None, None
+    key = _obter_chave_cripto()
+    try:
+        data = secure_loads(token, key)
+        if isinstance(data, dict):
+            return data.get('user'), data.get('pass')
+    except Exception:
+        session.sigm_auth = None
+    return None, None
+
+
+@auth.requires_login()
+def sigm_consulta():
+    """
+    Endpoint para consulta de protocolo na API do SiGM.
+    Retorna JSON com os dados tratados do protocolo ou status para autenticação/erro.
+    """
+    protocolo = (request.vars.get('protocolo') or '').strip()
+    if not protocolo:
+        return response.json({'status': 'error', 'message': 'Número de protocolo não informado.'})
+
+    empro_user = (request.vars.get('empro_user') or '').strip()
+    empro_pass = request.vars.get('empro_pass') or ''
+
+    if empro_user and empro_pass:
+        user = empro_user
+        password = empro_pass
+        is_new_auth = True
+    else:
+        user, password = _recuperar_credenciais_sigm()
+        is_new_auth = False
+
+    if not user or not password:
+        return response.json({
+            'status': 'auth_required',
+            'message': 'Credenciais EMPRO necessárias para consultar o SiGM.'
+        })
+
+    base_url, api_key = _obter_config_sigm()
+    if not api_key:
+        return response.json({
+            'status': 'error',
+            'message': 'Chave de API do SiGM (api_key) não encontrada no appconfig.json.'
+        })
+
+    target_url = f"{base_url}/api/v1/protocolos/detalhes/{protocolo}"
+    req = urllib.request.Request(target_url, headers={
+        'User-Agent': 'Web2py-Viveiro/1.0',
+        'Accept': 'application/json',
+        'X-API-Key': api_key,
+        'X-Empro-User': user,
+        'X-Empro-Pass': password
+    })
+
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            body = resp.read().decode('utf-8')
+            dados = json.loads(body)
+    except urllib.error.HTTPError as e:
+        status_code = e.code
+        err_msg = ""
+        try:
+            raw_body = e.read().decode('utf-8', errors='ignore')
+            err_json = json.loads(raw_body)
+            err_msg = err_json.get('detail') or ""
+        except Exception:
+            err_msg = ""
+
+        if err_msg:
+            err_msg = re.sub(r'<[^>]+>', ' ', err_msg).strip()
+
+        if status_code == 401:
+            session.sigm_auth = None
+            return response.json({
+                'status': 'auth_error',
+                'message': err_msg or 'Usuário ou senha EMPRO inválidos.'
+            })
+        elif status_code == 403:
+            return response.json({
+                'status': 'error',
+                'message': f"Acesso negado pela API SiGM (403): {err_msg or 'X-API-Key inválida ou não autorizada.'}"
+            })
+        elif status_code == 404:
+            return response.json({
+                'status': 'not_found',
+                'message': err_msg or f'Protocolo {protocolo} não encontrado no SiGM.'
+            })
+        else:
+            return response.json({
+                'status': 'error',
+                'message': err_msg or f'Erro retornado pela API SiGM: Código HTTP {status_code}.'
+            })
+    except urllib.error.URLError as e:
+        return response.json({
+            'status': 'error',
+            'message': f'Não foi possível conectar ao servidor SiGM ({base_url}): {e.reason}'
+        })
+    except Exception as e:
+        return response.json({
+            'status': 'error',
+            'message': f'Erro ao processar dados do SiGM: {str(e)}'
+        })
+
+    if is_new_auth:
+        _salvar_credenciais_sigm(user, password)
+
+    solicitante = str(dados.get('solicitante') or '').strip().upper()
+
+    dados_desc = dados.get('dados_descricao') or {}
+    logradouro_raw = dados_desc.get('logradouro') or ''
+    logradouro = _normalizar_logradouro(logradouro_raw)
+
+    num_casa = dados_desc.get('número_da_casa')
+    numero = '' if num_casa is None else str(num_casa).strip()
+
+    data_abertura = str(dados.get('data_abertura') or '').strip()
+
+    tipo_solic = str(dados_desc.get('tipo_de_solicitação') or '').lower()
+    is_poda = 'poda' in tipo_solic
+
+    qtd_arvores = dados_desc.get('quantidade_de_árvores')
+    quantidade = '' if qtd_arvores is None else str(qtd_arvores).strip()
+
+    return response.json({
+        'status': 'success',
+        'solicitante': solicitante,
+        'logradouro': logradouro,
+        'numero': numero,
+        'data_abertura': data_abertura,
+        'is_poda': is_poda,
+        'quantidade': quantidade
+    })
+
+
+@auth.requires_login()
+def sigm_receber():
+    """
+    Endpoint para efetivar o recebimento de protocolo na API do SiGM.
+    Chama /api/v1/protocolos/receber/{id_protocolo} via POST/GET.
+    """
+    protocolo = (request.vars.get('protocolo') or '').strip()
+    if not protocolo:
+        return response.json({'status': 'error', 'message': 'Número de protocolo não informado.'})
+
+    empro_user = (request.vars.get('empro_user') or '').strip()
+    empro_pass = request.vars.get('empro_pass') or ''
+
+    if empro_user and empro_pass:
+        user = empro_user
+        password = empro_pass
+        is_new_auth = True
+    else:
+        user, password = _recuperar_credenciais_sigm()
+        is_new_auth = False
+
+    if not user or not password:
+        return response.json({
+            'status': 'auth_required',
+            'message': 'Credenciais EMPRO necessárias para receber no SiGM.'
+        })
+
+    base_url, api_key = _obter_config_sigm()
+    if not api_key:
+        return response.json({
+            'status': 'error',
+            'message': 'Chave de API do SiGM (api_key) não encontrada no appconfig.json.'
+        })
+
+    target_url = f"{base_url}/api/v1/protocolos/receber/{protocolo}"
+    req = urllib.request.Request(target_url, data=b'', headers={
+        'User-Agent': 'Web2py-Viveiro/1.0',
+        'Accept': 'application/json',
+        'X-API-Key': api_key,
+        'X-Empro-User': user,
+        'X-Empro-Pass': password
+    })
+
+    try:
+        with urllib.request.urlopen(req, timeout=25) as resp:
+            body = resp.read().decode('utf-8')
+            dados = json.loads(body) if body else {}
+    except urllib.error.HTTPError as e:
+        status_code = e.code
+        err_msg = ""
+        try:
+            raw_body = e.read().decode('utf-8', errors='ignore')
+            err_json = json.loads(raw_body)
+            err_msg = err_json.get('detail') or err_json.get('message') or ""
+        except Exception:
+            err_msg = ""
+
+        if err_msg:
+            err_msg = re.sub(r'<[^>]+>', ' ', err_msg).strip()
+
+        if status_code == 401:
+            session.sigm_auth = None
+            return response.json({
+                'status': 'auth_error',
+                'message': err_msg or 'Usuário ou senha EMPRO inválidos.'
+            })
+        elif status_code == 403:
+            return response.json({
+                'status': 'error',
+                'message': f"Acesso negado pela API SiGM (403): {err_msg or 'X-API-Key inválida ou não autorizada.'}"
+            })
+        elif status_code == 404:
+            return response.json({
+                'status': 'not_found',
+                'message': err_msg or f'Protocolo {protocolo} não encontrado no SiGM.'
+            })
+        else:
+            return response.json({
+                'status': 'error',
+                'message': err_msg or f'Erro retornado pela API SiGM ao receber: Código HTTP {status_code}.'
+            })
+    except urllib.error.URLError as e:
+        return response.json({
+            'status': 'error',
+            'message': f'Não foi possível conectar ao servidor SiGM ({base_url}): {e.reason}'
+        })
+    except Exception as e:
+        return response.json({
+            'status': 'error',
+            'message': f'Erro ao receber no SiGM: {str(e)}'
+        })
+
+    if is_new_auth:
+        _salvar_credenciais_sigm(user, password)
+
+    msg = dados.get('message') or dados.get('detail') or f'Protocolo {protocolo} recebido com sucesso no SiGM.'
+    return response.json({
+        'status': 'success',
+        'message': msg,
+        'dados': dados
+    })
 
 
 
@@ -44,8 +376,104 @@ def avisos():
     return dict(aviso=XML(markdowner.convert(aviso.corpo))) # type: ignore
 
 
+def dashboard():
+    # Recebe o novo estado e atualiza a sessão
+    from datetime import datetime as dt
+    hoje = dt.today()
+    periodo = hoje.replace(day=1).strftime('%Y-%m-%d')
+    
+    if request.vars.periodo in ['Ano', 'Mês']:
+        session.periodo = request.vars.periodo
+        
+    if session.periodo == 'Ano':
+        periodo = hoje.replace(month=1, day=1).strftime('%Y-%m-%d')
+        
+    em_analises = db((db.Requerimentos.Despacho in ['Em Análise', 'Aguardando']) & (
+        db.Requerimentos.data_entrada >= periodo)).count()
+    deferidos = db((db.Requerimentos.Despacho == 'Deferido') & (
+        db.Requerimentos.data_entrada >= periodo)).count()
+    
+    indeferidos = db((db.Requerimentos.Despacho == 'Indeferido') & (
+        db.Requerimentos.data_entrada >= periodo)).count()
+    parcial_deferidos = db((db.Requerimentos.Despacho ==
+                            'Parcialmente Deferido') & (
+        db.Requerimentos.data_entrada >= periodo)).count()
+    arvores_para_replantio = db((db.Laudos.Protocolo > 0) & (db.Laudos.data_do_laudo >= periodo)).select(db.Laudos.qtd_repor.sum()).first() 
+    arvores_para_replantio = arvores_para_replantio._extra.get('SUM(`tab Protocolos`.`qtd repor`)')
+    compensar = db((db.Laudos.Despacho == 'Pendente de Compesação') & (
+        db.Laudos.data_do_laudo >= periodo)).count()
+    
+    supress_autorizadas = db.executesql(f'''SELECT SUM( COALESCE(`qtd ret1`, 0) + COALESCE(`qtd ret2`, 0) + COALESCE(`qtd ret3`, 0) + COALESCE(`qtd ret4`, 0) ) 
+            FROM `DadosGestArvores`.`tab Protocolos` AS `tab Protocolos` 
+            WHERE  `tab Protocolos`.`data do laudo` >= '{periodo}'  AND `tab Protocolos`.`Despacho` IN ('Deferido', 'Parcialmente Deferido')
+                ''')
+    supress_autorizadas = int(supress_autorizadas[0][0] or 0)
+    
+    supress_nao_autorizadas = db.executesql(f''' SELECT COALESCE(`Select_Indeferidas`.`soma_Indeferidas`, 0) + 
+            (COALESCE(`Select_solicitadas`.`solicitadas`, 0) - COALESCE(`deferidas_parciais`, 0)) 
+            AS `soma_Indeferidas`
+    FROM
+            (SELECT SUM( COALESCE(`qtd ret1`, 0) + COALESCE(`qtd ret2`, 0) + COALESCE(`qtd ret3`, 0) + COALESCE(`qtd ret4`, 0) ) AS `soma_Indeferidas`
+            FROM `DadosGestArvores`.`tab Protocolos` AS `tab Protocolos` 
+            WHERE `tab Protocolos`.`data do laudo` >= '{periodo}' AND `tab Protocolos`.`Despacho` = 'Indeferido') AS `Select_Indeferidas`,
+            (SELECT  SUM( COALESCE(`qtd ret1`, 0) + COALESCE(`qtd ret2`, 0) + COALESCE(`qtd ret3`, 0) + COALESCE(`qtd ret4`, 0) ) AS `solicitadas`
+            FROM `DadosGestArvores`.`tab Solicitacoes` AS `tab Solicitacoes` 
+            WHERE `tab Solicitacoes`.`data do laudo`>= '{periodo}' AND `tab Solicitacoes`.`Despacho` = 'Parcialmente Deferido') AS `Select_solicitadas`,
+            (SELECT  SUM( COALESCE(`qtd ret1`, 0) + COALESCE(`qtd ret2`, 0) + COALESCE(`qtd ret3`, 0) + COALESCE(`qtd ret4`, 0) ) AS `deferidas_parciais`
+            FROM `DadosGestArvores`.`tab Protocolos` AS `tab Protocolos` 
+            WHERE `tab Protocolos`.`data do laudo` >= '{periodo}' AND `tab Protocolos`.`Despacho` = 'Parcialmente Deferido') AS `Select_Pacial_Deferidas`
+                                    ''')
+    supress_nao_autorizadas = int(supress_nao_autorizadas[0][0])
+    
+    podas_autorizadas = db.executesql(f'''SELECT SUM( COALESCE(`qtd ret1`, 0) + COALESCE(`qtd ret2`, 0) + COALESCE(`qtd ret3`, 0) + COALESCE(`qtd ret4`, 0) ) 
+            FROM `DadosGestArvores`.`tab Solicitacoes` AS `tab Solicitacoes`
+            WHERE `tab Solicitacoes`.`Despacho` = 'Deferido' AND `tab Solicitacoes`.`data do laudo` >= '{periodo}'   
+                ''')
+    
+    qtd_podas = db.executesql(f'''SELECT
+            Select_total_por_pedido.soma_solicitadas AS `Total de árvores solicitadas`, 
+            COALESCE ( Select_deferidas.soma_deferidas, 0 ) + COALESCE ( `Select_Pacial_Deferidas`.`deferidas_parciais`, 0 ) AS `Total_Deferidas`,
+            COALESCE ( `Select_Indeferidas`.`soma_indeferidas`, 0 ) + COALESCE ( `Select_solicitadas_parcial_deferidas`.`solicitadas_parcial_deferida`, 0 ) - COALESCE ( `Select_Pacial_Deferidas`.`deferidas_parciais`, 0 ) AS `Total_Indeferidas`,
+            COALESCE (`solicitadas_parcial_deferida`, 0 ) AS `solicitadas_parcial_deferida`,
+            COALESCE ( `deferidas_parciais`, 0 ) AS `Parcialmente deferidas` 
 
-def index():
+            FROM 
+            ( SELECT SUM( COALESCE(`qtd poda1`, 0) + COALESCE(`qtd poda2`, 0) + COALESCE(`qtd poda3`, 0) + COALESCE(`qtd poda4`, 0)) AS soma_solicitadas
+                FROM `DadosGestArvores`.`tab Solicitacoes`
+                WHERE `data do laudo` >= '{periodo}'  AND `Despacho` IN ('Deferido', 'Indeferido', 'Parcialmente Deferido'))  AS Select_total_por_pedido,
+            ( SELECT SUM( COALESCE(`qtd poda1`, 0) + COALESCE(`qtd poda2`, 0) + COALESCE(`qtd poda3`, 0) + COALESCE(`qtd poda4`, 0)) AS soma_deferidas
+                FROM `DadosGestArvores`.`tab Solicitacoes` AS `tab Solicitacoes`
+                WHERE `tab Solicitacoes`.`data do laudo` >= '{periodo}' AND `tab Solicitacoes`.`Despacho` = 'Deferido' ) AS Select_deferidas,
+            ( SELECT SUM( COALESCE(`qtd poda1`, 0) + COALESCE(`qtd poda2`, 0) + COALESCE(`qtd poda3`, 0) + COALESCE(`qtd poda4`, 0)) AS soma_indeferidas
+                FROM `DadosGestArvores`.`tab Solicitacoes` AS `tab Solicitacoes`
+                WHERE `tab Solicitacoes`.`data do laudo` >= '{periodo}' AND `tab Solicitacoes`.`Despacho` = 'Indeferido' ) AS Select_Indeferidas,
+            ( SELECT SUM( COALESCE(`qtd poda1`, 0) + COALESCE(`qtd poda2`, 0) + COALESCE(`qtd poda3`, 0) + COALESCE(`qtd poda4`, 0)) AS `solicitadas_parcial_deferida`
+                FROM `DadosGestArvores`.`tab Solicitacoes` AS `tab Solicitacoes`
+                WHERE `tab Solicitacoes`.`data do laudo` >= '{periodo}' AND `tab Solicitacoes`.`Despacho` = 'Parcialmente Deferido' ) AS `Select_solicitadas_parcial_deferidas`,
+            ( SELECT SUM( COALESCE(`qtd poda1`, 0) + COALESCE(`qtd poda2`, 0) + COALESCE(`qtd poda3`, 0) + COALESCE(`qtd poda4`, 0)) AS `deferidas_parciais`
+                FROM `DadosGestArvores`.`tab Protocolos` AS `tab Protocolos` 
+                WHERE `tab Protocolos`.`data do laudo` >= '{periodo}' AND `tab Protocolos`.`Despacho` = 'Parcialmente Deferido' ) AS `Select_Pacial_Deferidas`                               
+                                        ''')
+    podas_autorizadas = int(qtd_podas[0][1])
+    podas_nao_autorizadas = int(qtd_podas[0][2])
+        
+    return dict(
+        compensar=f"{compensar:,}".replace(',', '.'),
+                        em_analises=f"{em_analises:,}".replace(',', '.'),
+                        deferidos=f"{deferidos:,}".replace(',', '.'),
+                        parcial_deferidos=f"{parcial_deferidos:,}".replace(',', '.'),
+                        indeferidos=f"{indeferidos:,}".replace(',', '.'),
+                        supress_autorizadas=f"{supress_autorizadas:,}".replace(
+                            ',', '.'),
+                        podas_autorizadas=f"{podas_autorizadas:,}".replace(',', '.'),
+                        supress_nao_autorizadas=f"{supress_nao_autorizadas:,}".replace(
+                            ',', '.'),
+                        podas_nao_autorizadas=f"{podas_nao_autorizadas:,}".replace(',', '.'),
+                        arvores_para_replantio=f"{arvores_para_replantio:,}".replace(',', '.'),
+    )
+
+
+def index():   
     user = auth.user
     mensagens = ''
     avisos = []
@@ -56,10 +484,13 @@ def index():
         
         mensagens = TABLE([P(f'''Olá {user.first_name if user else ""}! Você está no Sistema de Dados da Sec. Municipal de Meio Ambiente'''), # type: ignore
                     P(str(f'''Você tem {num_avisos}'''  if num_avisos > 0 else '') + str(' aviso' if num_avisos > 0 else 'avisos'))  if num_avisos > 0 else '', # type: ignore
-                        
                         ])
+        
 
-    return dict(mensagem=mensagens, avisos=avisos if user else '')
+    return dict(mensagem=mensagens,
+                periodo = session.periodo,
+                
+                avisos=avisos if user else '')
 
 
 

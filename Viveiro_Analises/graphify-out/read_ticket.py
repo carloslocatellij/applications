@@ -1,14 +1,17 @@
 import sys
 import types
+from pathlib import Path
+path_user = Path.home()
 sys.modules['cgi'] = types.ModuleType('cgi')
-sys.path.insert(0, r'C:\Users\clocatelli\web2py')
+sys.path.insert(0, f'{path_user}\web2py')
+sys.path.insert(0, f'{path_user}\web2py\site-packages')
 
 import glob
 import os
 import pickle
 
 print("\n--- SPECIFIC TICKET DETAIL ---")
-tpath = r'C:\Users\clocatelli\web2py\applications\Viveiro_Analises\errors\127.0.0.1.2026-08-10.14-01-46.de955503-d15f-418f-9d28-38e0cdfe0e97'
+tpath = f'{path_user}\web2py\applications\Viveiro_Analises\errors\127.0.0.1.2026-08-10.14-01-46.de955503-d15f-418f-9d28-38e0cdfe0e97'
 with open(tpath, 'rb') as f:
     tdata = pickle.load(f)
 print("Traceback:")

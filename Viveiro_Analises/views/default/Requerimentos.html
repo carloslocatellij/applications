@@ -5,7 +5,7 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
-                try { document.getElementById('Requerimentos_Requerente').focus();
+                try { document.getElementById('Requerimentos_Protocolo').focus();
                 } catch {console.log('Modo de Edição'); } } );
      </script>
 
@@ -35,10 +35,20 @@
     {{=formprocess.custom.begin}}
         <table width="100%" >
                     <tr>
+                        <td width="15%" align='left' style="padding-inline: 10px">{{=B('Protocolo:')}}
+                            <div align='center' class="card" style="display: flex; flex-direction: row; align-items: center; gap: 5px;">
+                                {{=formprocess.custom.widget['Protocolo']}}
+                                {{if request.vars.f != 'ver' and configuration.get('sigm') != '':}}
+                                    <button type="button" id="btn-sigm" class="btn btn-info btn-sm" style="font-weight: bold; white-space: nowrap;" title="Buscar dados no SiGM">SiGM-&gt;</button>
+                                {{pass}}
+                            </div></td>
+                        <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Protocolo Ref.: ')}} <div align='left' class="card">
+                                {{=formprocess.custom.widget['protocolo_anterior']}}</td>
+                        </tr>
                         <tr>
                             <td width="25%" align='left' style="padding-inline: 10px">{{=A('Requerente', _href=URL(c='default',f='Pessoas',  vars={}), _class='btn btn-primary', _style="height: 25px")}}:<div align='left' class="card">{{=formprocess.custom.widget['Requerente']}}</div> </td> 
-                            <td width="10%" align='left' style="padding-inline: 10px">{{=B('Cpf Cnpj:  ')}}<div align='left' class="card">{{=formprocess.custom.widget['cpf_cnpj']}}</td></div>            
-                            <td width="10%" align='left' style="padding-inline: 10px">{{=B('Protocolo:')}} <div align='center' class="card">{{=formprocess.custom.widget['Protocolo']}}</div></td>
+                            <td width="10%" align='left' style="padding-inline: 10px">{{=B('Cpf Cnpj:  ')}}<div align='left' class="card">{{=formprocess.custom.widget['cpf_cnpj']}}</div></td>
+                            </td>
                             <td width="20%" align='left' style="padding-inline: 10px">{{=B('Data de Entrada:')}} <div align='left' class="card">{{=formprocess.custom.widget['data_entrada']}}</div></td>
                         </tr> 
                     </tr>
@@ -46,8 +56,7 @@
                             <td width="45%" align='left' style="padding-inline: 10px;">{{=B('Endereço: ')}}<div align='left' class="card">{{=formprocess.custom.widget['Endereco1']}}</td>
                             <td width="5%" align='left'style="padding-inline: 10px;">{{=B('Numero:    ')}} <div align='left' class="card">{{=formprocess.custom.widget['Numero1']}}</td>
                             <td width="35%" align='left'style="padding-inline: 10px;">{{=B('Bairro:    ')}} <div align='left' class="card">{{=formprocess.custom.widget['Bairro']}}</td>
-                            <td width="15%" align='left' style="padding-inline: 10px;">{{=B('Protocolo Ref.: ')}} <div align='left' class="card">
-                                        {{=formprocess.custom.widget['protocolo_anterior']}}</td>
+                            
                         </tr>
 
                         <tr>
@@ -135,6 +144,9 @@
         </table>
     </td>  
     {{=formprocess.custom.submit}} 
+    {{if request.vars.f != 'ver' and configuration.get('sigm') != '':}}
+        <button type="button" id="btn-sigm-receber" class="btn btn-warning" style="display: none; margin-left: 5px; font-weight: bold;" title="Efetivar recebimento no sistema SiGM">Receber no SiGM ⬇</button>
+    {{pass}}
     {{=formprocess.custom.end}}
 
         <br>
@@ -146,5 +158,219 @@
                     _id='Laudos', _class="jumbotron", _style="border: 1px solid; padding:10px;word-wrap:break-word;") if tem_laudo else ''}}
                 </tr>
         </div>
+
+{{if request.vars.f != 'ver' and configuration.get('sigm') != '':}}
+<!-- Modal Credenciais EMPRO / SiGM -->
+<div class="modal fade" id="modalSigmAuth" tabindex="-1" role="dialog" aria-labelledby="modalSigmAuthLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalSigmAuthLabel">Credenciais EMPRO / SiGM</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small">Informe seu usuário e senha EMPRO para autenticar no SiGM nesta sessão.</p>
+        <div id="sigm-auth-alert" class="alert alert-danger" style="display: none; padding: 6px 10px; font-size: 13px;"></div>
+        <div class="form-group">
+          <label for="sigm_empro_user"><strong>Usuário EMPRO:</strong></label>
+          <input type="text" class="form-control" id="sigm_empro_user" placeholder="ex: usuario.empro" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="sigm_empro_pass"><strong>Senha EMPRO:</strong></label>
+          <input type="password" class="form-control" id="sigm_empro_pass" placeholder="Senha" autocomplete="current-password">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-salvar-sigm-auth">Confirmar e Prosseguir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    var urlConsultaSigm = "{{=URL('default', 'sigm_consulta')}}";
+    var urlReceberSigm = "{{=URL('default', 'sigm_receber')}}";
+    var ultimaAcaoSigm = 'consulta'; // 'consulta' ou 'receber'
+    var protocoloAtualSigm = '';
+
+    function preencherCamposSigm(dados) {
+        var camposComValor = [];
+        if ($('#Requerimentos_Requerente').val()) camposComValor.push('Requerente');
+        if ($('#Requerimentos_Endereco1').val()) camposComValor.push('Endereço');
+        if ($('#Requerimentos_Numero1').val()) camposComValor.push('Número');
+        if ($('#Requerimentos_data_entrada').val()) camposComValor.push('Data de Entrada');
+        if ($('#Requerimentos_qtd_poda1').val() || $('#Requerimentos_qtd_ret1').val()) camposComValor.push('Quantidade');
+
+        if (camposComValor.length > 0) {
+            var msg = "Os seguintes campos já possuem valores preenchidos: " + camposComValor.join(', ') + ".\nDeseja sobrescrevê-los com os dados do SiGM?";
+            if (!confirm(msg)) {
+                return;
+            }
+        }
+
+        if (dados.solicitante) $('#Requerimentos_Requerente').val(dados.solicitante);
+        if (dados.logradouro) $('#Requerimentos_Endereco1').val(dados.logradouro);
+        $('#Requerimentos_Numero1').val(dados.numero || '');
+        if (dados.data_abertura) $('#Requerimentos_data_entrada').val(dados.data_abertura);
+
+        if (dados.is_poda) {
+            $('#Requerimentos_qtd_poda1').val(dados.quantidade || '');
+        } else {
+            $('#Requerimentos_qtd_ret1').val(dados.quantidade || '');
+        }
+
+        alert('Dados do protocolo ' + dados.protocolo + ' preenchidos com sucesso!');
+    }
+
+    function executarConsultaSigm(protocolo, emproUser, emproPass) {
+        var $btn = $('#btn-sigm');
+        var textoOriginal = $btn.text();
+        $btn.prop('disabled', true).text('Buscando...');
+
+        var postData = { protocolo: protocolo };
+        if (emproUser && emproPass) {
+            postData.empro_user = emproUser;
+            postData.empro_pass = emproPass;
+        }
+
+        $.ajax({
+            url: urlConsultaSigm,
+            type: 'POST',
+            data: postData,
+            dataType: 'json',
+            success: function(resp) {
+                $btn.prop('disabled', false).text(textoOriginal);
+                if (!resp) {
+                    alert('Resposta inválida do servidor.');
+                    return;
+                }
+
+                if (resp.status === 'auth_required') {
+                    ultimaAcaoSigm = 'consulta';
+                    $('#sigm-auth-alert').hide().text('');
+                    $('#modalSigmAuth').modal('show');
+                } else if (resp.status === 'auth_error') {
+                    ultimaAcaoSigm = 'consulta';
+                    $('#sigm-auth-alert').text(resp.message || 'Credenciais inválidas.').show();
+                    $('#modalSigmAuth').modal('show');
+                } else if (resp.status === 'success') {
+                    $('#modalSigmAuth').modal('hide');
+                    resp.protocolo = protocolo;
+                    protocoloAtualSigm = protocolo;
+                    preencherCamposSigm(resp);
+                    $('#btn-sigm-receber').show();
+                } else {
+                    alert(resp.message || 'Erro ao consultar o SiGM.');
+                }
+            },
+            error: function(xhr, status, err) {
+                $btn.prop('disabled', false).text(textoOriginal);
+                alert('Erro de comunicação com o servidor: ' + (err || status));
+            }
+        });
+    }
+
+    function executarRecebimentoSigm(protocolo, emproUser, emproPass) {
+        var $btn = $('#btn-sigm-receber');
+        var textoOriginal = $btn.text();
+        $btn.prop('disabled', true).text('Recebendo no SiGM...');
+
+        var postData = { protocolo: protocolo };
+        if (emproUser && emproPass) {
+            postData.empro_user = emproUser;
+            postData.empro_pass = emproPass;
+        }
+
+        $.ajax({
+            url: urlReceberSigm,
+            type: 'POST',
+            data: postData,
+            dataType: 'json',
+            success: function(resp) {
+                $btn.prop('disabled', false).text(textoOriginal);
+                if (!resp) {
+                    alert('Resposta inválida do servidor.');
+                    return;
+                }
+
+                if (resp.status === 'auth_required') {
+                    ultimaAcaoSigm = 'receber';
+                    $('#sigm-auth-alert').hide().text('');
+                    $('#modalSigmAuth').modal('show');
+                } else if (resp.status === 'auth_error') {
+                    ultimaAcaoSigm = 'receber';
+                    $('#sigm-auth-alert').text(resp.message || 'Credenciais inválidas.').show();
+                    $('#modalSigmAuth').modal('show');
+                } else if (resp.status === 'success') {
+                    $('#modalSigmAuth').modal('hide');
+                    $btn.removeClass('btn-warning').addClass('btn-success').prop('disabled', true).text('Recebido no SiGM ✓');
+                    alert(resp.message || ('Protocolo ' + protocolo + ' recebido com sucesso no SiGM!'));
+                } else {
+                    alert(resp.message || 'Erro ao efetivar recebimento no SiGM.');
+                }
+            },
+            error: function(xhr, status, err) {
+                $btn.prop('disabled', false).text(textoOriginal);
+                alert('Erro de comunicação com o servidor ao receber no SiGM: ' + (err || status));
+            }
+        });
+    }
+
+    $('#btn-sigm').on('click', function(e){
+        e.preventDefault();
+        var protocolo = ($('#Requerimentos_Protocolo').val() || '').trim();
+        if (!protocolo) {
+            alert('Por favor, digite o número do protocolo antes de consultar.');
+            $('#Requerimentos_Protocolo').focus();
+            return;
+        }
+        executarConsultaSigm(protocolo, null, null);
+    });
+
+    $('#btn-sigm-receber').on('click', function(e){
+        e.preventDefault();
+        var protocolo = ($('#Requerimentos_Protocolo').val() || protocoloAtualSigm || '').trim();
+        if (!protocolo) {
+            alert('Número de protocolo não encontrado.');
+            return;
+        }
+        if (!confirm('Deseja realmente efetivar o recebimento do protocolo ' + protocolo + ' no SiGM?')) {
+            return;
+        }
+        executarRecebimentoSigm(protocolo, null, null);
+    });
+
+    $('#btn-salvar-sigm-auth').on('click', function(e){
+        e.preventDefault();
+        var protocolo = ($('#Requerimentos_Protocolo').val() || protocoloAtualSigm || '').trim();
+        var user = ($('#sigm_empro_user').val() || '').trim();
+        var pass = $('#sigm_empro_pass').val() || '';
+
+        if (!user || !pass) {
+            $('#sigm-auth-alert').text('Informe usuário e senha EMPRO.').show();
+            return;
+        }
+        $('#sigm-auth-alert').hide().text('');
+
+        if (ultimaAcaoSigm === 'receber') {
+            executarRecebimentoSigm(protocolo, user, pass);
+        } else {
+            executarConsultaSigm(protocolo, user, pass);
+        }
+    });
+
+    $('#sigm_empro_pass, #sigm_empro_user').on('keypress', function(e){
+        if (e.which === 13) {
+            $('#btn-salvar-sigm-auth').click();
+        }
+    });
+});
+</script>
+{{pass}}
+
 
     

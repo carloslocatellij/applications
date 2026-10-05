@@ -24,8 +24,17 @@ rtk python -m pytest tests/models/test_textos_modelos.py
 
 Para executar scripts diagnósticos ou migrações que exigem o contexto dos Models carregados:
 ```powershell
-rtk python C:\Users\clocatelli\web2py\web2py.py -S Viveiro_Analises -M -R applications\Viveiro_Analises\caminho\script.py
+rtk python C:\Users\{user}\web2py\web2py.py -S Viveiro_Analises -M -R applications\Viveiro_Analises\caminho\script.py
 ```
+
+## Leitura de Configurações (`AppConfig` / `appconfig.json`)
+
+Ao ler blocos JSON aninhados em `private/appconfig.json` (ex: `"sigm": {"url": "...", "api_key": "..."}`):
+1. **Atente-se ao método de acesso:** `configuration.get('sigm')` retorna `None` para dicionários aninhados.
+2. **Sintaxe Correta:**
+   - Use `configuration.take('sigm')` para retornar o dicionário.
+   - Ou use sintaxe pontilhada: `configuration.get('sigm.api_key')`.
+3. **Fallback para `reload=False`:** Se o `AppConfig` foi instanciado com `reload=False`, alterações no arquivo JSON durante a execução podem ser ignoradas devido ao cache em memória. Sempre adicione fallback para leitura direta com `json.load()` do `private/appconfig.json` quando a chave for crítica.
 
 ## Diagnóstico de Erros (Tickets Web2py)
 

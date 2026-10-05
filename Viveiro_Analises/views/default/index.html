@@ -1,6 +1,24 @@
 {{extend 'layout.html'}}
 
+<script>
+    function mudarPeriodo(novoPeriodo) {
+        // URL do controller que atualiza a sessão
+        var url = "{{=URL('default', 'dashboard.load')}}?periodo=" + novoPeriodo;
+        web2py_component(url, 'painel_dados');
+        
+        // Dispara requisição AJAX do web2py
+        ajax(url, [], []);
 
+        // Atualiza o visual dos botões na tela imediatamente
+        if (novoPeriodo === 'Mês') {
+            $('#btn-mes').removeClass('btn-outline-primary').addClass('btn-primary');
+            $('#btn-ano').removeClass('btn-primary').addClass('btn-outline-primary');
+        } else {
+            $('#btn-ano').removeClass('btn-outline-primary').addClass('btn-primary');
+            $('#btn-mes').removeClass('btn-primary').addClass('btn-outline-primary');
+        }
+    }
+</script>
 
 <h2>{{=('Sistema do Departamento de Análises e Laudos'.capitalize())}}</h2>
 
@@ -13,3 +31,13 @@
 {{if len(list(avisos)) > 0:}}
 <div style="align-self: center"><button id="open_modal" class="btn btn-primary",  >Avisos {{=SPAN(len(list(avisos)), _class='badge bg-danger')}} </button></div>
 {{pass}}
+
+
+<div class="btn-group" role="group" aria-label="Alternar Período">
+    <button type="button" id="btn-mes" class="btn {{='btn-primary' if periodo == 'Mês' else 'btn-outline-primary'}}" onclick="mudarPeriodo('Mês')">Mês</button>
+    <button type="button" id="btn-ano" class="btn {{='btn-primary' if periodo == 'Ano' else 'btn-outline-primary'}}" onclick="mudarPeriodo('Ano')">Ano</button>
+</div>
+
+<div class="mt-4">
+    {{=LOAD('default', 'dashboard.load', ajax=True, target='painel_dados')}}
+</div>

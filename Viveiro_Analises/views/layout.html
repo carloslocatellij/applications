@@ -41,6 +41,30 @@
        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
          <span class="navbar-toggler-icon"></span>
        </button>
+      <td width='10%'>
+        <!-- Navbar ======================================= -->
+        <nav class="navbar navbar-light navbar-expand-md bg-faded bg-dark navbar-dark justify-content-center">
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="{{=response.submenu[2]}}">{{=response.submenu[0]}}</button>
+      
+            <div class="dropdown-menu dropdown-menu-left"> <span class="navbar-toggler-icon"></span>
+      
+              {{for _item in response.submenu[3]:}}
+              {{if type(_item) == list:}}
+              {{if type(_item) == list:}} <a class="dropdown-item" type="button" href="{{=_item[2]}}" style="color: rgb(0, 156, 135); border-style: solid; " onmouseenter="style='background-color: lightblue'" onmouseleave="style='color: rgb(0, 156, 135)'">{{=_item[0]}}{{=SPAN(num_tarefas.count(),_class="badge badge-danger") if _item[0]=='Lista de tarefas' and num_tarefas.count() > 0 else ''}}{{pass}}</a>
+              {{for _subitem in _item:}}
+              {{if type(_subitem) == list:}} <a class="dropdown-item" type="button" href="{{=_subitem[2]}}"
+                style="color: rgb(0, 156, 135);">{{=_subitem[0]}}</a>{{pass}}
+              {{pass}}
+      
+              {{pass}}
+              {{pass}}
+            </div>
+          </div>
+          </div>
+      
+        </nav>
+      </td>
        <div class="navbar-collapse collapse w-100" id="navbarNavDropdown">
          <ul class="navbar-nav w-100 justify-content-center">
           {{for _item in response.menu or []:}}
@@ -96,35 +120,9 @@
     </nav>
 
     <div class="jumbotron jumbotron-fluid background" style="background-color: #333; color:white; padding:10px;word-wrap:break-word;">
-      <table>
-      <div class="container center">
-          <td width='10%'>
-                <!-- Navbar ======================================= -->
-                <nav class="navbar navbar-light navbar-expand-md bg-faded bg-dark navbar-dark justify-content-center">
-                  <div class="dropdown">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="{{=response.submenu[2]}}">{{=response.submenu[0]}}</button>
-
-                    <div class="dropdown-menu dropdown-menu-left"> <span class="navbar-toggler-icon"></span>
-
-                     {{for _item in response.submenu[3]:}}
-                             {{if type(_item) == list:}}
-                                 {{if type(_item) == list:}} <a class="dropdown-item" type="button" href="{{=_item[2]}}" style="color: rgb(0, 156, 135); border-style: solid; " onmouseenter="style='background-color: lightblue'" onmouseleave="style='color: rgb(0, 156, 135)'">{{=_item[0]}}{{=SPAN(num_tarefas.count(),_class="badge badge-danger") if _item[0]=='Lista de tarefas' and num_tarefas.count() > 0 else ''}}{{pass}}</a>
-                                  {{for _subitem in _item:}}
-                                       {{if type(_subitem) == list:}} <a class="dropdown-item" type="button" href="{{=_subitem[2]}}" style="color: rgb(0, 156, 135);" >{{=_subitem[0]}}</a>{{pass}}
-                                  {{pass}}
-
-                             {{pass}}
-                      {{pass}}
-                    </div>
-                    </div>
-                  </div>
-
-                </nav>
-          </td>
-          <td width='10%' align="center">{{if len(request.args) > 0:}}{{=P(request.args[0]) if request.function == 'Processos'  else ''}}<div>{{=A('Criar Tarefa', _href=URL(c='default',f='Criar_Tarefa', args=request.args[0], ), _class='btn btn-success', _style="align: center") if request.function == 'Processos' and request.args[0]  else ''}}</div>{{pass}} </td>
-          <td width='80%' align="right"><h1 class="display-5">{{='Viveiro Análises'}} </h1></td>
-
-        </table>
+      <div class="container center" align="center">
+          
+          <td width='80%' align="center"><h1 class="display-5">{{='Viveiro Análises'}} </h1></td>
       </div>
     </div>
     <!-- Masthead ===================================== -->

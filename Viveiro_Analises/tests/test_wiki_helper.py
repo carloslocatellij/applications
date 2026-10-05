@@ -2,12 +2,14 @@
 import unittest
 import sys
 import os
+from pathlib import Path
+path_user = Path.home()
 
 # Add paths for testing
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(base_dir, 'modules'))
-sys.path.insert(0, r'C:\Users\clocatelli\web2py')
-sys.path.insert(0, r'C:\Users\clocatelli\web2py\site-packages')
+sys.path.insert(0, f'{path_user}\web2py')
+sys.path.insert(0, f'{path_user}\web2py\site-packages')
 
 from wiki_helper import (
     slugify,

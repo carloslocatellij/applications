@@ -1,0 +1,83 @@
+
+<div class="card" , style="border: 2px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+{{=H3("📑 Nº de Processos: ")}}
+<table>
+    <td width="20%">
+        <div  class="card",  align='center',
+        style="border: 1px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+        {{=B("Pendentes de Compensação Ambiental ")}}
+            {{=DIV(H2(compensar), _class="card" , align="center", style="text-align: center;")}}
+        </div>
+    </td>
+    <td width="20%">
+        <div class="card" , align='center' ,
+            style="border: 1px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+            {{=B("Processos Em Análise ou Aguardando")}}
+            {{=DIV(H2(em_analises), _class="card" , align="center", style="text-align: center;")}}
+        </div>
+    </td>
+    <td width="20%">
+        <div class="card" , align='center' ,
+            style="border: 1px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+            {{=B("Processos Deferidos")}}
+            {{=DIV(H2(deferidos), _class="card" , align="center", style="text-align: center;")}}
+        </div>
+    </td>
+        <td width="20%">
+            <div class="card" , align='center' ,
+                style="border: 1px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+                {{=B("Processos Parcialmente Deferidos")}}
+                {{=DIV(H2(parcial_deferidos), _class="card" , align="center", style="text-align: center;")}}
+            </div>
+        </td>
+    <td width="20%">
+        <div class="card" , align='center' ,
+            style="border: 1px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+            {{=B("Processos Indeferidos")}}
+            {{=DIV(H2(indeferidos), _class="card" , align="center", style="text-align: center;")}}
+        </div>
+    </td>
+</table>
+</div>
+<br>
+
+<div class="card", style="border: 2px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+{{=H3("🌲 Nº de Arvores avaliadas:")}}
+<table>
+    <td width="20%">
+        <div class="card" , align='center' ,
+            style="border: 1px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+            {{=B("Supressões Deferidas:")}}
+            {{=DIV(H2(supress_autorizadas), _class="card" , align="center", style="text-align: center;")}}
+        </div>
+    </td>
+    <td width="20%">
+        <div class="card" , align='center' ,
+            style="border: 1px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+            {{=B("Supressões Indeferidas:")}}
+            {{=DIV(H2(supress_nao_autorizadas), _class="card" , align="center", style="text-align: center;")}}
+        </div>
+    </td>
+    <td width="20%">
+        <div class="card" , align='center' ,
+            style="border: 1px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+            {{=B("Podas Deferidas:")}}
+            {{=DIV(H2(podas_autorizadas), _class="card" , align="center", style="text-align: center;")}}
+        </div>
+    </td>
+    <td width="20%">
+        <div class="card" , align='center' ,
+            style="border: 1px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+            {{=B("Podas Indeferidas")}}
+            {{=DIV(H2(podas_nao_autorizadas), _class="card" , align="center", style="text-align: center;")}}
+        </div>
+    </td>
+    <td width="20%">
+        <div class="card" , align='center' ,
+            style="border: 1px solid; padding: 5px; word-wrap: break-word ; color: rgb(16, 60, 8)">
+            {{=B("Nº de replantios")}}
+            {{=DIV(H2(arvores_para_replantio), _class="card" , align="center", style="text-align: center;")}}
+        </div>
+    </td>
+</table>
+</div>
